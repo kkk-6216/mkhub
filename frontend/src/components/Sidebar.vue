@@ -63,13 +63,24 @@
       <!-- Sign In -->
       <div>
         <ul>
-          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950  transition duration-200">
-            <i class="mdi mdi-login mr-2" :class="{ 'mr-0': isCollapsed }">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-              </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/login">Войти</router-link>
+          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200" v-if="!isLoggedIn">
+            <router-link to="/login" class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700">Войти</router-link>
+          </li>
+          <!--          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200" v-if="!isLoggedIn">-->
+          <!--            <router-link to="/register" class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700">Зарегистрироваться</router-link>-->
+          <!--          </li>-->
+          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950  transition duration-200" v-else>
+            <div class="flex items-center" v-if="!isCollapsed">
+              <img :src="user.avatar || 'https://via.placeholder.com/30'" alt="Аватар" class="rounded-full w-8 h-8 mr-2">
+              <span>{{ user.name }} ({{ user.role }})</span>
+            </div>
+            <div class="flex items-center" v-else>
+              <img :src="user.avatar || 'https://via.placeholder.com/30'" alt="Аватар" class="rounded-full w-8 h-8 mr-2">
+              <!-- Only Avatar when collapsed -->
+            </div>
+          </li>
+          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950  transition duration-200" v-if="isLoggedIn">
+            <a href="#" @click.prevent="logout" class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-500">Выйти</a>
           </li>
         </ul>
       </div>
@@ -79,6 +90,7 @@
 
 <script>
 import registerArt from '@/assets/images/logo.png';
+import {createRouter as $router} from "vue-router";
 
 export default {
   name: 'Sidebar',
@@ -87,45 +99,47 @@ export default {
       isCollapsed: false,
       screenWidth: window.innerWidth,
       initialWidth: window.innerWidth,
-      registerArt: registerArt, // Убедитесь, что путь к изображению верен
+      registerArt: registerArt,
+      user: null // Добавляем состояние для хранения информации о пользователе
     };
   },
   mounted() {
     this.initialWidth = window.innerWidth;
     window.addEventListener('resize', this.updateScreenWidth);
-    this.updateScreenWidth(); // Initial check
+    this.updateScreenWidth();
+    this.loadUserFromLocalStorage(); // Загружаем данные пользователя из localStorage при монтировании
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateScreenWidth);
   },
   methods: {
+    $router,
     updateScreenWidth() {
       this.screenWidth = window.innerWidth;
 
       // Collapse logic (2/3 screen)
-      if (this.screenWidth < (this.initialWidth * 2) / 3) {
-        this.isCollapsed = true;
-      } else {
-        this.isCollapsed = false;
+      this.isCollapsed = this.screenWidth < (this.initialWidth * 2) / 3;
+    },
+    loadUserFromLocalStorage() {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        this.user = JSON.parse(storedUser);
       }
     },
+    logout() {
+      localStorage.removeItem('user');
+      this.user = null;
+    }
   },
+  computed: {
+    // Вычисляемое свойство, чтобы определить, авторизован ли пользователь
+    isLoggedIn() {
+      return this.user !== null;
+    }
+  }
 };
 </script>
 
 <style scoped>
-aside {
-  overflow: hidden; /* Ensure no scroll */
-  display: flex;
-  flex-direction: column;
-}
-nav {
-  flex-grow: 1; /* Allow nav to take remaining space */
-  overflow-y: auto; /*  add scroll if nav content overflows */
-}
-
-div {
-  overflow: hidden; /* Ensure no scroll */
-}
-/* You can add custom styles here if needed */
+/* Дополнительные стили, если нужны */
 </style>

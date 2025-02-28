@@ -115,9 +115,25 @@ export default {
       }
 
       try {
-        console.log('Login data:', { username: this.username, password: this.password });
-        alert('Вход выполнен успешно! (имитация)');
-        this.$router.push('/'); // Доступ к роутеру через this.$router
+        // Здесь добавьте логику проверки пользователя (вместо простого alert)
+        if (this.username === 'user' && this.password === 'password') {
+          // Создайте объект пользователя (замените данными из вашей системы)
+          const user = {
+            name: "Фиона",
+            role: "Пользователь",
+            avatar: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" // или путь к вашему аватару
+          };
+
+          // Сохраните данные пользователя в localStorage
+          localStorage.setItem('user', JSON.stringify(user));
+
+          // Перенаправьте на главную страницу (или другую нужную страницу)
+          this.$router.push('/');
+        } else {
+          // Отобразите сообщение об ошибке, если учетные данные неверны
+          this.errorMessage = 'Неверные имя пользователя или пароль.';
+        }
+
       } catch (error) {
         console.error('Login error:', error);
         this.errorMessage = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
