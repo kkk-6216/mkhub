@@ -2,9 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../pages/Login.vue';
 import Register from '../pages/Register.vue';
 import DefaultLayout from '../layouts/DefaultLayout.vue';
-import Dashboard from '../pages/Dashboard.vue';
+import Home from '../pages/Home.vue';
 import Courses from '../pages/Courses.vue';
-import Schedule from '../pages/Schedule.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
@@ -27,19 +26,14 @@ const routes = [
         component: DefaultLayout,  //  Используем DefaultLayout
         children: [
             {
-                path: 'dashboard', // /dashboard
-                name: 'Dashboard',
-                component: Dashboard
+                path: 'home', // /home
+                name: 'Home',
+                component: Home
             },
             {
                 path: 'courses', // /courses
                 name: 'Courses',
                 component: Courses
-            },
-            {
-                path: 'schedule', // /schedule
-                name: 'Schedule',
-                component: Schedule
             },
             {
                 path: 'resources', // /resources
@@ -57,8 +51,8 @@ const routes = [
                 component: Settings
             },
             {
-                path: '', //  Перенаправляем / на /dashboard.  Важно, чтобы это было последним дочерним маршрутом!
-                redirect: '/dashboard'
+                path: '', //  Перенаправляем / на /home.  Важно, чтобы это было последним дочерним маршрутом!
+                redirect: '/home'
             }
         ]
     },

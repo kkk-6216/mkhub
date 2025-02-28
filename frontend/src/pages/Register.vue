@@ -2,13 +2,13 @@
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="flex w-screen h-screen">
       <div class="w-1/2 flex flex-col items-center justify-center">
-        <h2 class="text-3xl bg-[#1B374D]font-semibold mb-2 text-left font-sans">Registration</h2>
-        <p class="text-gray-500 mb-6 text-left font-sans">Create an account</p>
+        <h2 class="text-3xl bg-[#1B374D]font-semibold mb-2 text-left font-sans">Регистрация</h2>
+        <p class="text-gray-500 mb-6 text-left font-sans">Создать аккаунт</p>
         <form class="w-80" @submit.prevent="register">
           <div class="relative mb-4">
             <input
                 type="text"
-                placeholder="User name"
+                placeholder="Имя пользователя"
                 class="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700"
                 v-model="username"
                 :class="{
@@ -36,7 +36,7 @@
           <div class="relative mb-4">
             <input
                 type="tel"
-                placeholder="Phone Number (+996xxxxxxxxx)"
+                placeholder="Номер телефона (+996xxxxxxxxx)"
                 class="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700"
                 v-model="phoneNumber"
                 :class="{
@@ -92,7 +92,7 @@
           <div class="relative mb-4">
             <input
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="Password"
+                placeholder="Пароль"
                 class="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700"
                 v-model="password"
                 :class="{
@@ -162,7 +162,7 @@
           <div class="relative mb-4">
             <input
                 :type="showConfirmPassword ? 'text' : 'password'"
-                placeholder="Confirm password"
+                placeholder="Подтвердите пароль"
                 class="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700"
                 v-model="confirmPassword"
                 :class="{
@@ -233,7 +233,7 @@
               class="w-full bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
               type="submit"
           >
-            Registrate
+            Зарегистрироваться
           </button>
 
           <p v-if="errorMessage" class="text-red-500 mt-2">
@@ -241,8 +241,8 @@
           </p>
         </form>
         <p class="text-gray-500 mt-4 text-center font-sans">
-          I already have an account
-          <router-link to="/login" class="text-blue-500">Login</router-link>
+          Уже есть аккаунт?
+          <router-link to="/login" class="text-blue-500">Войти</router-link>
         </p>
       </div>
 
@@ -251,7 +251,7 @@
       >
         <img
             :src="registerArt"
-            alt="Register Illustration"
+            alt="Иллюстрация регистрации"
             class="max-w-full rounded-2xl"
         />
       </div>
@@ -315,28 +315,28 @@ export default {
           !this.password ||
           !this.confirmPassword
       ) {
-        this.errorMessage = 'All fields are required.';
+        this.errorMessage = 'Необходимо заполнить все поля.';
         return;
       }
 
       if (!this.phoneNumberValid) {
-        this.errorMessage = 'Invalid phone number format.';
+        this.errorMessage = 'Неверный формат номера телефона.';
         return;
       }
 
       if (!this.emailValid) {
         this.errorMessage =
-            'Please use a valid @gmail.com, @icloud.com,@manas.edu.kg email address.';
+            'Пожалуйста, используйте действительный адрес электронной почты @gmail.com, @icloud.com или @manas.edu.kg.';
         return;
       }
 
       if (!this.passwordValid) {
-        this.errorMessage = 'Password must be at least 6 characters long.';
+        this.errorMessage = 'Длина пароля должна быть не менее 6 символов.';
         return;
       }
 
       if (!this.confirmPasswordMatch) {
-        this.errorMessage = 'Passwords do not match.';
+        this.errorMessage = 'Пароли не совпадают.';
         return;
       }
 
