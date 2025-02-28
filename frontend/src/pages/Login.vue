@@ -2,13 +2,13 @@
   <div class="flex items-center justify-center h-screen bg-gray-100">
     <div class="flex w-screen h-screen">
       <div class="w-1/2 flex flex-col items-center justify-center">
-        <h2 class="text-3xl bg-[#1B374D]] font-semibold mb-2 text-left font-sans">Login</h2>
-        <p class="text-gray-500 mb-6 text-left font-sans">Please login to continue</p>
+        <h2 class="text-3xl bg-[#1B374D]] font-semibold mb-2 text-left font-sans">Вход</h2>
+        <p class="text-gray-500 mb-6 text-left font-sans">Пожалуйста, войдите, чтобы продолжить</p>
         <form class="w-80" @submit.prevent="login">
           <div class="relative mb-4">
             <input
                 type="text"
-                placeholder="User name"
+                placeholder="Имя пользователя"
                 v-model="username"
                 :class="{
                 'border-red-500': !username && isSubmitted,
@@ -25,7 +25,7 @@
           <div class="relative mb-4">
             <input
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="Password"
+                placeholder="Пароль"
                 v-model="password"
                 :class="{
                 'border-red-500': !password && isSubmitted,
@@ -56,20 +56,20 @@
               class="w-full bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
               type="submit"
           >
-            Log In
+            Войти
           </button>
           <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
         </form>
         <div>  <!-- Обертка для параграфа -->
           <p class="text-gray-500 mt-4 text-center font-sans">
-            I don't have an account
-            <router-link to="/register" class="text-blue-500">Registrate</router-link>
+            У меня нет аккаунта
+            <router-link to="/register" class="text-blue-500">Зарегистрироваться</router-link>
           </p>
         </div> <!-- Закрытие обертки -->
       </div>
 
       <div class="w-1/2 bg-main rounded-2xl flex items-center justify-center p-8 m-10">
-        <img :src="registerArt" alt="Register Illustration" class="max-w-full rounded-2xl">
+        <img :src="registerArt" alt="Иллюстрация регистрации" class="max-w-full rounded-2xl">
       </div>
     </div>
   </div>
@@ -105,22 +105,22 @@ export default {
       this.isSubmitted = true;
 
       if (!this.username || !this.password) {
-        this.errorMessage = 'All fields are required.';
+        this.errorMessage = 'Необходимо заполнить все поля.';
         return;
       }
 
       if (!this.passwordValid) {
-        this.errorMessage = 'Password must be at least 6 characters long.';
+        this.errorMessage = 'Длина пароля должна быть не менее 6 символов.';
         return;
       }
 
       try {
         console.log('Login data:', { username: this.username, password: this.password });
-        alert('Login successful! (mock)');
+        alert('Вход выполнен успешно! (имитация)');
         this.$router.push('/'); // Доступ к роутеру через this.$router
       } catch (error) {
         console.error('Login error:', error);
-        this.errorMessage = 'An error occurred. Please try again later.';
+        this.errorMessage = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
       }
     },
   },
