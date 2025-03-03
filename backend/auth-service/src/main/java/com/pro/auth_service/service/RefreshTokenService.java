@@ -3,7 +3,6 @@ package com.pro.auth_service.service;
 import com.pro.auth_service.model.entity.RefreshToken;
 import com.pro.auth_service.model.entity.User;
 import com.pro.auth_service.repository.RefreshTokenRepository;
-import com.pro.auth_service.repository.UserRepository;
 import com.pro.auth_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

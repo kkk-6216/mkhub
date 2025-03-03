@@ -1,7 +1,6 @@
 package com.pro.auth_service.controller;
 
 import com.pro.auth_service.dto.RegistrationRequest;
-import com.pro.auth_service.model.entity.User;
 import com.pro.auth_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
