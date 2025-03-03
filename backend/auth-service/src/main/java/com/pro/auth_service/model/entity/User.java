@@ -31,12 +31,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(columnDefinition = "boolean default true")
     private boolean enabled;
 
+    @Column(columnDefinition = "boolean default true")
     private boolean accountNonExpired;
 
+    @Column(columnDefinition = "boolean default true")
     private boolean accountNonLocked;
 
+    @Column(columnDefinition = "boolean default true")
     private boolean credentialsNonExpired;
 
     @Temporal(TemporalType.TIMESTAMP)
