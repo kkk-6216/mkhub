@@ -1,4 +1,4 @@
-package com.pro.api_gateway.filters;
+package com.pro.api_gateway.filter;
 
 import com.pro.api_gateway.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
