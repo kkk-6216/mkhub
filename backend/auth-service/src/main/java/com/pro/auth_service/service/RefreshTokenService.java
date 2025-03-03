@@ -18,7 +18,6 @@ import java.util.Optional;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional

@@ -5,11 +5,9 @@ import com.pro.auth_service.dto.RefreshRequest;
 import com.pro.auth_service.model.entity.RefreshToken;
 import com.pro.auth_service.model.entity.User;
 import com.pro.auth_service.service.RefreshTokenService;
-import com.pro.auth_service.service.UserService;
 import com.pro.auth_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RefreshTokenController {
 
-    private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
-    private final UserService userService;
     private final JwtUtil jwtUtil;
 
     @PostMapping("/refresh")
