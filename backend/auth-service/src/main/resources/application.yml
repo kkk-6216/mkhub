@@ -19,10 +19,10 @@ spring:
 jwt:
   token:
     access:
-      secret: "AccessTokenSecretKey"
+      secret: "PkO9ZWWsRm-SMi1yM26jl-DvczK1I2JP"
       expiration: 3600000
     refresh:
-      secret: "RefreshTokenSecretKey"
+      secret: "MBMMtbXUpb-7u01Pnhw0p-8zE9Kli0DU"
       expiration: 604800000
 
 server:
