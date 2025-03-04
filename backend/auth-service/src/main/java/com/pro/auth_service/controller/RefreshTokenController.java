@@ -37,22 +37,21 @@ public class RefreshTokenController {
         }
 
         RefreshToken refreshTokenEntity = optionalToken.get();
-
-        if (refreshTokenService.isRefreshTokenExpired(refreshTokenEntity)) {
-            return ResponseEntity.status(401).body("Refresh token истёк");
-        }
-
         String username = jwtUtil.getUsernameFromRefreshToken(requestToken);
         String role = jwtUtil.getRoleFromRefreshToken(requestToken);
-
         String newAccessToken = jwtUtil.generateAccessToken(username, role);
 
-        User user = refreshTokenEntity.getUser();
-        RefreshToken newRefreshTokenEntity = refreshTokenService.createRefreshToken(user);
-        String newRefreshToken = newRefreshTokenEntity.getToken();
+        if (refreshTokenService.isRefreshTokenExpired(refreshTokenEntity)) {
+            User user = refreshTokenEntity.getUser();
+            RefreshToken newRefreshTokenEntity = refreshTokenService.createRefreshToken(user);
+            String newRefreshToken = newRefreshTokenEntity.getToken();
+            AuthResponse response = new AuthResponse(newAccessToken, newRefreshToken);
+            return ResponseEntity.ok(response);
+        } else {
+            AuthResponse response = new AuthResponse(newAccessToken, null);
+            return ResponseEntity.ok(response);
+        }
 
-        AuthResponse response = new AuthResponse(newAccessToken, newRefreshToken);
-        return ResponseEntity.ok(response);
     }
 
 }

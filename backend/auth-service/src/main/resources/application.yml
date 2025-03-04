@@ -19,10 +19,10 @@ spring:
 jwt:
   token:
     access:
-      secret: "PkO9ZWWsRm-SMi1yM26jl-DvczK1I2JP"
+      secret: "b8RktMUpn2buI-OT299m8oivRdP-UHjhOIyvQdI9-JG23FHW12W0A-P2tTDCFGbq"
       expiration: 3600000
     refresh:
-      secret: "MBMMtbXUpb-7u01Pnhw0p-8zE9Kli0DU"
+      secret: "il679VYSJ8aex-TiW83Bf313krc-V80Cxvtb1do9-Go0cubt8GNXP-IDsvZnIjNc"
       expiration: 604800000
 
 server:

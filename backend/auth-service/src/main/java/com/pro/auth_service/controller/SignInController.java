@@ -30,7 +30,6 @@ public class SignInController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
