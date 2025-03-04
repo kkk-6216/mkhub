@@ -119,8 +119,8 @@ export default {
         if (this.username === 'user' && this.password === 'password') {
           // Создайте объект пользователя (замените данными из вашей системы)
           const user = {
-            name: "Фиона",
-            role: "Пользователь",
+            name: "Фонарик",
+            role: "Студент",
             avatar: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg" // или путь к вашему аватару
           };
 
