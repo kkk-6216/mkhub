@@ -1,7 +1,6 @@
 <template>
   <div class="flex items-center justify-center h-screen bg-gray-100">
-    <div class="flex w-screen h-screen">
-      <div class="w-1/2 flex flex-col items-center justify-center">
+      <div class="flex w-screen h-screen flex-col items-center justify-center">
         <h2 class="text-3xl bg-[#1B374D]] font-semibold mb-2 text-left font-sans">Вход</h2>
         <p class="text-gray-500 mb-6 text-left font-sans">Пожалуйста, войдите, чтобы продолжить</p>
         <form class="w-80" @submit.prevent="login">
@@ -67,17 +66,11 @@
           </p>
         </div> <!-- Закрытие обертки -->
       </div>
-
-      <div class="w-1/2 bg-main rounded-2xl flex items-center justify-center p-8 m-10">
-        <img :src="registerArt" alt="Иллюстрация регистрации" class="max-w-full rounded-2xl">
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router';
-import registerArt from '@/assets/images/картинка_1.png';
 
 export default {
   name: 'Login',
@@ -89,7 +82,6 @@ export default {
       errorMessage: '',
       isSubmitted: false,
       showPassword: false,
-      registerArt: registerArt, // Необходимо добавить изображение в data
     };
   },
   computed: {
