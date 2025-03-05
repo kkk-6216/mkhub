@@ -30,22 +30,26 @@ public class SignInController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        System.out.println("Запрос поступил");
+        System.out.println(loginRequest);
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
                         loginRequest.getPassword()
                 )
         );
+        System.out.println("Authentication прошло успешно");
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        System.out.println("Едем дальше");
         User user = userService.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
+        System.out.println("Найден успешно");
         String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole().name());
         RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user);
         String refreshToken = refreshTokenEntity.getToken();
 
         AuthResponse response = new AuthResponse(accessToken, refreshToken);
+        System.out.println("Возврат ответа");
         return ResponseEntity.ok(response);
     }
 
