@@ -1,8 +1,8 @@
 <template>
-  <div class="flex items-center justify-center h-screen bg-gray-100">
+  <div class="flex items-center justify-center h-screen bg-white-100">
     <div class="flex w-screen h-screen flex-col items-center justify-center">
-      <h2 class="text-3xl font-semibold mb-2 text-left font-sans">Вход</h2>
-      <p class="text-gray-500 mb-6 text-left font-sans">Пожалуйста, войдите, чтобы продолжить</p>
+      <h2 class="text-3xl font-semibold mb-[20px] text-left">Вход</h2>
+      <p class="text-gray-500 mb-6 text-left">Пожалуйста, войдите, чтобы продолжить</p>
       <form class="w-80" @submit.prevent="login">
         <!-- Имя пользователя -->
         <InputField
@@ -42,17 +42,22 @@
         </PasswordField>
 
         <button
-            class="w-full bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+            class="w-full bg-[#0d2856] text-white py-2 rounded-[10px]
+                   hover:bg-[#092040] hover:scale-101
+                   focus:outline-none focus:ring-2 focus:ring-gray-300
+                   transition duration-300 ease-in-out"
             type="submit"
         >
           Войти
         </button>
-        <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="text-red-500 mt-2 text-center">{{ errorMessage }}</p>
       </form>
+      <div class="w-[100px] h-[1px] m-5 bg-[#0d2856] rounded-[10px]"></div>
+
       <div>
-        <p class="text-gray-500 mt-4 text-center font-sans">
-          У меня нет аккаунта
-          <router-link to="/register" class="text-blue-500">Зарегистрироваться</router-link>
+        <p class="text-gray-500 mt-2 text-center">
+          У меня нет аккаунта&nbsp;
+          <router-link to="/register" class="text-[#0d2856]">Зарегистрироваться</router-link>
         </p>
       </div>
     </div>
