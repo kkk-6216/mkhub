@@ -45,7 +45,7 @@ public class SecurityConfiguration {
         provider.setPasswordEncoder(passwordEncoder());
 
         ProviderManager manager = new ProviderManager(provider);
-        manager.setEraseCredentialsAfterAuthentication(false);
+        manager.setEraseCredentialsAfterAuthentication(true);
         return manager;
     }
 
