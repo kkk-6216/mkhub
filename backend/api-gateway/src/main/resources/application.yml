@@ -28,11 +28,6 @@ spring:
     discovery:
       enabled: true
     gateway:
-      cors-configurations:
-        '[/**]':
-          allowedOrigins: "*"
-          allowedMethods: "*"
-          allowedHeaders: "*"
       routes:
         - id: auth-service
           uri: lb://auth-service
