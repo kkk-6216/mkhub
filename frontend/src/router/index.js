@@ -7,6 +7,7 @@ import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
+import AddFaculty from "/pages/AddFaculty.vue";
 
 const routes = [
     {
@@ -51,9 +52,15 @@ const routes = [
                 component: Settings
             },
             {
+                path: 'AddFaculty', //
+                name: 'AddFaculty',
+                component: AddFaculty
+            },
+            {
                 path: '', //  Перенаправляем / на /home.  Важно, чтобы это было последним дочерним маршрутом!
                 redirect: '/home'
             }
+
         ]
     },
 
