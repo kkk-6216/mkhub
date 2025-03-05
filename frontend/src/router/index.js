@@ -1,91 +1,86 @@
-
 import { createRouter, createWebHistory } from 'vue-router';
-
+import Login from '../pages/Login.vue';
+import Register from '../pages/Register.vue';
+import DefaultLayout from '../layouts/DefaultLayout.vue';
 import Home from '../pages/Home.vue';
 import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
-import {useAuthStore} from "@/store/auth.js";
-
-import authRoutes from '@/modules/auth/router/index.js';
+import AddFaculty from "/pages/AddFaculty.vue";
 
 const routes = [
-    ...authRoutes,
     {
-        path: '/',
-        component: () => import("@/layouts/DefaultLayout.vue"),
+        path: '/login',
+        name: 'Login',
+        component: Login,
+        meta: { layout: 'minimal' } // Используем MinimalLayout
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: Register,
+        meta: { layout: 'minimal' } // Используем MinimalLayout
+    },
+    {
+        path: '/', //  Главная страница
+        component: DefaultLayout,  //  Используем DefaultLayout
         children: [
             {
-                path: 'home',
+                path: 'home', // /home
                 name: 'Home',
                 component: Home
             },
             {
-                path: 'courses',
+                path: 'courses', // /courses
                 name: 'Courses',
-                component: Courses,
-                meta: { requiresAuth: true }
+                component: Courses
             },
             {
-                path: 'resources',
+                path: 'resources', // /resources
                 name: 'Resources',
-                component: Resources,
-                meta: { requiresAuth: true }
+                component: Resources
             },
             {
-                path: 'messages',
+                path: 'messages', // /messages
                 name: 'Messages',
-                component: Messages,
-                meta: { requiresAuth: true }
+                component: Messages
             },
             {
-                path: 'settings',
+                path: 'settings', // /settings
                 name: 'Settings',
-                component: Settings,
-                meta: { requiresAuth: true }
+                component: Settings
             },
             {
-                path: '',
-                redirect: '/home'
+                path: 'AddFaculty', //
+                name: 'AddFaculty',
+                component: AddFaculty
             },
+            {
+                path: '', //  Перенаправляем / на /home.  Важно, чтобы это было последним дочерним маршрутом!
+                redirect: '/home'
+            }
+
         ]
     },
-    {
-        path: "/:pathMatch(.*)*",
-        name: "NotFound",
-        component: () => import("@/pages/NotFound.vue"),
-        meta: {
-            layout: 'minimal',
-        },
-        beforeEnter: (to, from, next) => {
-            const isAuthenticated = localStorage.getItem("accessToken");
-            if (!isAuthenticated) {
-                next("/login");
-            } else {
-                next();
-            }
-        },
-    }
 
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes,
+    history: createWebHistory(),
+    routes
 });
 
-router.beforeEach(async (to, from, next) => {
-    const authStore = useAuthStore();
-    const isAuthenticated = !!authStore.accessToken;
+router.beforeEach((to, from, next) => {
+    const layout = to.meta.layout || 'default';
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        next({ path: "/login", query: { redirect: to.fullPath } });
-    } else if (to.meta.requiresGuest && isAuthenticated) {
-        next("/");
-    } else {
-        next();
-    }
+    // Remove existing layout classes
+    document.body.classList.remove('default-layout', 'minimal-layout');
+
+    // Add new layout class
+    document.body.classList.add(`${layout}-layout`);
+
+    next();
 });
 
 export default router;
