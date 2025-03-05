@@ -38,7 +38,7 @@
             :is-submitted="isSubmitted"
             :is-valid="passwordValid"
             placeholder="Пароль"
-            @click="togglePassword('password')"
+            @togglePassword="togglePassword('password')"
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
@@ -61,7 +61,7 @@
             :is-submitted="isSubmitted"
             :is-valid="confirmPasswordMatch"
             placeholder="Подтвердите пароль"
-            @click="togglePassword('confirmPassword')"
+            @togglePassword="togglePassword('confirmPassword')"
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
