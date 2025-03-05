@@ -12,7 +12,7 @@
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/user-icon.svg" alt="User Icon" />
+              <img src="../../../assets/icons/LoginRegister-Icons/user-icon.svg" alt="User Icon" />
             </div>
           </template>
         </InputField>
@@ -27,7 +27,7 @@
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/email-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/email-icon.svg" alt="User Icon"/>
             </div>
           </template>
         </InputField>
@@ -42,15 +42,15 @@
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
             </div>
           </template>
           <template #toggleIcon>
             <div v-if="showPassword" class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
             </div>
             <div v-else class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
             </div>
           </template>
         </PasswordField>
@@ -65,15 +65,15 @@
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
             </div>
           </template>
           <template #toggleIcon>
             <div v-if="showConfirmPassword" class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
             </div>
             <div v-else class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
+              <img src="../../../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
             </div>
           </template>
         </PasswordField>
