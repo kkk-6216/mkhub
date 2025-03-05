@@ -7,7 +7,7 @@ import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
-import AddFaculty from "/pages/AddFaculty.vue";
+import AddFaculty from '../pages/AddFaculty.vue';
 
 const routes = [
     {
