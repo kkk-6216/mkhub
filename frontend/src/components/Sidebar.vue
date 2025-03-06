@@ -183,14 +183,8 @@
               />
               <span>{{ user.name }} ({{ user.role }})</span>
             </div>
-            <div class="flex items-center" v-else>
-              <img
-                :src="user.avatar || 'https://via.placeholder.com/30'"
-                alt="Аватар"
-                class="rounded-full w-8 h-8 mr-2"
-              />
-            </div>
           </li>
+
           <li
             class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
             v-if="isLoggedIn"
