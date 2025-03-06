@@ -6,13 +6,16 @@
       <form class="w-80" @submit.prevent="register">
         <!-- Имя пользователя -->
         <InputField
-            v-model="username"
-            :is-submitted="isSubmitted"
-            placeholder="Имя пользователя"
+          v-model="username"
+          :is-submitted="isSubmitted"
+          placeholder="Имя пользователя"
         >
           <template #icon>
-            <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/user-icon.svg" alt="User Icon" />
+            <div class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/user-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
         </InputField>
@@ -33,71 +36,89 @@
 
         <!-- Email -->
         <InputField
-            v-model="email"
-            :is-submitted="isSubmitted"
-            :is-valid="emailValid"
-            type="email"
-            placeholder="Email"
+          v-model="email"
+          :is-submitted="isSubmitted"
+          :is-valid="emailValid"
+          type="email"
+          placeholder="Email"
         >
           <template #icon>
-            <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/email-icon.svg" alt="User Icon"/>
+            <div class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/email-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
         </InputField>
 
         <!-- Пароль -->
         <PasswordField
-            v-model="password"
-            :is-submitted="isSubmitted"
-            :is-valid="passwordValid"
-            placeholder="Пароль"
-            @click="togglePassword('password')"
+          v-model="password"
+          :is-submitted="isSubmitted"
+          :is-valid="passwordValid"
+          placeholder="Пароль"
+          @togglePassword="togglePassword('password')"
         >
           <template #icon>
-            <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
+            <div class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/lock-closed-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
           <template #toggleIcon>
-            <div v-if="showPassword" class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
+            <div v-if="showPassword" class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/eye-icon.svg"
+                alt="User Icon"
+              />
             </div>
-            <div v-else class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
+            <div v-else class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/eye-slash-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
         </PasswordField>
 
         <!-- Подтверждение пароля -->
         <PasswordField
-            v-model="confirmPassword"
-            :is-submitted="isSubmitted"
-            :is-valid="confirmPasswordMatch"
-            placeholder="Подтвердите пароль"
-            @click="togglePassword('confirmPassword')"
+          v-model="confirmPassword"
+          :is-submitted="isSubmitted"
+          :is-valid="confirmPasswordMatch"
+          placeholder="Подтвердите пароль"
+          @togglePassword="togglePassword('confirmPassword')"
         >
           <template #icon>
-            <div class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/lock-closed-icon.svg" alt="User Icon"/>
+            <div class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/lock-closed-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
           <template #toggleIcon>
-            <div v-if="showConfirmPassword" class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-icon.svg" alt="User Icon"/>
+            <div v-if="showConfirmPassword" class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/eye-icon.svg"
+                alt="User Icon"
+              />
             </div>
-            <div v-else class="w-6 h-6 stroke-1 ">
-              <img src="../assets/icons/LoginRegister-Icons/eye-slash-icon.svg" alt="User Icon"/>
+            <div v-else class="w-6 h-6 stroke-1">
+              <img
+                src="../../../assets/icons/LoginRegister-Icons/eye-slash-icon.svg"
+                alt="User Icon"
+              />
             </div>
           </template>
         </PasswordField>
 
         <button
-            class="w-full bg-[#0d2856] text-white py-2 rounded-[10px]
-                   hover:bg-[#092040] hover:scale-101
-                   focus:outline-none focus:ring-2 focus:ring-gray-300
-                   transition duration-300 ease-in-out"
-            type="submit"
+          class="w-full bg-[#0d2856] text-white py-2 rounded-[10px] hover:bg-[#092040] hover:scale-101 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
+          type="submit"
         >
           Зарегистрироваться
         </button>
@@ -171,11 +192,11 @@ export default {
       this.isSubmitted = true;
 
       if (
-          !this.username ||
-          !this.phoneNumber ||
-          !this.email ||
-          !this.password ||
-          !this.confirmPassword
+        !this.username ||
+        !this.phoneNumber ||
+        !this.email ||
+        !this.password ||
+        !this.confirmPassword
       ) {
         this.errorMessage = 'Необходимо заполнить все поля.';
         return;
@@ -188,7 +209,7 @@ export default {
 
       if (!this.emailValid) {
         this.errorMessage =
-            'Пожалуйста, используйте действительный адрес электронной почты @gmail.com, @icloud.com или @manas.edu.kg.';
+          'Пожалуйста, используйте действительный адрес электронной почты @gmail.com, @icloud.com или @manas.edu.kg.';
         return;
       }
 
@@ -235,7 +256,7 @@ export default {
       } catch (error) {
         console.error('Ошибка при регистрации:', error);
         this.errorMessage =
-            'Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.';
+          'Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.';
       }
     },
   },
