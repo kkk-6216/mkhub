@@ -2,19 +2,19 @@
   <div class="h-screen flex flex-col overflow-hidden">
     <!-- Sidebar -->
     <aside
-        class="bg-gray-100 shadow-lg fixed left-0 top-0 h-screen transition-all duration-300 flex flex-col overflow-hidden"
-        :class="{ 'w-64 p-6': !isCollapsed, 'w-16 p-4': isCollapsed }"
+      class="bg-gray-100 shadow-lg fixed left-0 top-0 h-screen transition-all duration-300 flex flex-col overflow-hidden"
+      :class="{ 'w-64 p-6': !isCollapsed, 'w-16 p-4': isCollapsed }"
     >
       <!-- Logo -->
       <div
-          class="flex items-center space-x-3 mb-6 pb-12 pt-4"
-          :class="{ 'justify-center pl-0': isCollapsed, 'pl-6': !isCollapsed }"
+        class="flex items-center space-x-3 mb-6 pb-12 pt-4"
+        :class="{ 'justify-center pl-0': isCollapsed, 'pl-6': !isCollapsed }"
       >
         <img
-            :src="registerArt"
-            alt="Register Illustration"
-            class="max-w-full rounded-2xl"
-            :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"
+          :src="registerArt"
+          alt="Register Illustration"
+          class="max-w-full rounded-2xl"
+          :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"
         />
       </div>
 
@@ -162,12 +162,12 @@
         <ul>
           <!-- Если пользователь НЕ аутентифицирован, показываем кнопку "Войти" -->
           <li
-              v-if="!isAuthenticated"
-              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
+            v-if="!isAuthenticated"
+            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <router-link
-                to="/login"
-                class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700"
+              to="/login"
+              class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700"
             >
               Войти
             </router-link>
@@ -175,35 +175,35 @@
 
           <!-- Если пользователь аутентифицирован, показываем его данные -->
           <li
-              v-else
-              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
+            v-else
+            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <div class="flex items-center" v-if="!isCollapsed">
               <img
-                  :src="user?.avatar || 'https://via.placeholder.com/30'"
-                  alt="Аватар"
-                  class="rounded-full w-8 h-8 mr-2"
+                :src="user?.avatar || 'https://via.placeholder.com/30'"
+                alt="Аватар"
+                class="rounded-full w-8 h-8 mr-2"
               />
               <span>{{ user?.name }} ({{ user?.role }})</span>
             </div>
             <div class="flex items-center" v-else>
               <img
-                  :src="user?.avatar || 'https://via.placeholder.com/30'"
-                  alt="Аватар"
-                  class="rounded-full w-8 h-8 mr-2"
+                :src="user?.avatar || 'https://via.placeholder.com/30'"
+                alt="Аватар"
+                class="rounded-full w-8 h-8 mr-2"
               />
             </div>
           </li>
 
           <!-- Кнопка "Выйти" видна только аутентифицированным пользователям -->
           <li
-              v-if="isAuthenticated"
-              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
+            v-if="isAuthenticated"
+            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <a
-                href="#"
-                @click.prevent="logout"
-                class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-500"
+              href="#"
+              @click.prevent="logout"
+              class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-500"
             >
               Выйти
             </a>
@@ -267,6 +267,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

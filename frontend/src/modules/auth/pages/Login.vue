@@ -64,7 +64,9 @@
           {{ errorMessage }}
         </p>
       </form>
-      <div class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"></div>
+      <div
+        class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"
+      ></div>
 
       <div>
         <p class="text-gray-500 mt-2 text-center">
@@ -82,7 +84,7 @@
 import InputField from '@/modules/auth/components/InputField.vue';
 import PasswordField from '@/modules/auth/components/PasswordField.vue';
 import { useRouter } from 'vue-router';
-import {useAuthStore} from "@/store/auth.js";
+import { useAuthStore } from '@/store/auth.js';
 
 export default {
   name: 'Login',
@@ -124,16 +126,17 @@ export default {
       try {
         await this.authStore.login({
           username: this.username,
-          password: this.password
+          password: this.password,
         });
-        this.router.push("/");
+
+        this.router.push('/');
       } catch (error) {
         if (error.response && error.response.status === 403) {
-          this.errorMessage = "Неверные учетные данные";
+          this.errorMessage = 'Неверные учетные данные';
         } else if (error.request) {
-          this.errorMessage = "Сервер не отвечает. Попробуйте позже.";
+          this.errorMessage = 'Сервер не отвечает. Попробуйте позже.';
         } else {
-          this.errorMessage = "Возникла ошибка";
+          this.errorMessage = 'Возникла ошибка';
         }
       }
     },
