@@ -20,26 +20,16 @@
 
       <!-- Navigation -->
       <nav class="flex-grow">
-        <!-- Make nav take available vertical space -->
         <ul>
-          <li
-            :class="[
-              'flex',
-              'items-center',
-              'p-2',
-              'rounded-lg',
-              'pb-4',
-              'text-gray-500',
-              'hover:text-gray-950',
-              'transition',
-              'duration-200',
-              { 'text-gray-950': $route.path === '/home' },
-            ]"
+          <!-- Главная -->
+          <MenuItem
+            :isCollapsed="isCollapsed"
+            :isActive="$route.path === '/home'"
+            iconClass="mdi-view-dashboard"
+            to="/home"
+            label="Главная"
           >
-            <i
-              class="mdi mdi-view-dashboard mr-2"
-              :class="{ 'mr-0': isCollapsed }"
-            >
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -54,28 +44,18 @@
                   d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
                 />
               </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/home">Главная</router-link>
-          </li>
+            </template>
+          </MenuItem>
 
-          <li
-            :class="[
-              'flex',
-              'items-center',
-              'p-2',
-              'rounded-lg',
-              'pb-4',
-              'text-gray-500',
-              'hover:text-gray-950',
-              'transition',
-              'duration-200',
-              { 'text-gray-950': $route.path === '/courses' },
-            ]"
+          <!-- Курсы -->
+          <MenuItem
+            :isCollapsed="isCollapsed"
+            :isActive="$route.path === '/courses'"
+            iconClass="mdi-book-open-variant"
+            to="/courses"
+            label="Курсы"
           >
-            <i
-              class="mdi mdi-book-open-variant mr-2"
-              :class="{ 'mr-0': isCollapsed }"
-            >
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -87,30 +67,21 @@
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
+                  d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
                 />
               </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/courses">Курсы</router-link>
-          </li>
-          <li
-            :class="[
-              'flex',
-              'items-center',
-              'p-2',
-              'rounded-lg',
-              'pb-4',
-              'text-gray-500',
-              'hover:text-gray-950',
-              'transition',
-              'duration-200',
-              { 'text-gray-950': $route.path === '/resources' },
-            ]"
+            </template>
+          </MenuItem>
+
+          <!-- Ресурсы -->
+          <MenuItem
+            :isCollapsed="isCollapsed"
+            :isActive="$route.path === '/resources'"
+            iconClass="mdi-folder-open"
+            to="/resources"
+            label="Ресурсы"
           >
-            <i
-              class="mdi mdi-folder-open mr-2"
-              :class="{ 'mr-0': isCollapsed }"
-            >
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -125,27 +96,18 @@
                   d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
                 />
               </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/resources"
-              >Ресурсы</router-link
-            >
-          </li>
+            </template>
+          </MenuItem>
 
-          <li
-            :class="[
-              'flex',
-              'items-center',
-              'p-2',
-              'rounded-lg',
-              'pb-4',
-              'text-gray-500',
-              'hover:text-gray-950',
-              'transition',
-              'duration-200',
-              { 'text-gray-950': $route.path === '/messages' },
-            ]"
+          <!-- Сообщения -->
+          <MenuItem
+            :isCollapsed="isCollapsed"
+            :isActive="$route.path === '/messages'"
+            iconClass="mdi-message"
+            to="/messages"
+            label="Сообщения"
           >
-            <i class="mdi mdi-message mr-2" :class="{ 'mr-0': isCollapsed }">
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -160,27 +122,18 @@
                   d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z"
                 />
               </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/messages"
-              >Сообщения</router-link
-            >
-          </li>
+            </template>
+          </MenuItem>
 
-          <li
-            :class="[
-              'flex',
-              'items-center',
-              'p-2',
-              'rounded-lg',
-              'pb-4',
-              'text-gray-500',
-              'hover:text-gray-950',
-              'transition',
-              'duration-200',
-              { 'text-gray-950': $route.path === '/settings' },
-            ]"
+          <!-- Настройки -->
+          <MenuItem
+            :isCollapsed="isCollapsed"
+            :isActive="$route.path === '/settings'"
+            iconClass="mdi-cog"
+            to="/settings"
+            label="Настройки"
           >
-            <i class="mdi mdi-cog mr-2" :class="{ 'mr-0': isCollapsed }">
+            <template #icon>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -200,14 +153,12 @@
                   d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                 />
               </svg>
-            </i>
-            <router-link v-if="!isCollapsed" to="/settings"
-              >Настройки</router-link
-            >
-          </li>
+            </template>
+          </MenuItem>
         </ul>
       </nav>
-      <!-- Sign In -->
+
+      <!-- Вход/Выход -->
       <div>
         <ul>
           <li
@@ -220,9 +171,6 @@
               >Войти</router-link
             >
           </li>
-          <!--          <li class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200" v-if="!isLoggedIn">-->
-          <!--            <router-link to="/register" class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700">Зарегистрироваться</router-link>-->
-          <!--          </li>-->
           <li
             class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
             v-else
@@ -241,7 +189,6 @@
                 alt="Аватар"
                 class="rounded-full w-8 h-8 mr-2"
               />
-              <!-- Only Avatar when collapsed -->
             </div>
           </li>
           <li
@@ -260,13 +207,16 @@
     </aside>
   </div>
 </template>
-
 <script>
 import registerArt from '@/assets/images/logo.png';
+import MenuItem from '@/modules/auth/components/MenuItem.vue';
 import { createRouter as $router } from 'vue-router';
 
 export default {
   name: 'Sidebar',
+  components: {
+    MenuItem, // Регистрируем компонент MenuItem
+  },
   data() {
     return {
       isCollapsed: false,
