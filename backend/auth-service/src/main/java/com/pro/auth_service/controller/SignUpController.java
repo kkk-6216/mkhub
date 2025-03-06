@@ -32,7 +32,7 @@ public class SignUpController {
     public ResponseEntity<?> register(@RequestBody RegistrationRequest registrationRequest) {
 
         if (userService.findByUsername(registrationRequest.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username is already taken");
+            return ResponseEntity.badRequest().body("Имя пользователя уже используется");
         }
 
         User user = userService.createUser(registrationRequest);
@@ -43,6 +43,7 @@ public class SignUpController {
                         registrationRequest.getPassword()
                 )
         );
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole().name());
@@ -50,6 +51,7 @@ public class SignUpController {
         String refreshToken = refreshTokenEntity.getToken();
 
         AuthResponse authResponse = new AuthResponse(accessToken, refreshToken);
+
         return ResponseEntity.ok(authResponse);
     }
 
