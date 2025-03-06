@@ -3,7 +3,7 @@
     <div class="flex w-screen h-screen flex-col items-center justify-center">
       <h2 class="text-3xl font-semibold mb-2 text-left">Регистрация</h2>
       <p class="text-gray-500 mb-6 text-left">Создать аккаунт</p>
-      <form class="w-80" @submit.prevent="register">
+      <form class="w-80" method="post" @submit.prevent="register">
         <!-- Имя пользователя -->
         <InputField
           v-model="username"
@@ -22,11 +22,11 @@
 
         <!-- Email -->
         <InputField
-          v-model="email"
-          :is-submitted="isSubmitted"
-          :is-valid="emailValid"
-          type="email"
-          placeholder="Email"
+            v-model="email"
+            :is-submitted="isSubmitted"
+            :is-valid="emailValid"
+            type="text"
+            placeholder="Email"
         >
           <template #icon>
             <div class="w-6 h-6 stroke-1">
@@ -103,8 +103,11 @@
         </PasswordField>
 
         <button
-          class="w-full bg-[#0d2856] text-white py-2 rounded-[10px] hover:bg-[#092040] hover:scale-101 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
-          type="submit"
+            class="w-full bg-[var(--main-color)] text-white py-2 rounded-[10px]
+                   hover:bg-[#092040] hover:scale-101
+                   focus:outline-none focus:ring-2 focus:ring-gray-300
+                   transition duration-300 ease-in-out"
+            type="submit"
         >
           Зарегистрироваться
         </button>
@@ -114,11 +117,11 @@
         </p>
       </form>
 
-      <div class="w-[100px] h-[1px] m-5 bg-[#0d2856] rounded-[10px]"></div>
+      <div class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"></div>
 
       <p class="text-gray-500 mt-4 text-center">
         Уже есть аккаунт?&nbsp;
-        <router-link to="/login" class="text-[#0d2856]">Войти</router-link>
+        <router-link to="/login" class="text-[var(--main-color)]">Войти</router-link>
       </p>
     </div>
   </div>
@@ -127,7 +130,8 @@
 <script>
 import InputField from '@/modules/auth/components/InputField.vue';
 import PasswordField from '@/modules/auth/components/PasswordField.vue';
-import { useRouter } from 'vue-router';
+import {useAuthStore} from "@/store/auth.js";
+import {useRouter} from "vue-router";
 
 export default {
   name: 'Register',
@@ -138,7 +142,6 @@ export default {
   data() {
     return {
       username: '',
-      phoneNumber: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -149,11 +152,6 @@ export default {
     };
   },
   computed: {
-    phoneNumberValid() {
-      if (!this.phoneNumber) return false;
-      const regex = /^\+996\d{9}$/;
-      return regex.test(this.phoneNumber);
-    },
     emailValid() {
       if (!this.email) return true;
       const regex = /^[^\s@]+@(gmail\.com|icloud\.com|manas\.edu\.kg)$/;
@@ -178,24 +176,18 @@ export default {
       this.isSubmitted = true;
 
       if (
-        !this.username ||
-        !this.phoneNumber ||
-        !this.email ||
-        !this.password ||
-        !this.confirmPassword
+          !this.username ||
+          !this.email ||
+          !this.password ||
+          !this.confirmPassword
       ) {
         this.errorMessage = 'Необходимо заполнить все поля.';
         return;
       }
 
-      if (!this.phoneNumberValid) {
-        this.errorMessage = 'Неверный формат номера телефона.';
-        return;
-      }
-
       if (!this.emailValid) {
         this.errorMessage =
-          'Пожалуйста, используйте действительный адрес электронной почты @gmail.com, @icloud.com или @manas.edu.kg.';
+            'Пожалуйста, используйте адрес электронной почты @gmail.com, @icloud.com или @manas.edu.kg.';
         return;
       }
 
@@ -210,44 +202,27 @@ export default {
       }
 
       try {
-        // Здесь будет ваш код для отправки данных на сервер для регистрации
-        // const response = await fetch('/api/register', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify({ username, phoneNumber, email, password, confirmPassword })
-        // });
-
-        // if (response.ok) {
-        //   // Успешная регистрация
-        //   console.log('Регистрация успешна!');
-        //   this.$router.push('/login'); // Перенаправление на страницу входа
-        // } else {
-        //   // Обработка ошибок
-        //   const data = await response.json();
-        //   this.errorMessage = data.message || 'Ошибка регистрации.';
-        // }
-
-        console.log('Данные для регистрации:', {
+        await this.authStore.register({
           username: this.username,
-          phoneNumber: this.phoneNumber,
           email: this.email,
-          password: this.password,
-          confirmPassword: this.confirmPassword,
+          password: this.password
         });
-        // Временное сообщение об успешной регистрации (пока нет реального backend)
-        alert('Регистрация прошла успешно! (имитация)');
-        this.$router.push('/login');
+        this.router.push("/");
       } catch (error) {
-        console.error('Ошибка при регистрации:', error);
-        this.errorMessage =
-          'Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.';
+        console.log(error)
+        if (error.response && error.response.status === 400) {
+          this.errorMessage = error.response.data || "Ошибка регистрации";
+        } else if (error.request) {
+          this.errorMessage = "Сервер не отвечает. Попробуйте позже.";
+        } else {
+          this.errorMessage = "Произошла ошибка регистрации.";
+        }
       }
     },
   },
   beforeCreate() {
-    this.$router = useRouter(); // Инициализация роутера внутри beforeCreate
+    this.authStore = useAuthStore();
+    this.router = useRouter();
   },
 };
 </script>

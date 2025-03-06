@@ -64,12 +64,12 @@
           {{ errorMessage }}
         </p>
       </form>
-      <div class="w-[100px] h-[1px] m-5 bg-[#0d2856] rounded-[10px]"></div>
+      <div class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"></div>
 
       <div>
         <p class="text-gray-500 mt-2 text-center">
           У меня нет аккаунта&nbsp;
-          <router-link to="/register" class="text-[#0d2856]"
+          <router-link to="/register" class="text-[var(--main-color)]"
             >Зарегистрироваться</router-link
           >
         </p>
@@ -82,6 +82,7 @@
 import InputField from '@/modules/auth/components/InputField.vue';
 import PasswordField from '@/modules/auth/components/PasswordField.vue';
 import { useRouter } from 'vue-router';
+import {useAuthStore} from "@/store/auth.js";
 
 export default {
   name: 'Login',
@@ -121,33 +122,25 @@ export default {
       }
 
       try {
-        // Здесь добавьте логику проверки пользователя (вместо простого alert)
-        if (this.username === 'user' && this.password === 'password') {
-          // Создайте объект пользователя (замените данными из вашей системы)
-          const user = {
-            name: 'Фиона',
-            role: 'Пользователь',
-            avatar:
-              'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg', // или путь к вашему аватару
-          };
-
-          // Сохраните данные пользователя в localStorage
-          localStorage.setItem('user', JSON.stringify(user));
-
-          // Перенаправьте на главную страницу (или другую нужную страницу)
-          this.$router.push('/');
-        } else {
-          // Отобразите сообщение об ошибке, если учетные данные неверны
-          this.errorMessage = 'Неверные имя пользователя или пароль.';
-        }
+        await this.authStore.login({
+          username: this.username,
+          password: this.password
+        });
+        this.router.push("/");
       } catch (error) {
-        console.error('Login error:', error);
-        this.errorMessage = 'Произошла ошибка. Пожалуйста, попробуйте позже.';
+        if (error.response && error.response.status === 403) {
+          this.errorMessage = "Неверные учетные данные";
+        } else if (error.request) {
+          this.errorMessage = "Сервер не отвечает. Попробуйте позже.";
+        } else {
+          this.errorMessage = "Возникла ошибка";
+        }
       }
     },
   },
   beforeCreate() {
-    this.$router = useRouter(); // Инициализация роутера внутри beforeCreate
+    this.authStore = useAuthStore();
+    this.router = useRouter();
   },
 };
 </script>

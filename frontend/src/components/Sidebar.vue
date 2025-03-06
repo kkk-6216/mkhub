@@ -2,26 +2,25 @@
   <div class="h-screen flex flex-col overflow-hidden">
     <!-- Sidebar -->
     <aside
-      class="bg-gray-100 shadow-lg fixed left-0 top-0 h-screen transition-all duration-300 flex flex-col overflow-hidden"
-      :class="{ 'w-64 p-6': !isCollapsed, 'w-16 p-4': isCollapsed }"
+        class="bg-gray-100 shadow-lg fixed left-0 top-0 h-screen transition-all duration-300 flex flex-col overflow-hidden"
+        :class="{ 'w-64 p-6': !isCollapsed, 'w-16 p-4': isCollapsed }"
     >
       <!-- Logo -->
       <div
-        class="flex items-center space-x-3 mb-6 pb-12 pt-4"
-        :class="{ 'justify-center pl-0': isCollapsed, 'pl-6': !isCollapsed }"
+          class="flex items-center space-x-3 mb-6 pb-12 pt-4"
+          :class="{ 'justify-center pl-0': isCollapsed, 'pl-6': !isCollapsed }"
       >
         <img
-          :src="registerArt"
-          alt="Register Illustration"
-          class="max-w-full rounded-2xl"
-          :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"
+            :src="registerArt"
+            alt="Register Illustration"
+            class="max-w-full rounded-2xl"
+            :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"
         />
       </div>
 
       <!-- Navigation -->
       <nav class="flex-grow">
         <ul>
-          <!-- Главная -->
           <MenuItem
             :isCollapsed="isCollapsed"
             :isActive="$route.path === '/home'"
@@ -161,102 +160,113 @@
       <!-- Вход/Выход -->
       <div>
         <ul>
+          <!-- Если пользователь НЕ аутентифицирован, показываем кнопку "Войти" -->
           <li
-            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
-            v-if="!isLoggedIn"
+              v-if="!isAuthenticated"
+              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <router-link
-              to="/login"
-              class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700"
-              >Войти</router-link
+                to="/login"
+                class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700"
             >
+              Войти
+            </router-link>
           </li>
+
+          <!-- Если пользователь аутентифицирован, показываем его данные -->
           <li
-            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
-            v-else
+              v-else
+              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <div class="flex items-center" v-if="!isCollapsed">
               <img
-                :src="user.avatar || 'https://via.placeholder.com/30'"
-                alt="Аватар"
-                class="rounded-full w-8 h-8 mr-2"
+                  :src="user?.avatar || 'https://via.placeholder.com/30'"
+                  alt="Аватар"
+                  class="rounded-full w-8 h-8 mr-2"
               />
-              <span>{{ user.name }} ({{ user.role }})</span>
+              <span>{{ user?.name }} ({{ user?.role }})</span>
+            </div>
+            <div class="flex items-center" v-else>
+              <img
+                  :src="user?.avatar || 'https://via.placeholder.com/30'"
+                  alt="Аватар"
+                  class="rounded-full w-8 h-8 mr-2"
+              />
             </div>
           </li>
 
+          <!-- Кнопка "Выйти" видна только аутентифицированным пользователям -->
           <li
-            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
-            v-if="isLoggedIn"
+              v-if="isAuthenticated"
+              class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
           >
             <a
-              href="#"
-              @click.prevent="logout"
-              class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-500"
-              >Выйти</a
+                href="#"
+                @click.prevent="logout"
+                class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-500"
             >
+              Выйти
+            </a>
           </li>
         </ul>
       </div>
     </aside>
   </div>
 </template>
+
 <script>
 import registerArt from '@/assets/images/logo.png';
 import MenuItem from '@/modules/auth/components/MenuItem.vue';
-import { createRouter as $router } from 'vue-router';
+import { useAuthStore } from '@/store/auth.js';
+import { computed } from 'vue';
 
 export default {
   name: 'Sidebar',
   components: {
-    MenuItem, // Регистрируем компонент MenuItem
+    MenuItem,
+  },
+  setup() {
+    const authStore = useAuthStore();
+
+    // Вычисляемые свойства
+    const isAuthenticated = computed(() => !!authStore.accessToken);
+    const user = computed(() => authStore.user);
+
+    const logout = async () => {
+      await authStore.logout();
+    };
+
+    return {
+      registerArt,
+      isAuthenticated,
+      user,
+      logout,
+    };
   },
   data() {
     return {
       isCollapsed: false,
       screenWidth: window.innerWidth,
       initialWidth: window.innerWidth,
-      registerArt: registerArt,
-      user: null, // Добавляем состояние для хранения информации о пользователе
     };
   },
   mounted() {
     this.initialWidth = window.innerWidth;
     window.addEventListener('resize', this.updateScreenWidth);
     this.updateScreenWidth();
-    this.loadUserFromLocalStorage(); // Загружаем данные пользователя из localStorage при монтировании
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.updateScreenWidth);
   },
   methods: {
-    $router,
     updateScreenWidth() {
       this.screenWidth = window.innerWidth;
-
-      // Collapse logic (2/3 screen)
       this.isCollapsed = this.screenWidth < (this.initialWidth * 2) / 3;
-    },
-    loadUserFromLocalStorage() {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        this.user = JSON.parse(storedUser);
-      }
-    },
-    logout() {
-      localStorage.removeItem('user');
-      this.user = null;
-    },
-  },
-  computed: {
-    // Вычисляемое свойство, чтобы определить, авторизован ли пользователь
-    isLoggedIn() {
-      return this.user !== null;
     },
   },
 };
 </script>
 
 <style scoped>
-/* Дополнительные стили, если нужны */
+
 </style>
