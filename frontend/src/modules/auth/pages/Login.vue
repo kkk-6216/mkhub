@@ -1,7 +1,7 @@
 <template>
-  <div class="flex items-center justify-center h-screen bg-white-100">
+  <div class="flex items-center justify-center h-screen">
     <div class="flex w-screen h-screen flex-col items-center justify-center">
-      <h2 class="text-3xl font-semibold mb-[20px] text-left">Вход</h2>
+      <h2 class="text-3xl font-semibold mb-[20px] text-main text-left">Вход</h2>
       <p class="text-gray-500 mb-6 text-left">
         Пожалуйста, войдите, чтобы продолжить
       </p>
@@ -54,24 +54,19 @@
           </template>
         </PasswordField>
 
-        <button
-          class="w-full bg-[#0d2856] text-white py-2 rounded-[10px] hover:bg-[#092040] hover:scale-101 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
-          type="submit"
-        >
-          Войти
-        </button>
+        <DefaultButton label="Войти" type="submit" variant="primary" fullWidth></DefaultButton>
+
         <p v-if="errorMessage" class="text-red-500 mt-2 text-center">
           {{ errorMessage }}
         </p>
+
       </form>
-      <div
-        class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"
-      ></div>
+      <div class="w-[100px] h-[1px] m-5 bg-main rounded-[10px]"></div>
 
       <div>
         <p class="text-gray-500 mt-2 text-center">
           У меня нет аккаунта&nbsp;
-          <router-link to="/register" class="text-[var(--main-color)]"
+          <router-link to="/register" class="text-main"
             >Зарегистрироваться</router-link
           >
         </p>
@@ -84,11 +79,13 @@
 import InputField from '@/modules/auth/components/InputField.vue';
 import PasswordField from '@/modules/auth/components/PasswordField.vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/store/auth.js';
+import {useAuthStore} from "@/store/auth.js";
+import DefaultButton from "@/components/buttons/DefaultButton.vue";
 
 export default {
   name: 'Login',
   components: {
+    DefaultButton,
     InputField,
     PasswordField,
   },
@@ -126,17 +123,16 @@ export default {
       try {
         await this.authStore.login({
           username: this.username,
-          password: this.password,
+          password: this.password
         });
-
-        this.router.push('/');
+        this.router.push("/");
       } catch (error) {
         if (error.response && error.response.status === 403) {
-          this.errorMessage = 'Неверные учетные данные';
+          this.errorMessage = "Неверные учетные данные";
         } else if (error.request) {
-          this.errorMessage = 'Сервер не отвечает. Попробуйте позже.';
+          this.errorMessage = "Сервер не отвечает. Попробуйте позже.";
         } else {
-          this.errorMessage = 'Возникла ошибка';
+          this.errorMessage = "Возникла ошибка";
         }
       }
     },

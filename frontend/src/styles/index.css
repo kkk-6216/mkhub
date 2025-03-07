@@ -3,10 +3,10 @@
 
 @theme {
   --color-main: #0d2856;
-}
-
-:root {
-  --main-color: #0d2856;
+  --color-dark: #061633;
+  --color-main-hover: #092040;
+  --color-sidebar-item-default: #9b9db8;
+  --color-sidebar-item-active: #0a1319;
 }
 
 body {

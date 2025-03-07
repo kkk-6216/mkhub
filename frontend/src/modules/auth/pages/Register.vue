@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-white">
+  <div class="flex items-center justify-center min-h-screen">
     <div class="flex w-screen h-screen flex-col items-center justify-center">
       <h2 class="text-3xl font-semibold mb-2 text-left">Регистрация</h2>
       <p class="text-gray-500 mb-6 text-left">Создать аккаунт</p>
@@ -102,26 +102,18 @@
           </template>
         </PasswordField>
 
-        <button
-            class="w-full bg-[var(--main-color)] text-white py-2 rounded-[10px]
-                   hover:bg-[#092040] hover:scale-101
-                   focus:outline-none focus:ring-2 focus:ring-gray-300
-                   transition duration-300 ease-in-out"
-            type="submit"
-        >
-          Зарегистрироваться
-        </button>
+        <DefaultButton label="Зарегистрироваться" type="submit" variant="primary" fullWidth></DefaultButton>
 
         <p v-if="errorMessage" class="text-red-500 mt-2 text-center">
           {{ errorMessage }}
         </p>
       </form>
 
-      <div class="w-[100px] h-[1px] m-5 bg-[var(--main-color)] rounded-[10px]"></div>
+      <div class="w-[100px] h-[1px] m-5 bg-main rounded-[10px]"></div>
 
       <p class="text-gray-500 mt-4 text-center">
         Уже есть аккаунт?&nbsp;
-        <router-link to="/login" class="text-[var(--main-color)]">Войти</router-link>
+        <router-link to="/login" class="text-main">Войти</router-link>
       </p>
     </div>
   </div>
@@ -132,10 +124,12 @@ import InputField from '@/modules/auth/components/InputField.vue';
 import PasswordField from '@/modules/auth/components/PasswordField.vue';
 import {useAuthStore} from "@/store/auth.js";
 import {useRouter} from "vue-router";
+import DefaultButton from "@/components/buttons/DefaultButton.vue";
 
 export default {
   name: 'Register',
   components: {
+    DefaultButton,
     InputField,
     PasswordField,
   },
@@ -207,7 +201,7 @@ export default {
           email: this.email,
           password: this.password
         });
-        this.router.push("/");
+        await this.router.push("/");
       } catch (error) {
         console.log(error)
         if (error.response && error.response.status === 400) {

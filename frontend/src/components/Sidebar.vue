@@ -2,28 +2,33 @@
   <div class="h-screen flex flex-col overflow-hidden">
     <!-- Sidebar -->
     <aside
-      class="bg-gray-100 shadow-lg fixed left-0 top-0 h-screen transition-all duration-300 flex flex-col overflow-hidden"
-      :class="{ 'w-64 p-6': !isCollapsed, 'w-16 p-4': isCollapsed }"
+        class="border-r border-[#eaeaea] fixed left-0 top-5 bottom-5 h-auto transition-all duration-300 flex flex-col overflow-hidden"
+        :class="{ 'w-64 px-5': !isCollapsed, 'w-16 px-3': isCollapsed }"
     >
       <!-- Logo -->
-      <div
-        class="flex items-center space-x-3 mb-6 pb-12 pt-4"
-        :class="{ 'justify-center pl-0': isCollapsed, 'pl-6': !isCollapsed }"
+      <router-link to="/home">
+        <div
+          class="flex items-center  mb-0  pt-2"
+          :class="{ 'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >
-        <img
-          :src="registerArt"
-          alt="Register Illustration"
-          class="max-w-full rounded-2xl"
-          :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"
-        />
+        <span class="text-[20px] text-main uppercase font-bold">
+          <span v-if="isCollapsed">MK</span>
+          <span v-else>MKHUB</span>
+        </span>
+<!--        <img-->
+<!--            :src="registerArt"-->
+<!--            alt="Register Illustration"-->
+<!--            class="max-w-full rounded-2xl"-->
+<!--            :class="{ 'max-h-12': isCollapsed, 'max-h-24': !isCollapsed }"-->
+<!--        />-->
       </div>
-
+      </router-link>
       <!-- Navigation -->
-      <nav class="flex-grow">
+      <nav class="flex-grow flex flex-col justify-center ">
         <ul>
           <MenuItem
             :isCollapsed="isCollapsed"
-            :isActive="$route.path === '/home'"
+            :isActive="isActive('/home')"
             iconClass="mdi-view-dashboard"
             to="/home"
             label="Главная"
@@ -49,7 +54,7 @@
           <!-- Курсы -->
           <MenuItem
             :isCollapsed="isCollapsed"
-            :isActive="$route.path === '/courses'"
+            :isActive="isActive('/courses')"
             iconClass="mdi-book-open-variant"
             to="/courses"
             label="Курсы"
@@ -75,7 +80,7 @@
           <!-- Ресурсы -->
           <MenuItem
             :isCollapsed="isCollapsed"
-            :isActive="$route.path === '/resources'"
+            :isActive="isActive('/resources')"
             iconClass="mdi-folder-open"
             to="/resources"
             label="Ресурсы"
@@ -101,7 +106,7 @@
           <!-- Сообщения -->
           <MenuItem
             :isCollapsed="isCollapsed"
-            :isActive="$route.path === '/messages'"
+            :isActive="isActive('/messages')"
             iconClass="mdi-message"
             to="/messages"
             label="Сообщения"
@@ -127,7 +132,7 @@
           <!-- Настройки -->
           <MenuItem
             :isCollapsed="isCollapsed"
-            :isActive="$route.path === '/settings'"
+            :isActive="isActive('/settings')"
             iconClass="mdi-cog"
             to="/settings"
             label="Настройки"
@@ -161,16 +166,13 @@
       <div>
         <ul>
           <!-- Если пользователь НЕ аутентифицирован, показываем кнопку "Войти" -->
-          <li
-            v-if="!isAuthenticated"
-            class="flex items-center p-2 rounded-lg text-gray-500 hover:text-gray-950 transition duration-200"
-          >
-            <router-link
-              to="/login"
-              class="w-full text-center py-2 rounded-md bg-main text-white hover:bg-gray-700"
-            >
-              Войти
-            </router-link>
+          <li v-if="!isAuthenticated">
+            <DefaultButton
+                label="Войти"
+                variant="primary"
+                fullWidth
+                @click="goToLogin"
+            />
           </li>
 
           <!-- Если пользователь аутентифицирован, показываем его данные -->
@@ -219,10 +221,12 @@ import registerArt from '@/assets/images/logo.png';
 import MenuItem from '@/modules/auth/components/MenuItem.vue';
 import { useAuthStore } from '@/store/auth.js';
 import { computed } from 'vue';
+import DefaultButton from "@/components/buttons/DefaultButton.vue";
 
 export default {
   name: 'Sidebar',
   components: {
+    DefaultButton,
     MenuItem,
   },
   setup() {
@@ -263,7 +267,18 @@ export default {
       this.screenWidth = window.innerWidth;
       this.isCollapsed = this.screenWidth < (this.initialWidth * 2) / 3;
     },
+    goToLogin() {
+      this.$router.push("/login");
+    },
+    isActive(path) {
+      return this.currentPath === path;
+    }
   },
+  computed: {
+    currentPath() {
+      return this.$route.path;
+    }
+  }
 };
 </script>
 
