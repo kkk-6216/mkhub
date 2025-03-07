@@ -9,9 +9,6 @@ import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
 import {useAuthStore} from "@/store/auth.js";
-import {defineAsyncComponent} from "vue";
-
-const DefaultLayout = defineAsyncComponent(() => import("@/layouts/DefaultLayout.vue"));
 
 const routes = [
     {
@@ -35,7 +32,7 @@ const routes = [
     },
     {
         path: '/',
-        component: DefaultLayout,
+        component: () => import("@/layouts/DefaultLayout.vue"),
         children: [
             {
                 path: 'home',

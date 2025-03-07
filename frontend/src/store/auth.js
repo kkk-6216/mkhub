@@ -24,6 +24,7 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('accessToken', this.accessToken);
         localStorage.setItem('refreshToken', this.refreshToken);
         this.user = jwtDecode(this.accessToken);
+        console.log(this.user);
       } catch (error) {
         throw error;
       }
@@ -44,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async refreshToken() {
+    async refreshAuthToken() {
       if (!this.refreshToken) {
         console.warn("Нет refreshToken, выходим из системы");
         await this.logout();
@@ -85,7 +86,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         if (!this.accessToken) {
           console.warn("AccessToken отсутствует. Пробуем обновить перед выходом...");
-          await this.refreshToken();
+          await this.refreshAuthToken();
         }
 
         if (this.accessToken) {

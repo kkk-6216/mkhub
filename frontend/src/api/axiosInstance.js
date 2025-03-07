@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
                 throw new Error("Нет refreshToken. Выход из системы.");
             }
 
-            await authStore.refreshToken();
+            await authStore.refreshAuthToken();
             originalRequest.headers["Authorization"] = `Bearer ${authStore.accessToken}`;
             return apiClient(originalRequest);
         } catch (refreshError) {

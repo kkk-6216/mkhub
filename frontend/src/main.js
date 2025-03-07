@@ -14,9 +14,10 @@ app.use(router);
 const authStore = useAuthStore();
 
 (async () => {
+
     if (authStore.accessToken && authStore.refreshToken) {
         try {
-            await authStore.refreshToken();
+            await authStore.refreshAuthToken();
         } catch (error) {
             console.warn("Ошибка обновления токена:", error.message);
             await authStore.logout();
