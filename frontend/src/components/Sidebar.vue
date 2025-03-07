@@ -11,6 +11,7 @@
           class="flex items-center  mb-0  pt-2"
           :class="{ 'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >
+
         <span class="text-[20px] text-main uppercase font-bold">
           <span v-if="isCollapsed">MK</span>
           <span v-else>MKHUB</span>
