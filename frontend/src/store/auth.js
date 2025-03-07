@@ -58,11 +58,12 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (!response.data.accessToken) {
-          throw new Error("Не получен новый accessToken");
+          console.warn("Не получен новый accessToken");
+          await this.logout();
+          return null;
         }
 
         this.accessToken = response.data.accessToken;
-
         localStorage.setItem('accessToken', this.accessToken);
         this.user = jwtDecode(this.accessToken);
 
@@ -70,6 +71,8 @@ export const useAuthStore = defineStore('auth', {
           this.refreshToken = response.data.refreshToken;
           localStorage.setItem('refreshToken', this.refreshToken);
         }
+
+        return response; // если нужно вернуть результат
       } catch (error) {
         console.warn("Ошибка обновления токена:", error.message);
 
@@ -78,8 +81,9 @@ export const useAuthStore = defineStore('auth', {
           await this.logout();
         }
 
-        throw new Error("Сессия истекла. Пожалуйста, войдите заново.");
+        return null;
       }
+
     },
 
     async logout() {

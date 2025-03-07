@@ -31,18 +31,21 @@ apiClient.interceptors.response.use(
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 
-        try {
-            if (!authStore.refreshToken) {
-                throw new Error("Нет refreshToken. Выход из системы.");
-            }
+          try {
+              if (!authStore.refreshToken) {
+                  console.warn("Нет refreshToken. Выход из системы.");
+                  await authStore.logout();
+                  await router.push("/login");
+                  return;
+              }
 
-            await authStore.refreshAuthToken();
-            originalRequest.headers["Authorization"] = `Bearer ${authStore.accessToken}`;
-            return apiClient(originalRequest);
-        } catch (refreshError) {
-          await authStore.logout();
-          await router.push("/login");
-        }
+              await authStore.refreshAuthToken();
+              originalRequest.headers["Authorization"] = `Bearer ${authStore.accessToken}`;
+              return apiClient(originalRequest);
+          } catch (refreshError) {
+              await authStore.logout();
+              await router.push("/login");
+          }
       }
 
       return Promise.reject(error);
