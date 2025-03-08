@@ -125,7 +125,10 @@ export default {
           username: this.username,
           password: this.password
         });
-        this.router.push("/");
+
+        const redirectPath = this.$route.query.redirect || "/";
+        this.$router.push(redirectPath);
+
       } catch (error) {
         if (error.response && error.response.status === 403) {
           this.errorMessage = "Неверные учетные данные";

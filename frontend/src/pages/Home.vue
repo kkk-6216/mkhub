@@ -5,6 +5,7 @@
       <p class="text-gray-600 text-lg">Рады видеть вас.</p>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -12,3 +13,5 @@ export default {
   name: 'WelcomePage',
 };
 </script>
+
+
