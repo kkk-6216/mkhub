@@ -21,35 +21,53 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+let isRefreshing = false;
+let refreshSubscribers = [];
+
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-      const authStore = useAuthStore();
-      const originalRequest = error.config;
+        const authStore = useAuthStore();
+        const originalRequest = error.config;
 
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
+            if (!authStore.refreshToken) {
+                console.warn("Нет refreshToken. Выход из системы.");
+                await authStore.logout();
+                await router.push("/login");
+                return Promise.reject(error);
+            }
 
-          try {
-              if (!authStore.refreshToken) {
-                  console.warn("Нет refreshToken. Выход из системы.");
-                  await authStore.logout();
-                  await router.push("/login");
-                  return;
-              }
+            if (!isRefreshing) {
+                isRefreshing = true;
+                try {
+                    await authStore.refreshAuthToken();
+                    isRefreshing = false;
+                    refreshSubscribers.forEach((cb) => cb(authStore.accessToken));
+                    refreshSubscribers = [];
+                    originalRequest.headers["Authorization"] = `Bearer ${authStore.accessToken}`;
+                    return apiClient(originalRequest);
+                } catch (refreshError) {
+                    isRefreshing = false;
+                    await authStore.logout();
+                    await router.push("/login");
+                    return Promise.reject(refreshError);
+                }
+            } else {
+                return new Promise((resolve) => {
+                    refreshSubscribers.push((token) => {
+                        originalRequest.headers["Authorization"] = `Bearer ${token}`;
+                        resolve(apiClient(originalRequest));
+                    });
+                });
+            }
+        }
 
-              await authStore.refreshAuthToken();
-              originalRequest.headers["Authorization"] = `Bearer ${authStore.accessToken}`;
-              return apiClient(originalRequest);
-          } catch (refreshError) {
-              await authStore.logout();
-              await router.push("/login");
-          }
-      }
-
-      return Promise.reject(error);
+        return Promise.reject(error);
     }
 );
+
 
 export default apiClient;

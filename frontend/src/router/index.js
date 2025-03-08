@@ -1,8 +1,6 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
 
-import Login from '../modules/auth/pages/Login.vue';
-import Register from '../modules/auth/pages/Register.vue';
 import Home from '../pages/Home.vue';
 import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
@@ -10,26 +8,10 @@ import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
 import {useAuthStore} from "@/store/auth.js";
 
-const routes = [
-    {
-        path: '/login',
-        name: 'Login',
-        component: Login,
-        meta: {
-            layout: 'minimal',
-            requiresGuest: true
-        }
+import authRoutes from '@/modules/auth/router/index.js';
 
-    },
-    {
-        path: '/register',
-        name: 'Register',
-        component: Register,
-        meta: {
-            layout: 'minimal',
-            requiresGuest: true
-        }
-    },
+const routes = [
+    ...authRoutes,
     {
         path: '/',
         component: () => import("@/layouts/DefaultLayout.vue"),
@@ -40,25 +22,25 @@ const routes = [
                 component: Home
             },
             {
-                path: 'courses', // /courses
+                path: 'courses',
                 name: 'Courses',
                 component: Courses,
                 meta: { requiresAuth: true }
             },
             {
-                path: 'resources', // /resources
+                path: 'resources',
                 name: 'Resources',
                 component: Resources,
                 meta: { requiresAuth: true }
             },
             {
-                path: 'messages', // /messages
+                path: 'messages',
                 name: 'Messages',
                 component: Messages,
                 meta: { requiresAuth: true }
             },
             {
-                path: 'settings', // /settings
+                path: 'settings',
                 name: 'Settings',
                 component: Settings,
                 meta: { requiresAuth: true }
@@ -66,9 +48,25 @@ const routes = [
             {
                 path: '',
                 redirect: '/home'
-            }
+            },
         ]
     },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: () => import("@/pages/NotFound.vue"),
+        meta: {
+            layout: 'minimal',
+        },
+        beforeEnter: (to, from, next) => {
+            const isAuthenticated = localStorage.getItem("accessToken");
+            if (!isAuthenticated) {
+                next("/login");
+            } else {
+                next();
+            }
+        },
+    }
 
 ];
 
@@ -82,7 +80,7 @@ router.beforeEach(async (to, from, next) => {
     const isAuthenticated = !!authStore.accessToken;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        next("/login");
+        next({ path: "/login", query: { redirect: to.fullPath } });
     } else if (to.meta.requiresGuest && isAuthenticated) {
         next("/");
     } else {

@@ -4,6 +4,7 @@ import router from "./router";
 import "./styles/index.css";
 import { createPinia } from "pinia";
 import { useAuthStore } from "@/store/auth.js";
+import {jwtDecode} from "jwt-decode";
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -17,7 +18,12 @@ const authStore = useAuthStore();
 
     if (authStore.accessToken && authStore.refreshToken) {
         try {
-            await authStore.refreshAuthToken();
+            const decoded = jwtDecode(authStore.accessToken);
+            const now = Math.floor(Date.now() / 1000);
+
+            if (decoded.exp < now) {
+                await authStore.refreshAuthToken();
+            }
         } catch (error) {
             console.warn("Ошибка обновления токена:", error.message);
             await authStore.logout();
