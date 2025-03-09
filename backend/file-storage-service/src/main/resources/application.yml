@@ -1,0 +1,37 @@
+
+spring:
+  application:
+    name: file-storage-service
+
+  datasource:
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/file-storage-service
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  token:
+    access:
+      secret: "b8RktMUpn2buI-OT299m8oivRdP-UHjhOIyvQdI9-JG23FHW12W0A-P2tTDCFGbq"
+      expiration: 3600000
+    refresh:
+      secret: "il679VYSJ8aex-TiW83Bf313krc-V80Cxvtb1do9-Go0cubt8GNXP-IDsvZnIjNc"
+      expiration: 604800000
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
