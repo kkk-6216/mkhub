@@ -38,26 +38,28 @@ public class JwtUtil {
         this.refreshSecretKey = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateAccessToken(String username, String role) {
+    public String generateAccessToken(Long id, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
                 .subject(username)
                 .claim("role", role)
+                .claim("id", id)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(accessSecretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
-    public String generateRefreshToken(String username, String role) {
+    public String generateRefreshToken(Long id, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
                 .subject(username)
                 .claim("role", role)
+                .claim("id", id)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(refreshSecretKey, Jwts.SIG.HS512)
@@ -122,6 +124,24 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.get("role", String.class);
+    }
+
+    public Long getIdFromAccessToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(accessSecretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("id", Long.class);
+    }
+
+    public Long getIdFromRefreshToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(refreshSecretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("id", Long.class);
     }
 
 }

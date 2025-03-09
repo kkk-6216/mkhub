@@ -36,10 +36,11 @@ spring:
           filters:
             - StripPrefix=1
 
-#        - id: user-service
-#          uri: lb://user-service
-#          predicates:
-#            - Path=/api/users/**
-#          filters:
-#            - AuthenticationFilter
-#            - StripPrefix=1
+        - id: file-storage-service
+          uri: lb://file-storage-service
+          predicates:
+            - Path=/api/files/**
+          filters:
+            - StripPrefix=1
+            - name: JwtGatewayFilter
+

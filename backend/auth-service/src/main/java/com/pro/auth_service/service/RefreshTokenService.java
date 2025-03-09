@@ -22,7 +22,7 @@ public class RefreshTokenService {
     @Transactional
     public RefreshToken createRefreshToken(User user) {
 
-        String token = jwtUtil.generateRefreshToken(user.getUsername(), user.getRole().name());
+        String token = jwtUtil.generateRefreshToken(user.getId(), user.getUsername(), user.getRole().name());
         Date expiryDate = new Date(new Date().getTime() + jwtUtil.getRefreshTokenExpiration());
 
         refreshTokenRepository.deleteByUser(user);

@@ -37,9 +37,12 @@ public class RefreshTokenController {
         }
 
         RefreshToken refreshTokenEntity = optionalToken.get();
+
         String username = jwtUtil.getUsernameFromRefreshToken(requestToken);
         String role = jwtUtil.getRoleFromRefreshToken(requestToken);
-        String newAccessToken = jwtUtil.generateAccessToken(username, role);
+        Long id = jwtUtil.getIdFromRefreshToken(requestToken);
+
+        String newAccessToken = jwtUtil.generateAccessToken(id, username, role);
 
         if (refreshTokenService.isRefreshTokenExpired(refreshTokenEntity)) {
             User user = refreshTokenEntity.getUser();

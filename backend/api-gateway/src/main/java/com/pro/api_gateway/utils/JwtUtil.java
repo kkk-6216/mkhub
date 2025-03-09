@@ -123,4 +123,22 @@ public class JwtUtil {
         return claims.get("role", String.class);
     }
 
+    public Long getIdFromAccessToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(accessSecretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("id", Long.class);
+    }
+
+    public Long getIdFromRefreshToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(refreshSecretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("id", Long.class);
+    }
+
 }

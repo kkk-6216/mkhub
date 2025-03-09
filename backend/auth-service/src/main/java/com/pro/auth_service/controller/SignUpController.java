@@ -46,7 +46,7 @@ public class SignUpController {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole().name());
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername(), user.getRole().name());
         RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user);
         String refreshToken = refreshTokenEntity.getToken();
 

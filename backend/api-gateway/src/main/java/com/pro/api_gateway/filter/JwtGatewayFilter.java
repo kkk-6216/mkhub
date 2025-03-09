@@ -50,9 +50,11 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
 
         String username = jwtUtil.getUsernameFromAccessToken(token);
         String role = jwtUtil.getRoleFromAccessToken(token);
+        Long id = jwtUtil.getIdFromRefreshToken(token);
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                .header("X-User-Id", username)
+                .header("X-User-Id", String.valueOf(id))
+                .header("X-User-Username", username)
                 .header("X-User-Role", role)
                 .build();
         ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();

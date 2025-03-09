@@ -43,7 +43,8 @@ public class SignInController {
         User user = userService.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole().name());
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername(), user.getRole().name());
+
         RefreshToken refreshTokenEntity = refreshTokenService.createRefreshToken(user);
         String refreshToken = refreshTokenEntity.getToken();
 
