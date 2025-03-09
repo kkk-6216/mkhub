@@ -1,10 +1,10 @@
 <template>
-  <div class="flex h-screen bg-gray-100">
+  <div class="flex h-screen ">
     <!-- Боковая панель -->
-    <Sidebar class="w-32" />
+    <Sidebar class="min-w-[8rem] max-w-[10rem] h-full" />
 
     <!-- Основной контент -->
-    <div class="flex-1 w-full overflow-x-hidden overflow-y-auto p-0">
+    <div class="flex-1 w-full min-w-0 overflow-x-hidden overflow-y-auto p-0 relative">
       <router-view />
     </div>
   </div>
@@ -16,7 +16,7 @@ import Sidebar from '../components/Sidebar.vue';
 export default {
   name: 'DefaultLayout',
   components: {
-    Sidebar
+    Sidebar,
   },
   // Нет setup(), так как нет логики, требующей Composition API
 };
