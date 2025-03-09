@@ -1,8 +1,11 @@
 package com.pro.auth_service.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RefreshRequest {
 
     private String refreshToken;
