@@ -1,10 +1,11 @@
 package com.pro.auth_service.util;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.Data;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
@@ -14,7 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class JwtUtil {
 
     @Value("${jwt.token.access.secret}")
