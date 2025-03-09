@@ -42,5 +42,4 @@ spring:
             - Path=/api/files/**
           filters:
             - StripPrefix=1
-            - name: JwtGatewayFilter
 
