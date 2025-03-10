@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <!-- Jadval -->
+    <!-- Таблица -->
     <div class="overflow-x-auto">
       <table class="w-full text-left bg-white">
         <thead>
@@ -79,7 +79,7 @@
             </div>
             <div class="col-span-full">
             <div class="flex justify-end space-x-2 ">
-              <DefaultButton label="Отмена" type="button" variant="danger" @click="closeAddPanel"></DefaultButton>
+              <DefaultButton label="Отмена" type="button" variant="secondary" @click="closeAddPanel"></DefaultButton>
               <DefaultButton label="Сохранить" type="button" variant="primary" @click="addFaculty"></DefaultButton>
             </div>
             </div>
@@ -89,15 +89,59 @@
       </form>
     </div>
 
-    <!-- Modal oyna: Fakultetni tahrirlash -->
-    <div v-if="isEditPanelOpen" class="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+<!--    &lt;!&ndash; Modal oyna: Fakultetni tahrirlash &ndash;&gt;-->
+<!--    <div v-if="isEditPanelOpen" class="fixed inset-0 flex items-center justify-center backdrop-blur-sm">-->
+<!--      <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-1/3 border border-gray-200">-->
+<!--        <h3 class="text-xl font-bold mb-4">Редактировать факультет</h3>-->
+<!--        <input v-model="editedFaculty.name" type="text" class="w-full p-2 border rounded-lg mb-4" />-->
+<!--        <textarea v-model="editedFaculty.description" class="w-full p-2 border rounded-lg mb-4"></textarea>-->
+<!--        <div class="flex justify-end space-x-2">-->
+<!--          <button @click="saveFaculty" class="px-4 py-2 bg-dark text-white rounded-lg hover:bg-dark">Сохранить</button>-->
+<!--          <button @click="closeEditPanel" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Отмена</button>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+
+
+        <div v-if="isEditPanelOpen" class="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+          <form action="" class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-2/5 border border-gray-200">
+            <div class="space-y-12">
+              <div class=" pb-1">
+                <h2 class="text-base/7 font-medium text-gray-900 ">Редактировать факультет</h2>
+                <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div class="sm:col-span-4">
+                    <label for="username" class="block text-sm/6 font-medium text-gray-900">Название</label>
+                    <div class="mt-2">
+                      <div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-main">
+                        <input  v-model="editedFaculty.name" type="text" name="username" id="username" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-span-full">
+                    <label for="about" class="block text-sm/6 font-medium text-gray-900">Описание</label>
+                    <div class="mt-2">
+                      <textarea v-model="editedFaculty.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+                    </div>
+                  </div>
+                  <div class="col-span-full">
+                    <div class="flex justify-end space-x-2 ">
+                      <DefaultButton label="Отмена" type="button"  variant="secondary" @click="closeEditPanel"></DefaultButton>
+                      <DefaultButton label="Сохранить" type="button"  variant="primary" @click="saveFaculty"></DefaultButton>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+    <div v-if="isDeleteConfirmationOpen" class="fixed inset-5 flex items-center justify-center backdrop-blur-sm">
       <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-1/3 border border-gray-200">
-        <h3 class="text-xl font-bold mb-4">Редактировать факультет</h3>
-        <input v-model="editedFaculty.name" type="text" class="w-full p-2 border rounded-lg mb-4" />
-        <textarea v-model="editedFaculty.description" class="w-full p-2 border rounded-lg mb-4"></textarea>
+        <h3 class="text-xl font-medium mb-5 text-dark">Подтверждение удаления</h3>
+        <p class="text-gray-700 mb-5">Вы уверены, что хотите удалить этот факультет?</p>
         <div class="flex justify-end space-x-2">
-          <button @click="saveFaculty" class="px-4 py-2 bg-dark text-white rounded-lg hover:bg-dark">Сохранить</button>
-          <button @click="closeEditPanel" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Отмена</button>
+          <DefaultButton label="Удалить" size="sm" type="button" variant="danger" @click="confirmDelete"></DefaultButton>
+          <DefaultButton label="Отмена" size="sm" type="button" variant="secondary" @click="closeDeleteConfirmation"></DefaultButton>
         </div>
       </div>
     </div>
@@ -108,7 +152,7 @@
         <h3 class="text-xl font-bold mb-4">{{ selectedFaculty.name }}</h3>
         <p class="text-gray-700 mb-4">{{ selectedFaculty.description }}</p>
         <div class="flex justify-end w-full">
-          <button @click="closeFacultyDetails" class="w-1/4 bg-blue-400 text-white py-1 rounded-md hover:bg-blue-600">
+          <button @click="closeFacultyDetails" class="w-1/4 bg-dark text-white py-1 rounded-md hover:bg-dark">
             OK
           </button>
         </div>
@@ -145,6 +189,7 @@ export default {
     openAddPanel() {
       this.isAddPanelOpen = true;
       this.isEditPanelOpen = false;
+
     },
     // Закрыть панель добавления
     closeAddPanel() {
