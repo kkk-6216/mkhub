@@ -25,6 +25,7 @@ public class RefreshTokenController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshRequest request) {
+        System.out.println("Refresh token: " + request.getRefreshToken());
         String requestToken = request.getRefreshToken();
 
         if (!jwtUtil.validateRefreshToken(requestToken)) {

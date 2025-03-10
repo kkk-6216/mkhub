@@ -29,7 +29,8 @@ public class AuthValidationController {
         UserInfoDto userInfo = new UserInfoDto(
                 jwtUtil.getIdFromAccessToken(accessToken),
                 jwtUtil.getUsernameFromAccessToken(accessToken),
-                jwtUtil.getRoleFromAccessToken(accessToken)
+                jwtUtil.getRoleFromAccessToken(accessToken),
+                jwtUtil.getExpirationDateFromAccessToken(accessToken)
         );
 
         return ResponseEntity.ok(userInfo);
