@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto p-6 bg-white rounded-lg">
     <!-- Sarlavha va Fakultet qo'shish tugmasi -->
     <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-semibold text-dark">Список факультетов</h2>
+      <h2 class="text-2xl font-medium text-dark">Список факультетов</h2>
       <button @click="openAddPanel"
               class="text-white px-3 py-1 rounded-md hover:opacity-90 flex items-center bg-main hover:bg-main-hover">
         Создать
@@ -24,8 +24,8 @@
         </thead>
         <tbody>
         <tr v-for="(faculty, index) in faculties" :key="index" class="border-b border-gray-300 hover:bg-gray-50">
-          <td class="py-3 text-xs text-dark">{{ index + 1 }}</td>
-          <td @click="openFacultyDetails(index)" class="py-3 cursor-pointer text-xs text-left text-dark hover:text-main">
+          <td class="py-3 text-sm text-dark">{{ index + 1 }}</td>
+          <td @click="openFacultyDetails(index)" class="py-3 cursor-pointer text-sm text-left text-dark hover:text-main">
               {{ faculty.name }}
           </td>
           <td class="py-3 text-right">
@@ -48,28 +48,45 @@
     <!-- Modal oyna: Fakultetni o'chirishni tasdiqlash -->
     <div v-if="isDeleteConfirmationOpen" class="fixed inset-5 flex items-center justify-center backdrop-blur-sm">
       <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-1/3 border border-gray-200">
-        <h3 class="text-xl font-bold mb-4">Подтверждение удаления</h3>
-        <p class="text-gray-700 mb-4">Вы уверены, что хотите удалить этот факультет?</p>
+        <h3 class="text-xl font-medium mb-5 text-dark">Подтверждение удаления</h3>
+        <p class="text-gray-700 mb-5">Вы уверены, что хотите удалить этот факультет?</p>
         <div class="flex justify-end space-x-2">
-          <button @click="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Удалить</button>
-          <button @click="closeDeleteConfirmation" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Отмена</button>
+          <DefaultButton label="Удалить" size="sm" type="button" variant="danger" @click="confirmDelete"></DefaultButton>
+          <DefaultButton label="Отмена" size="sm" type="button" variant="secondary" @click="closeDeleteConfirmation"></DefaultButton>
         </div>
       </div>
     </div>
 
-    <!-- Modal oyna: Fakultet qo'shish -->
     <div v-if="isAddPanelOpen" class="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
-      <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-2/5 border border-gray-200">
-        <h3 class="text-xl font-bold mb-4">Создать факультет</h3>
-        <h1>Название факультета</h1>
-        <input v-model="newFaculty.name" type="text" class="w-full p-2 border rounded-lg mb-4" />
-        <h1>Описание факультета</h1>
-        <textarea v-model="newFaculty.description" class="w-full p-4 border rounded-lg mb-4"></textarea>
-        <div class="flex justify-end space-x-2">
-          <button @click="closeAddPanel" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Отмена</button>
-          <button @click="addFaculty" class="px-4 py-2 bg-dark text-white rounded-lg hover:bg-dark">Сохранить</button>
+      <form action="" class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg w-2/5 border border-gray-200">
+        <div class="space-y-12">
+        <div class=" pb-1">
+          <h2 class="text-base/7 font-medium text-gray-900 ">Создать факультет</h2>
+          <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div class="sm:col-span-4">
+              <label for="username" class="block text-sm/6 font-medium text-gray-900">Название</label>
+              <div class="mt-2">
+                <div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-main">
+                  <input  v-model="newFaculty.name" type="text" name="username" id="username" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" >
+                </div>
+              </div>
+            </div>
+            <div class="col-span-full">
+              <label for="about" class="block text-sm/6 font-medium text-gray-900">Описание</label>
+              <div class="mt-2">
+                <textarea v-model="newFaculty.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+              </div>
+            </div>
+            <div class="col-span-full">
+            <div class="flex justify-end space-x-2 ">
+              <DefaultButton label="Отмена" type="button" variant="danger" @click="closeAddPanel"></DefaultButton>
+              <DefaultButton label="Сохранить" type="button" variant="primary" @click="addFaculty"></DefaultButton>
+            </div>
+            </div>
+         </div>
         </div>
-      </div>
+        </div>
+      </form>
     </div>
 
     <!-- Modal oyna: Fakultetni tahrirlash -->
@@ -101,7 +118,10 @@
 </template>
 
 <script>
+import DefaultButton from "@/components/buttons/DefaultButton.vue";
+
 export default {
+  components: {DefaultButton},
   data() {
     return {
       faculties: [
@@ -198,14 +218,12 @@ th, td {
   padding: 8px 12px;
 }
 th {
-  color: #6b7280;
+
   font-weight: 500;
   text-transform: uppercase;
-  font-size: 0.75rem;
+
 }
-td {
-  font-size: 0.75rem;
-}
+
 tr:hover {
   background-color: #f9fafb;
 }
