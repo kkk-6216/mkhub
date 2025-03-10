@@ -30,7 +30,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        if (path.startsWith("/api/auth/sign-up") || path.startsWith("/api/auth/sign-in")) {
+        if (path.startsWith("/api/auth/sign-up") || path.startsWith("/api/auth/sign-in") || path.startsWith("/api/auth/refresh")) {
             System.out.println("Путь совпало!!!");
             return chain.filter(exchange);
         }
@@ -50,7 +50,7 @@ public class JwtGatewayFilter implements GlobalFilter, Ordered {
 
         String username = jwtUtil.getUsernameFromAccessToken(token);
         String role = jwtUtil.getRoleFromAccessToken(token);
-        Long id = jwtUtil.getIdFromRefreshToken(token);
+        Long id = jwtUtil.getIdFromAccessToken(token);
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                 .header("X-User-Id", String.valueOf(id))

@@ -94,58 +94,52 @@ public class JwtUtil {
         }
     }
 
-    public String getUsernameFromAccessToken(String token) {
-        Claims claims = Jwts.parser()
+    private Claims getClaimsFromAccessToken(String token) {
+        return Jwts.parser()
                 .verifyWith(accessSecretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return claims.getSubject();
+    }
+
+    private Claims getClaimsFromRefreshToken(String token) {
+        return Jwts.parser()
+                .verifyWith(refreshSecretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public String getUsernameFromAccessToken(String token) {
+        return getClaimsFromAccessToken(token).getSubject();
     }
 
     public String getUsernameFromRefreshToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(refreshSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.getSubject();
+        return getClaimsFromRefreshToken(token).getSubject();
     }
 
     public String getRoleFromAccessToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(accessSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("role", String.class);
+        return getClaimsFromAccessToken(token).get("role", String.class);
     }
 
     public String getRoleFromRefreshToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(refreshSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("role", String.class);
+        return getClaimsFromRefreshToken(token).get("role", String.class);
     }
 
     public Long getIdFromAccessToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(accessSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("id", Long.class);
+        return getClaimsFromAccessToken(token).get("id", Long.class);
     }
 
     public Long getIdFromRefreshToken(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(refreshSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        return claims.get("id", Long.class);
+        return getClaimsFromRefreshToken(token).get("id", Long.class);
+    }
+
+    public Date getExpirationDateFromAccessToken(String token) {
+        return getClaimsFromAccessToken(token).getExpiration();
+    }
+
+    public Date getExpirationDateFromRefreshToken(String token) {
+        return getClaimsFromRefreshToken(token).getExpiration();
     }
 
 }
