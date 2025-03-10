@@ -101,7 +101,7 @@
               </div>
             </div>
             <div class="col-span-full">
-              <label for="about" class="block text-sm/6 font-medium text-gray-900">Описание</label>
+              <label for="about" class="block text-sm/6 font-bold text-gray-900">Описание</label>
               <div class="mt-2">
                 <textarea v-model="editedFaculty.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
               </div>
@@ -118,16 +118,44 @@
     </Modal>
 
     <!-- Modal oyna: Fakultet haqida ma'lumot -->
+<!--    <Modal v-if="isFacultyDetailsOpen" @close="closeFacultyDetails">-->
+<!--     <h2 class="text-base/7 font-medium mb-4">{{ selectedFaculty.name }}</h2>-->
+<!--      <p class="text-gray-700 mb-4">{{ selectedFaculty.description }}</p>-->
+<!--      <div class="flex justify-end w-full">-->
+<!--        <button @click="closeFacultyDetails" class="w-1/4 bg-dark text-white py-1 rounded-md hover:bg-dark">-->
+<!--          OK-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </Modal>-->
+
     <Modal v-if="isFacultyDetailsOpen" @close="closeFacultyDetails">
-      <h3 class="text-xl font-bold mb-4">{{ selectedFaculty.name }}</h3>
-      <p class="text-gray-700 mb-4">{{ selectedFaculty.description }}</p>
-      <div class="flex justify-end w-full">
-        <button @click="closeFacultyDetails" class="w-1/4 bg-dark text-white py-1 rounded-md hover:bg-dark">
-          OK
-        </button>
+
+        <h2 class="text-xl font-medium text-dark mb-6 text-left">Информация о факультете</h2>
+        <!-- Название факультета -->
+        <div class="mb-4">
+          <label class="block text-base/6 font-medium text-gray-600">Название</label>
+          <p class=" py-5 text-sm  text-gray-900 ">
+            {{ selectedFaculty.name }}
+          </p>
+
+
+        <!-- Описание факультета -->
+        <div>
+          <label class="block text-base/6 font-medium text-gray-600">Описание</label>
+          <p class=" py-5 text-sm  text-gray-900 ">
+            {{ selectedFaculty.description }}
+          </p>
+        </div>
+
+        <!-- Кнопка -->
+        <div class="flex justify-end mt-6">
+          <DefaultButton label="OK" type="button" variant="primary" @click="closeFacultyDetails"></DefaultButton>
+        </div>
       </div>
-    </Modal>
+      </Modal>
+
   </div>
+
 </template>
 
 <script>
