@@ -9,6 +9,7 @@ import Settings from '../pages/Settings.vue';
 import {useAuthStore} from "@/store/auth.js";
 
 import authRoutes from '@/modules/auth/router/index.js';
+import Faculty from "@/modules/faculty/pages/Faculty.vue";
 
 const routes = [
     ...authRoutes,
@@ -40,9 +41,9 @@ const routes = [
                 meta: { requiresAuth: true }
             },
             {
-                path: 'settings',
-                name: 'Settings',
-                component: Settings,
+                path: 'faculties',
+                name: 'Faculty',
+                component: Faculty,
                 meta: { requiresAuth: true }
             },
             {
