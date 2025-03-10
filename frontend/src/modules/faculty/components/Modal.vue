@@ -9,10 +9,13 @@
       <slot></slot>
     </div>
   </div>
+
 </template>
 
 <script>
+
 export default {
   name: "Modal",
 };
+
 </script>

@@ -129,30 +129,47 @@
 <!--    </Modal>-->
 
     <Modal v-if="isFacultyDetailsOpen" @close="closeFacultyDetails">
+      <h2 class="text-xl font-medium text-dark mb-6 text-left">Информация о факультете</h2>
 
-        <h2 class="text-xl font-medium text-dark mb-6 text-left">Информация о факультете</h2>
-        <!-- Название факультета -->
-        <div class="mb-4">
-          <label class="block text-base/6 font-medium text-gray-600">Название</label>
-          <p class=" py-5 text-sm  text-gray-900 ">
-            {{ selectedFaculty.name }}
-          </p>
-
-
-        <!-- Описание факультета -->
-        <div>
-          <label class="block text-base/6 font-medium text-gray-600">Описание</label>
-          <p class=" py-5 text-sm  text-gray-900 ">
-            {{ selectedFaculty.description }}
-          </p>
-        </div>
-
-        <!-- Кнопка -->
-        <div class="flex justify-end mt-6">
-          <DefaultButton label="OK" type="button" variant="primary" @click="closeFacultyDetails"></DefaultButton>
-        </div>
+      <!-- Название факультета -->
+      <div class="mb-4">
+        <label class="block text-base/6 font-medium text-gray-600">Название</label>
+        <p class="py-5 text-sm text-gray-900">
+          {{ selectedFaculty.name }}
+        </p>
       </div>
-      </Modal>
+
+      <!-- Описание факультета -->
+      <div>
+        <label class="block text-base/6 font-medium text-gray-600">Описание</label>
+        <p class="py-5 text-sm text-gray-900">
+          {{ selectedFaculty.description }}
+        </p>
+      </div>
+
+      <!-- Информация о кафедрах -->
+      <div class="mt-6 border-t pt-4">
+        <div class="flex items-center cursor-pointer" @click="toggleDepartments">
+          <svg class="w-5 h-5 text-black mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+               xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+          </svg>
+          <span class="text-base font-medium text-gray-600">Информация о кафедрах</span>
+        </div>
+
+        <ul v-if="isDepartmentsOpen" class="mt-3 text-sm text-gray-900">
+          <li v-for="department in selectedFaculty.departments" :key="department.id" class="py-1">
+            {{ department.name }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Кнопка -->
+      <div class="flex justify-end mt-6">
+        <DefaultButton label="OK" type="button" variant="primary" @click="closeFacultyDetails"></DefaultButton>
+      </div>
+    </Modal>
+
 
   </div>
 
@@ -164,91 +181,115 @@ import Modal from "@/modules/faculty/components/Modal.vue";
 
 export default {
   name: "Faculty",
-  components: { DefaultButton, Modal },
+  components: {DefaultButton, Modal},
   data() {
     return {
       faculties: [
-        { name: "Факультет информационных технологий", description: "Подготовка специалистов в области IT и программирования." },
-        { name: "Факультет математики и механики", description: "Исследования в области математики и механики." },
-        { name: "Факультет медицины", description: "Подготовка квалифицированных врачей и медицинских специалистов." },
+        {
+          name: "Факультет информационных технологий",
+          description: "Подготовка специалистов в области IT и программирования.",
+          departments: [
+            {id: 1, name: "Кафедра программирования"},
+            {id: 2, name: "Кафедра кибербезопасности"},
+            {id: 3, name: "Кафедра искусственного интеллекта"},
+            {id: 4, name: "Кафедра веб-разработки"},
+            {id: 5, name: "Кафедра мобильной разработки"},
+          ],
+        },
+        {
+          name: "Факультет математики и механики",
+          description: "Исследования в области математики и механики.",
+          departments: [
+            {id: 1, name: "Кафедра алгебры"},
+            {id: 2, name: "Кафедра механики"},
+            {id: 3, name: "Кафедра теории чисел"},
+            {id: 4, name: "Кафедра статистики"},
+            {id: 5, name: "Кафедра математического моделирования"},
+          ],
+        },
+        {
+          name: "Факультет медицины",
+          description: "Подготовка квалифицированных врачей и медицинских специалистов.",
+          departments: [
+            {id: 1, name: "Кафедра хирургии"},
+            {id: 2, name: "Кафедра кардиологии"},
+            {id: 3, name: "Кафедра неврологии"},
+            {id: 4, name: "Кафедра педиатрии"},
+            {id: 5, name: "Кафедра реабилитации"},
+          ],
+        },
       ],
-      newFaculty: { name: "", description: "" },
+      newFaculty: {name: "", description: "", departments: []},
       isAddPanelOpen: false,
       isEditPanelOpen: false,
       isFacultyDetailsOpen: false,
       isDeleteConfirmationOpen: false,
-      editedFaculty: { name: "", description: "" },
+      editedFaculty: {name: "", description: "", departments: []},
       editIndex: null,
-      selectedFaculty: { name: "", description: "" },
+      selectedFaculty: {name: "", description: "", departments: []},
       deleteIndex: null,
+      isDepartmentsOpen: false, // Bo‘limlar ro‘yxati ochiq/yopiq holati
     };
   },
   methods: {
-    // Открыть панель добавления
     openAddPanel() {
       this.isAddPanelOpen = true;
       this.isEditPanelOpen = false;
     },
-    // Закрыть панель добавления
     closeAddPanel() {
       this.isAddPanelOpen = false;
-      this.newFaculty = { name: "", description: "" };
+      this.newFaculty = {name: "", description: "", departments: []};
     },
-    // Открыть панель редактирования
     openEditPanel(index) {
       this.editIndex = index;
-      this.editedFaculty = { ...this.faculties[index] };
+      this.editedFaculty = {...this.faculties[index]};
       this.isEditPanelOpen = true;
     },
-    // Закрыть панель редактирования
     closeEditPanel() {
       this.isEditPanelOpen = false;
-      this.editedFaculty = { name: "", description: "" };
+      this.editedFaculty = {name: "", description: "", departments: []};
       this.editIndex = null;
     },
-    // Открыть детали факультета
     openFacultyDetails(index) {
-      this.selectedFaculty = { ...this.faculties[index] };
+      this.selectedFaculty = {...this.faculties[index]};
       this.isFacultyDetailsOpen = true;
     },
-    // Закрыть детали факультета
     closeFacultyDetails() {
       this.isFacultyDetailsOpen = false;
-      this.selectedFaculty = { name: "", description: "" };
+      this.selectedFaculty = {name: "", description: "", departments: []};
     },
-    // Добавить факультет
     addFaculty() {
       if (this.newFaculty.name.trim() && this.newFaculty.description.trim()) {
-        this.faculties.push({ ...this.newFaculty });
+        this.faculties.push({...this.newFaculty});
         this.closeAddPanel();
       }
     },
-    // Сохранить изменения факультета
     saveFaculty() {
       if (this.editedFaculty.name.trim() && this.editedFaculty.description.trim() && this.editIndex !== null) {
-        this.faculties[this.editIndex] = { ...this.editedFaculty };
+        this.faculties[this.editIndex] = {...this.editedFaculty};
         this.closeEditPanel();
       }
     },
-    // Открыть подтверждение удаления
     openDeleteConfirmation(index) {
       this.deleteIndex = index;
       this.isDeleteConfirmationOpen = true;
     },
-    // Закрыть подтверждение удаления
     closeDeleteConfirmation() {
       this.isDeleteConfirmationOpen = false;
       this.deleteIndex = null;
     },
-    // Подтвердить удаление
     confirmDelete() {
       if (this.deleteIndex !== null) {
         this.faculties.splice(this.deleteIndex, 1);
         this.closeDeleteConfirmation();
       }
     },
-  },
-};
+    // Kafedralarni asta-sekin chiqarish yoki yashirish
+    toggleDepartments() {
+      this.isDepartmentsOpen = !this.isDepartmentsOpen;
+    }
+  }
+}
 </script>
 
 <style scoped>
