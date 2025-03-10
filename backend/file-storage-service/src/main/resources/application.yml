@@ -21,6 +21,12 @@ spring:
     discovery:
       enabled: true
 
+google:
+  drive:
+    credentials: classpath:mkhub-storage-cred.json
+    root-folder-id: 1eaYCxnlVjiqshR_4pxjXgnju_etx2PBp
+
+
 jwt:
   token:
     access:
@@ -40,3 +46,6 @@ eureka:
   instance:
     prefer-ip-address: true
 
+logging:
+  level:
+    org.springframework.security: DEBUG
