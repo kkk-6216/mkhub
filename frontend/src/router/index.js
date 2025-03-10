@@ -6,6 +6,8 @@ import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
+import Profile from '../pages/Profile.vue';
+// import EditProfile from '../pages/EditProfile.vue';
 import {useAuthStore} from "@/store/auth.js";
 
 import authRoutes from '@/modules/auth/router/index.js';
@@ -45,6 +47,16 @@ const routes = [
                 component: Settings,
                 meta: { requiresAuth: true }
             },
+            {
+                path: '/profile',
+                name: 'Profile',
+                component: Profile
+            },
+            // {
+            //     path: '/edit-profile',
+            //     name: 'EditProfile',
+            //     component: EditProfile
+            // },
             {
                 path: '',
                 redirect: '/home'
