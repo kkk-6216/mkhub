@@ -25,13 +25,6 @@
         </div>
 
         <div class="sm:col-span-4">
-          <label for="email" class="block text-sm/6 font-medium text-gray-900">Адрес электронной почты</label>
-          <div class="mt-2">
-            <input id="email" name="email" type="email" v-model="email" autocomplete="email" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-
-        <div class="sm:col-span-3">
           <label for="phone-number" class="block text-sm/6 font-medium text-gray-900">Номер телефона</label>
           <div class="mt-2">
             <input type="tel" name="phone-number" id="phone-number" v-model="phoneNumber" autocomplete="tel" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
@@ -39,14 +32,14 @@
         </div>
 
         <!-- Instagram moved below phone number, taking 3 columns -->
-        <div class="sm:col-span-3">
+        <div class="sm:col-span-4">
           <label for="instagram" class="block text-sm/6 font-medium text-gray-900">Instagram</label>
           <div class="mt-2">
             <input type="text" name="instagram" id="instagram" v-model="instagram" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
 
-        <div class="sm:col-span-3">
+        <div class="sm:col-span-4">
           <label for="github" class="block text-sm/6 font-medium text-gray-900">GitHub</label>
           <div class="mt-2">
             <input type="text" name="github" id="github" v-model="github" autocomplete="github" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
@@ -76,7 +69,6 @@ export default {
     return {
       firstName: '',
       lastName: '',
-      email: '',
       phoneNumber: '',
       instagram: '',
       github: '',
@@ -87,7 +79,6 @@ export default {
     setTimeout(() => {
       this.firstName = 'John';
       this.lastName = 'Doe';
-      this.email = 'john.doe@example.com';
       this.phoneNumber = '+15551234567';
       this.instagram = 'johndoe';
       this.github = 'johndoe';
@@ -99,7 +90,6 @@ export default {
       console.log('Saving changes:', {
         firstName: this.firstName,
         lastName: this.lastName,
-        email: this.email,
         phoneNumber: this.phoneNumber,
         instagram: this.instagram,
         github: this.github,
