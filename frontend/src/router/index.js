@@ -6,9 +6,15 @@ import Courses from '../pages/Courses.vue';
 import Resources from '../pages/Resources.vue';
 import Messages from '../pages/Messages.vue';
 import Settings from '../pages/Settings.vue';
-import Profile from '../pages/Profile.vue';
-// import EditProfile from '../pages/EditProfile.vue';
 import {useAuthStore} from "@/store/auth.js";
+
+
+import MyDetails from '../pages/profile/MyDetails.vue';
+import EditMyDetails from '../pages/profile/EditMyDetails.vue';
+import Profile from '../pages/profile/Profile.vue';
+import EditProfile from '../pages/profile/EditProfile.vue';
+import Password from '../pages/profile/Password.vue';
+import Notifications from '../pages/profile/Notifications.vue';
 
 import authRoutes from '@/modules/auth/router/index.js';
 
@@ -48,18 +54,54 @@ const routes = [
                 meta: { requiresAuth: true }
             },
             {
-                path: '/profile',
-                name: 'Profile',
-                component: Profile
-            },
-            // {
-            //     path: '/edit-profile',
-            //     name: 'EditProfile',
-            //     component: EditProfile
-            // },
-            {
                 path: '',
                 redirect: '/home'
+            },
+        ]
+    },
+    {
+        path: '/',
+        component: () => import("@/layouts/ProfileLayout.vue"),
+        children: [ // Define nested routes for settings pages
+            {
+                path: 'my-details',
+                name: 'MyDetails',
+                component: MyDetails,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: '/my-details/edit',
+                name: 'EditMyDetails',
+                component: EditMyDetails,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: 'profile',
+                name: 'Profile',
+                component: Profile,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: '/edit-profile',
+                name: 'EditProfile',
+                component: EditProfile,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: 'password',
+                name: 'Password',
+                component: Password,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: 'notifications',
+                name: 'Notifications',
+                component: Notifications,
+                meta: { requiresAuth: true }
+            },
+            {
+                path: '',
+                redirect: '/profile'
             },
         ]
     },

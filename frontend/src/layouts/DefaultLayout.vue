@@ -16,7 +16,7 @@ import Sidebar from '../components/Sidebar.vue';
 export default {
   name: 'DefaultLayout',
   components: {
-    Sidebar,
+    Sidebar
   },
   // Нет setup(), так как нет логики, требующей Composition API
 };
