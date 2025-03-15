@@ -6,19 +6,21 @@
 
 <script>
 import DefaultLayout from './layouts/DefaultLayout.vue';
+import AdminLayout from './layouts/AdminLayout.vue';
 import MinimalLayout from './layouts/MinimalLayout.vue';
 import ProfileLayout from './layouts/ProfileLayout.vue';
 
 export default {
-  components: {
-    DefaultLayout,
-    MinimalLayout,
-    ProfileLayout,
-  },
   computed: {
     layout() {
-      return `${this.$route.meta.layout || 'default'}-layout`;
-    },
-  },
+      const layouts = {
+        default: DefaultLayout,
+        admin: AdminLayout,
+        minimal: MinimalLayout,
+        profile: ProfileLayout,
+      };
+      return layouts[this.$route.meta.layout] || DefaultLayout;
+    }
+  }
 };
 </script>

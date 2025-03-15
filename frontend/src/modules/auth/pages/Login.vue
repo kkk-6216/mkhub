@@ -126,10 +126,13 @@ export default {
           password: this.password
         });
 
-        const redirectPath = this.$route.query.redirect || "/";
-        this.$router.push(redirectPath);
+        if (this.authStore.user?.role === "ROLE_ADMIN") {
+          this.$router.push("/admin/monitoring");
+        } else {
+          this.$router.push("/home");
+        }
 
-      } catch (error) {
+        } catch (error) {
         if (error.response && error.response.status === 403) {
           this.errorMessage = "Неверные учетные данные";
         } else if (error.request) {

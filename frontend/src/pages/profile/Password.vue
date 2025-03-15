@@ -25,7 +25,7 @@
               <input type="password" id="newPassword" v-model="newPassword" autocomplete="new-password"
                      class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                      placeholder="••••••••" required/>
-              <p class="text-sm/6 text-gray-500 mt-1">Ваш новый пароль должен содержать более 6 символов.</p>
+              <p v-if="newPasswordError" class="text-sm/6 text-red-500 mt-1">{{ newPasswordError }}</p>
             </div>
           </div>
 
@@ -35,6 +35,7 @@
               <input type="password" id="confirmPassword" v-model="confirmPassword" autocomplete="new-password"
                      class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                      placeholder="••••••••" required/>
+              <p v-if="confirmPasswordError" class="text-sm/6 text-red-500 mt-1">{{ confirmPasswordError }}</p>
             </div>
           </div>
 
@@ -48,7 +49,7 @@
       <ConfirmationModal
           :show="showConfirmationModal"
           title="Изменить пароль"
-          message="Вы уверены, что хотите изменить пароль? Это дейстие нельзя отменить."
+          :message="confirmationMessage"
           confirm-text="Изменить"
           cancel-text="Отмена"
           @confirm="handleSubmit"
@@ -75,16 +76,59 @@ export default {
       newPassword: '',
       confirmPassword: '',
       showConfirmationModal: false,
+      newPasswordError: '',
+      confirmPasswordError: '',
+      isFormValid: false,
     };
   },
   computed: {
     isButtonDisabled() {
-      return !this.currentPassword || !this.newPassword || !this.confirmPassword;
+      return !this.isFormValid || !this.currentPassword || !this.newPassword || !this.confirmPassword;
+    },
+    confirmationMessage() {
+      if (!this.isFormValid) {
+        return 'Пожалуйста, исправьте ошибки в форме.';
+      }
+      return 'Вы уверены, что хотите изменить пароль? Это действие нельзя отменить.';
+    }
+  },
+  watch: {
+    newPassword() {
+      this.validateNewPassword();
+      this.validateConfirmPassword();
+      this.updateFormValidity();
+    },
+    confirmPassword() {
+      this.validateConfirmPassword();
+      this.updateFormValidity();
     }
   },
   methods: {
+    validateNewPassword() {
+      if (this.newPassword.length < 6) {
+        this.newPasswordError = 'Пароль должен содержать не менее 6 символов.';
+      } else {
+        this.newPasswordError = '';
+      }
+    },
+    validateConfirmPassword() {
+      if (this.newPassword !== this.confirmPassword && this.confirmPassword.length > 0) {
+        this.confirmPasswordError = 'Пароли не совпадают.';
+      } else {
+        this.confirmPasswordError = '';
+      }
+    },
+    updateFormValidity() {
+      this.isFormValid = !this.newPasswordError && !this.confirmPasswordError;
+    },
     handleConfirmation() {
-      this.showConfirmationModal = true;
+      if (this.isFormValid) {
+        this.showConfirmationModal = true;
+      } else {
+        // Do something, like display an error message.
+        alert('Пожалуйста, заполните форму корректно.'); // Or use a better notification.
+      }
+
     },
     closeConfirmationModal() {
       this.showConfirmationModal = false;
@@ -100,6 +144,9 @@ export default {
       this.newPassword = '';
       this.confirmPassword = '';
       this.showConfirmationModal = false;
+      this.newPasswordError = '';
+      this.confirmPasswordError = '';
+      this.isFormValid = false;
     }
   },
 }
