@@ -7,7 +7,7 @@
     >
       <!-- Logo -->
 
-      <div @click="goTo('/')"
+      <div @click="goTo('/admin/monitoring')"
            class="flex items-center  mb-0  pt-2 cursor-pointer"
            :class="{'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >

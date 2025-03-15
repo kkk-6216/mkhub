@@ -89,7 +89,7 @@ export default {
     goToEditProfile() {
       // Use router to navigate to the EditProfile component
       // Pass user data as props or through route params/query
-      window.location.href = '/edit-profile';
+      window.location.href =  '/profile/edit';
       // this.$router.push({ name: 'EditProfile', params: { ...this.user } });
     },
   },

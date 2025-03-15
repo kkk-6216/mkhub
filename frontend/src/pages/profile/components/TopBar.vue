@@ -25,12 +25,10 @@
           Профиль
         </router-link>
 
-
         <router-link
             to="../my-details"
             class="py-4 px-1 border-b-2 font-medium text-sm text-gray-500 whitespace-nowrap border-transparent hover:text-main hover:border-main"
             active-class="!border-main !text-main"
-            aria-current="page"
         >
           Мои данные
         </router-link>
@@ -57,35 +55,31 @@
 
 <script>
 import { useAuthStore } from "@/store/auth.js";
-import { computed, defineComponent } from 'vue';
 
-export default defineComponent({
-  name: 'TopBar',
-  setup() {
-    const authStore = useAuthStore();
-    const user = computed(() => authStore.user);
-
-    const userName = computed(() => {
-      return user.value?.sub || 'Имя пользователя'; // Fallback, если имени нет
-    });
-
-    const userRole = computed(() => {
+export default {
+  name: "TopBar",
+  data() {
+    return {
+      authStore: useAuthStore(),
+    };
+  },
+  computed: {
+    user() {
+      return this.authStore.user;
+    },
+    userName() {
+      return this.user?.sub || "Имя пользователя";
+    },
+    userRole() {
       const roleMap = {
         ROLE_STUDENT: "Студент",
         ROLE_MODERATOR: "Модератор",
         ROLE_ADMIN: "Админ",
       };
-      return roleMap[user.value?.role] || "Неизвестная роль";
-    });
-
-    return {
-      user,
-      userName,
-      userRole,
-    };
+      return roleMap[this.user?.role] || "Неизвестная роль";
+    },
   },
-  components: {},
-});
+};
 </script>
 
 <style scoped>

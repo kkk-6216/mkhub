@@ -111,7 +111,7 @@ export default {
   },
   methods: {
     goToEdit() {
-      this.$router.push('/my-details/edit');
+      this.$router.push('/edit/my-details');
     },
   },
 };

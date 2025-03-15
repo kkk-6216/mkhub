@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen bg-gray-100">
+  <div class="flex h-screen">
     <!-- Боковая панель -->
     <AdminSidebar class="w-32" />
 

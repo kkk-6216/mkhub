@@ -114,7 +114,7 @@ const routes = [
                 component: MyDetails,
             },
             {
-                path: '/my-details/edit',
+                path: '/edit/my-details',
                 name: 'EditMyDetails',
                 component: EditMyDetails,
             },
@@ -124,7 +124,7 @@ const routes = [
                 component: Profile,
             },
             {
-                path: '/edit-profile',
+                path: '/profile/edit',
                 name: 'EditProfile',
                 component: EditProfile,
             },
