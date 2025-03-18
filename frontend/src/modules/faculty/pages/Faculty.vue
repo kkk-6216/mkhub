@@ -46,10 +46,10 @@
     </div>
 
     <!-- Modal oyna: Fakultetni o'chirishni tasdiqlash -->
-    <Modal v-if="isDeleteConfirmationOpen" @close="closeDeleteConfirmation">
+    <Modal v-if="isDeleteConfirmationOpen" @close="closeDeleteConfirmation" width="w-[430px]">
       <h3 class="text-xl font-medium mb-5 text-dark">Подтверждение удаления</h3>
-      <p class="text-gray-700 mb-5">Вы уверены, что хотите удалить этот факультет?</p>
-      <div class="flex justify-end space-x-2">
+      <p class="text-gray-700  mb-5">Вы уверены, что хотите удалить этот факультет?</p>
+      <div class="flex justify-end  space-x-2">
         <DefaultButton label="Удалить" size="sm" type="button" variant="danger" @click="confirmDelete"></DefaultButton>
         <DefaultButton label="Отмена" size="sm" type="button" variant="secondary" @click="closeDeleteConfirmation"></DefaultButton>
       </div>
@@ -301,6 +301,7 @@ table {
 th, td {
   padding: 8px 12px;
 }
+
 th {
   font-weight: 500;
   text-transform: uppercase;
