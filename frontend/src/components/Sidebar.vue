@@ -118,7 +118,9 @@ export default {
         { to: '/courses', label: 'Курсы', icon: markRaw(CoursesIcon), iconClass: 'mdi-book-open-variant' },
         { to: '/resources', label: 'Ресурсы', icon: markRaw(ResourcesIcon), iconClass: 'mdi-folder-open' },
         { to: '/messages', label: 'Сообщения', icon: markRaw(MessagesIcon), iconClass: 'mdi-message' },
-        { to: '/faculties', label: 'Факультеты', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog' }
+        { to: '/faculties', label: 'Факультеты', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog' },
+        { to: '/directions', label: 'Направления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog' }
+
       ]
     };
   },
