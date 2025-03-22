@@ -1,4 +1,6 @@
 
+
+
 spring:
   application:
     name: file-storage-service
@@ -21,20 +23,18 @@ spring:
     discovery:
       enabled: true
 
+  data:
+    redis:
+      host: localhost
+      database: 0
+      port: 6379
+      password:
+
+
 google:
   drive:
-    credentials: classpath:mkhub-storage-cred.json
+    credentials: mkhub-storage-cred.json
     root-folder-id: 1eaYCxnlVjiqshR_4pxjXgnju_etx2PBp
-
-
-jwt:
-  token:
-    access:
-      secret: "b8RktMUpn2buI-OT299m8oivRdP-UHjhOIyvQdI9-JG23FHW12W0A-P2tTDCFGbq"
-      expiration: 3600000
-    refresh:
-      secret: "il679VYSJ8aex-TiW83Bf313krc-V80Cxvtb1do9-Go0cubt8GNXP-IDsvZnIjNc"
-      expiration: 604800000
 
 server:
   port: 0
