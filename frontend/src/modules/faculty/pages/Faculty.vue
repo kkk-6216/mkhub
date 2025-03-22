@@ -53,7 +53,9 @@
         <DefaultButton label="Удалить" size="sm" type="button" variant="danger" @click="confirmDelete"></DefaultButton>
         <DefaultButton label="Отмена" size="sm" type="button" variant="secondary" @click="closeDeleteConfirmation"></DefaultButton>
       </div>
+
     </Modal>
+
 
     <!-- Modal oyna: Fakultet qo'shish -->
     <Modal v-if="isAddPanelOpen" @close="closeAddPanel">
@@ -118,16 +120,6 @@
     </Modal>
 
     <!-- Modal oyna: Fakultet haqida ma'lumot -->
-<!--    <Modal v-if="isFacultyDetailsOpen" @close="closeFacultyDetails">-->
-<!--     <h2 class="text-base/7 font-medium mb-4">{{ selectedFaculty.name }}</h2>-->
-<!--      <p class="text-gray-700 mb-4">{{ selectedFaculty.description }}</p>-->
-<!--      <div class="flex justify-end w-full">-->
-<!--        <button @click="closeFacultyDetails" class="w-1/4 bg-dark text-white py-1 rounded-md hover:bg-dark">-->
-<!--          OK-->
-<!--        </button>-->
-<!--      </div>-->
-<!--    </Modal>-->
-
     <Modal v-if="isFacultyDetailsOpen" @close="closeFacultyDetails">
       <h2 class="text-xl font-medium text-dark mb-6 text-left">Информация о факультете</h2>
 

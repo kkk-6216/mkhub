@@ -10,7 +10,7 @@ import {useAuthStore} from "@/store/auth.js";
 
 import authRoutes from '@/modules/auth/router/index.js';
 import Faculty from "@/modules/faculty/pages/Faculty.vue";
-import Department from "../pages/Department.vue";
+import Department from "../modules/Department/pages/Department.vue";
 
 const routes = [
     ...authRoutes,
