@@ -1,0 +1,25 @@
+
+server:
+  port: 0
+
+spring:
+  application:
+    name: content-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/content-service
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  cloud:
+    discovery:
+      enabled: true
