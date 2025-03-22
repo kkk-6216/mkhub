@@ -1,6 +1,6 @@
-package com.pro.file_storage_service.service;
+package com.pro.content_service.service;
 
-import com.pro.file_storage_service.dto.UserInfoDto;
+import com.pro.content_service.dto.user.UserInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
