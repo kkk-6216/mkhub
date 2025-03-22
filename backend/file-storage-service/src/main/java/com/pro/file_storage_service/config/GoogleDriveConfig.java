@@ -26,7 +26,7 @@ public class GoogleDriveConfig {
     private String serviceAccountKeyPath;
 
     @Bean
-    public Drive googleDriveService() throws IOException, GeneralSecurityException {
+    public Drive googleDriveBean() throws IOException, GeneralSecurityException {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
