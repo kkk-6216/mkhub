@@ -1,8 +1,8 @@
-package com.pro.file_storage_service.filter;
+package com.pro.content_service.filter;
 
-import com.pro.file_storage_service.client.AuthClient;
-import com.pro.file_storage_service.dto.UserInfoDto;
-import com.pro.file_storage_service.service.TokenCacheService;
+import com.pro.content_service.client.AuthClient;
+import com.pro.content_service.dto.user.UserInfoDto;
+import com.pro.content_service.service.TokenCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
