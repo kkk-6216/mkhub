@@ -1,22 +1,22 @@
 <template>
-  <div class="flex h-screen ">
+  <div class="flex h-screen">
     <!-- Боковая панель -->
-    <Sidebar class="min-w-[8rem] max-w-[10rem] h-full" />
+    <ModeratorSidebar class="w-32" />
 
     <!-- Основной контент -->
-    <div class="flex-1 w-full min-w-0 overflow-x-hidden overflow-y-auto p-0 relative">
+    <div class="flex-1 w-full overflow-x-hidden overflow-y-auto p-0">
       <router-view />
     </div>
   </div>
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar/Sidebar.vue';
+import ModeratorSidebar from '../components/Sidebar/ModeratorSidebar.vue';
 
 export default {
-  name: 'DefaultLayout',
+  name: 'ModeratorLayout',
   components: {
-   Sidebar
+    ModeratorSidebar
   },
   // Нет setup(), так как нет логики, требующей Composition API
 };
