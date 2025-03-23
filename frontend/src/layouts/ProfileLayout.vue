@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar.vue';
+import Sidebar from '../components/Sidebar/Sidebar.vue';
 import TopBar from '../pages/profile/components/TopBar.vue';
 
 export default {

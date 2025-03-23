@@ -7,9 +7,9 @@
     >
       <!-- Logo -->
 
-      <div @click="goTo('/home')"
-          class="flex items-center  mb-0  pt-2 cursor-pointer"
-          :class="{'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
+      <div @click="goTo('/moderator/dashboard')"
+           class="flex items-center  mb-0  pt-2 cursor-pointer"
+           :class="{'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >
         <span class="text-[20px] text-main uppercase font-bold">
           <span v-if="isCollapsed">MK</span>
@@ -94,14 +94,16 @@ import MenuItem from '@/modules/auth/components/MenuItem.vue';
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
 import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
-import CoursesIcon from "@/components/icons/SidebarIcons/CoursesIcon.vue";
-import ResourcesIcon from "@/components/icons/SidebarIcons/ResourcesIcon.vue";
-import MessagesIcon from "@/components/icons/SidebarIcons/MessagesIcon.vue";
-import SettingsIcon from "@/components/icons/SidebarIcons/SettingsIcon.vue";
+import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
+import FacultiesIcon from "@/components/icons/AdminSidebarIcons/FacultiesIcon.vue";
+import DepartmentIcon from "@/components/icons/AdminSidebarIcons/DepartmentIcon.vue";
+import ModerationIcon from "@/components/icons/AdminSidebarIcons/ModerationIcon.vue";
+import RequestsIcon from "@/components/icons/AdminSidebarIcons/RequestsIcon.vue";
 import {markRaw} from "vue";
+import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
 
 export default {
-  name: 'Sidebar',
+  name: 'ModeratorSidebar',
   components: {
     DefaultButton,
     MenuItem,
@@ -114,11 +116,13 @@ export default {
       initialWidth: window.innerWidth,
       isOpen: false,
       menuItems: [
-        { to: '/home', label: 'Главная', icon: markRaw(HomeIcon), iconClass: 'mdi-view-dashboard' },
-        { to: '/courses', label: 'Курсы', icon: markRaw(CoursesIcon), iconClass: 'mdi-book-open-variant' },
-        { to: '/resources', label: 'Ресурсы', icon: markRaw(ResourcesIcon), iconClass: 'mdi-folder-open' },
-        { to: '/messages', label: 'Сообщения', icon: markRaw(MessagesIcon), iconClass: 'mdi-message' },
-        { to: '/settings', label: 'Настройки', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog' }
+        { to: '/moderator/dashboard', label: 'Главная', icon: markRaw(HomeIcon), iconClass: 'mdi-home' },
+        { to: '/moderator/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
+        { to: '/moderator/faculties', label: 'Факультеты', icon: markRaw(FacultiesIcon), iconClass: 'mdi-school' },
+        { to: '/moderator/departments', label: 'Кафедры', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
+        { to: '/moderator/moderation', label: 'Модерации', icon: markRaw(ModerationIcon), iconClass: 'mdi-shield-check' },
+        { to: '/moderator/requests', label: 'Запросы', icon: markRaw(RequestsIcon), iconClass: 'mdi-message-question' },
+        { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
       ]
     };
   },
@@ -179,6 +183,3 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
