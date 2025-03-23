@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import AdminSidebar from '../components/AdminSidebar.vue';
+import AdminSidebar from '../components/Sidebar/AdminSidebar.vue';
 
 export default {
   name: 'AdminLayout',

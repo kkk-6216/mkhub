@@ -7,6 +7,7 @@
 <script>
 import DefaultLayout from './layouts/DefaultLayout.vue';
 import AdminLayout from './layouts/AdminLayout.vue';
+import ModeratorLayout from './layouts/ModeratorLayout.vue';
 import MinimalLayout from './layouts/MinimalLayout.vue';
 import ProfileLayout from './layouts/ProfileLayout.vue';
 
@@ -15,6 +16,7 @@ export default {
     layout() {
       const layouts = {
         default: DefaultLayout,
+        moderator: ModeratorLayout,
         admin: AdminLayout,
         minimal: MinimalLayout,
         profile: ProfileLayout,

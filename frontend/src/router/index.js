@@ -16,12 +16,16 @@ import EditProfile from '../pages/profile/EditProfile.vue';
 import Password from '../pages/profile/Password.vue';
 import Notifications from '../pages/profile/Notifications.vue';
 
-import UsersPage from '../pages/admin/UsersPage.vue';
-import ContentPage from '../pages/admin/ContentPage.vue';
-import FacultiesPage from '../pages/admin/FacultiesPage.vue';
-import DepartmentPage from '../pages/admin/DepartmentPage.vue';
+import UsersAdminPage from '../pages/admin/UsersAdminPage.vue';
 import MonitoringPage from '../pages/admin/MonitoringPage.vue';
 import ApiGatewayPage from '../pages/admin/ApiGatewayPage.vue';
+
+import DashboardPage from '../pages/moderator/DashboardPage.vue';
+import UsersPage from '../pages/moderator/UsersPage.vue';
+import DepartmentPage from '../pages/moderator/DepartmentPage.vue';
+import FacultiesPage from '../pages/moderator/FacultiesPage.vue';
+import ModerationPage from '../pages/moderator/ModerationPage.vue';
+import RequestsPage from '../pages/moderator/RequestsPage.vue';
 
 import authRoutes from '@/modules/auth/router/index.js';
 
@@ -64,6 +68,47 @@ const routes = [
         ]
     },
     {
+        path: '/moderator',
+        component: () => import("@/layouts/ModeratorLayout.vue"),
+        meta: { requiresAuth: true, roles: ['ROLE_MODERATOR'], layout: "moderator" },
+        children: [
+            {
+                path: '/moderator/dashboard',
+                name: 'DashboardPage',
+                component: DashboardPage,
+            },
+            {
+                path: '/moderator/users',
+                name: 'UsersPage',
+                component: UsersPage,
+            },
+            {
+                path: '/moderator/faculties',
+                name: 'FacultiesPage',
+                component: FacultiesPage,
+            },
+            {
+                path: '/moderator/departments',
+                name: 'DepartmentPage',
+                component: DepartmentPage,
+            },
+            {
+                path: '/moderator/moderation',
+                name: 'ModerationPage',
+                component: ModerationPage,
+            },
+            {
+                path: '/moderator/requests',
+                name: 'RequestsPage',
+                component: RequestsPage,
+            },
+            {
+                path: '',
+                redirect: '/moderator/dashboard'
+            },
+        ]
+    },
+    {
         path: '/admin',
         component: () => import("@/layouts/AdminLayout.vue"),
         meta: { requiresAuth: true, roles: ['ROLE_ADMIN'], layout: "admin" },
@@ -75,23 +120,8 @@ const routes = [
             },
             {
                 path: '/admin/users',
-                name: 'UsersPage',
-                component: UsersPage,
-            },
-            {
-                path: '/admin/content',
-                name: 'ContentPage',
-                component: ContentPage,
-            },
-            {
-                path: '/admin/faculties',
-                name: 'FacultiesPage',
-                component: FacultiesPage,
-            },
-            {
-                path: '/admin/departments',
-                name: 'DepartmentPage',
-                component: DepartmentPage,
+                name: 'UsersAdminPage',
+                component: UsersAdminPage,
             },
             {
                 path: '/admin/api-gateway',

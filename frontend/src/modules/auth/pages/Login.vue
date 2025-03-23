@@ -126,11 +126,12 @@ export default {
           password: this.password
         });
 
-        if (this.authStore.user?.role === "ROLE_ADMIN") {
-          this.$router.push("/admin/monitoring");
-        } else {
-          this.$router.push("/home");
-        }
+        // if (this.authStore.user?.role === "ROLE_ADMIN") {
+        //   this.$router.push("/home");
+        // } else {
+        //   this.$router.push("/home");
+        // }
+        this.$router.push("/home");
 
         } catch (error) {
         if (error.response && error.response.status === 403) {

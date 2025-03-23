@@ -95,10 +95,8 @@ import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
 import MonitoringIcon from "@/components/icons/AdminSidebarIcons/MonitoringIcon.vue";
 import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
-import ContentIcon from "@/components/icons/AdminSidebarIcons/ContentIcon.vue";
-import FacultiesIcon from "@/components/icons/AdminSidebarIcons/FacultiesIcon.vue";
-import DepartmentIcon from "@/components/icons/AdminSidebarIcons/DepartmentIcon.vue";
 import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
+import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
 import {markRaw} from "vue";
 
 export default {
@@ -117,10 +115,8 @@ export default {
       menuItems: [
         { to: '/admin/monitoring', label: 'Мониторинг', icon: markRaw(MonitoringIcon), iconClass: 'mdi-monitor' },
         { to: '/admin/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
-        { to: '/admin/content', label: 'Контент', icon: markRaw(ContentIcon), iconClass: 'mdi-file-document' },
-        { to: '/admin/faculties', label: 'Факультеты', icon: markRaw(FacultiesIcon), iconClass: 'mdi-school' },
-        { to: '/admin/departments', label: 'Кафедры', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
-        { to: '/admin/api-gateway', label: 'API Gateway', icon: markRaw(ApiGatewayIcon), iconClass: 'mdi-api' }
+        { to: '/admin/api-gateway', label: 'API Gateway', icon: markRaw(ApiGatewayIcon), iconClass: 'mdi-api' },
+        { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
       ]
     };
   },
@@ -181,6 +177,3 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
