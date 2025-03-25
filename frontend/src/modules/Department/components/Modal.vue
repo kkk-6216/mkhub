@@ -4,7 +4,7 @@
       @mousedown.self="$emit('close')"
   >
     <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg border border-gray-200" :class="width">
-      <slot></slot>
+      <slot></slot> <!-- Bu yerda modal oynaning kontenti joylashadi -->
     </div>
   </div>
 </template>
@@ -15,9 +15,9 @@ export default {
   props: {
     width: {
       type: String,
-      default: "w-2/5",
-      required: false,
-    }
-  }
+      default: "w-[500px]",
+    },
+  },
 };
 </script>
+

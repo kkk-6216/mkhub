@@ -99,6 +99,7 @@ import ResourcesIcon from "@/components/icons/ResourcesIcon.vue";
 import MessagesIcon from "@/components/icons/MessagesIcon.vue";
 import SettingsIcon from "@/components/icons/SettingsIcon.vue";
 import {markRaw} from "vue";
+import FacultyIcon from "@/components/icons/SettingsIcon.vue";
 
 export default {
   name: 'Sidebar',
