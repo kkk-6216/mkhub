@@ -8,15 +8,15 @@ import Messages from '../pages/student/Messages.vue';
 import Settings from '../pages/student/Settings.vue';
 import {useAuthStore} from "@/store/auth.js";
 
-import UsersPage from '../pages/admin/UsersPage.vue';
-import ContentPage from '../pages/admin/ContentPage.vue';
-import FacultiesPage from '../pages/admin/FacultiesPage.vue';
-import DepartmentPage from '../pages/admin/DepartmentPage.vue';
+ import UsersAdminPage from '../pages/admin/UsersAdminPage.vue';
+// import ContentPage from '../pages/admin/ContentPage.vue';
+// import FacultiesPage from '../pages/admin/FacultiesPage.vue';
+// import DepartmentPage from '../pages/admin/DepartmentPage.vue';
 import MonitoringPage from '../pages/admin/MonitoringPage.vue';
 import ApiGatewayPage from '../pages/admin/ApiGatewayPage.vue';
 
 import DashboardPage from '../pages/moderator/DashboardPage.vue';
-import UsersPage from '../pages/moderator/UsersPage.vue';
+ import UsersPage from '../pages/moderator/UsersPage.vue';
 import DepartmentPage from '../pages/moderator/DepartmentPage.vue';
 import FacultiesPage from '../pages/moderator/FacultiesPage.vue';
 import ModerationPage from '../pages/moderator/ModerationPage.vue';

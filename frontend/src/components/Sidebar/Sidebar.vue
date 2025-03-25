@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import MenuItem from '@/modules/auth/components/MenuItem.vue';
+import MenuItem from '@/components/MenuItem.vue';
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
 import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
