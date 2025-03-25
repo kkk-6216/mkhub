@@ -1,4 +1,4 @@
-package com.pro.content_service.exception.handler;
+package com.pro.content_service.handler;
 
 import com.pro.content_service.exception.ResourceNotFoundException;
 import com.pro.content_service.exception.UnauthorizedException;
