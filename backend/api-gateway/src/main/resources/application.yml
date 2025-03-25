@@ -43,3 +43,10 @@ spring:
           filters:
             - StripPrefix=1
 
+        - id: content-service
+          uri: lb://content-service
+          predicates:
+            - Path=/api/**
+          filters:
+            - StripPrefix=1
+
