@@ -1,3 +1,4 @@
+
 <template>
   <div class="max-w-7xl mx-auto p-6 bg-white rounded-lg">
     <!-- Sarlavha va Bo'lim qo'shish tugmasi -->
@@ -32,28 +33,43 @@
             <div class="col-span-full">
               <label for="departmentDescription" class="block text-sm/6 font-medium text-gray-900">Описание</label>
               <div class="mt-2">
-                <textarea v-model="newDepartment.description" id="departmentDescription" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+                <textarea v-model="newDepartment.description" id="departmentDescription" style="resize: none;" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
               </div>
             </div>
 
             <!-- Fakultetni tanlash -->
-            <div class="col-span-full">
-              <label for="facultySearch" class="block text-sm/6 font-medium text-gray-900">Выберите факультет</label>
+            <div class="col-span-full relative">
+              <label for="facultySearch" class="block text-sm/6 font-medium text-gray-900">
+                Выберите факультет
+              </label>
               <div class="mt-2 relative">
-                <input v-model="facultySearchQuery" type="text" id="facultySearch" placeholder="Поиск факультета" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6">
-                <ul v-if="filteredFaculties.length > 0" class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                  <li v-for="faculty in filteredFaculties" :key="faculty.id" @click="selectFaculty(faculty)" class="px-4 py-2 cursor-pointer hover:bg-gray-100">
+                <!-- Input maydoni -->
+                <input
+                    v-model="facultySearchQuery"
+                    type="text"
+                    id="facultySearch"
+                    placeholder="Поиск факультета"
+                    class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"
+                    @focus="isFacultyListOpen = true"
+                    @blur="closeFacultyList"
+                />
+
+                <!-- Fakultetlar ro'yxati (scroll bilan) -->
+                <ul
+                    v-if="isFacultyListOpen && filteredFaculties.length > 0"
+                    class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-32 overflow-y-auto"
+                >
+                  <li
+                      v-for="faculty in filteredFaculties"
+                      :key="faculty.id"
+                      @mousedown="selectFaculty(faculty)"
+                      class="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                  >
                     {{ faculty.name }}
                   </li>
                 </ul>
               </div>
             </div>
-
-            <!-- Tanlangan fakultet -->
-            <div v-if="selectedFaculty" class="col-span-full">
-              <p class="text-sm text-gray-700">Выбранный факультет: <span class="font-medium">{{ selectedFaculty.name }}</span></p>
-            </div>
-
             <!-- Tugmalar -->
             <div class="col-span-full">
               <div class="flex justify-end space-x-2">
@@ -61,6 +77,7 @@
                 <DefaultButton label="Сохранить" type="button" variant="primary" @click="addDepartment"></DefaultButton>
               </div>
             </div>
+
           </div>
         </div>
       </form>
@@ -73,6 +90,7 @@
         <tr class="border-b border-gray-300">
           <th class="py-2 text-xs font-medium text-gray-500">#</th>
           <th class="py-2 text-xs font-medium text-gray-500">Название</th>
+          <th class="py-2 text-xs font-medium text-gray-500">Факультет</th>
           <th class="py-2 text-xs font-medium text-gray-500 text-right">Действие</th>
         </tr>
         </thead>
@@ -82,6 +100,7 @@
           <td @click="openDepartmentDetails(index)" class="py-3 cursor-pointer text-sm text-left text-dark hover:text-main">
             {{ department.name }}
           </td>
+          <td class="py-3 text-sm text-dark">{{ department.faculty.name }}</td>
           <td class="py-3 text-right">
             <button @click="openEditPanel(index)" class="p-1 bg-gray-200 rounded-md hover:bg-gray-300 ">
               <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -126,7 +145,7 @@
             <div class="col-span-full">
               <label for="about" class="block text-sm/6 font-bold text-gray-900">Описание</label>
               <div class="mt-2">
-                <textarea v-model="editedDepartment.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+                <textarea v-model="editedDepartment.description" name="about" id="about" rows="3" style="resize: none;"  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
               </div>
             </div>
             <div class="col-span-full">
@@ -140,7 +159,7 @@
       </form>
     </Modal>
 
-    <!-- Modal oyna: Bo'lim haqida ma'lumot -->
+    <!-- Modal oyna: Bo'lim haqida ma'lumот -->
     <Modal v-if="isDepartmentDetailsOpen" @close="closeDepartmentDetails">
       <h2 class="text-xl font-medium text-dark mb-6 text-left">Информация о кафедре</h2>
 
@@ -160,6 +179,14 @@
         </p>
       </div>
 
+      <!-- Факультет -->
+      <div>
+        <label class="block text-base/6 font-medium text-gray-600">Факультет</label>
+        <p class="py-5 text-sm text-gray-900">
+          {{ selectedDepartment.faculty.name }}
+        </p>
+      </div>
+
       <!-- Кнопка -->
       <div class="flex justify-end mt-6">
         <DefaultButton label="OK" type="button" variant="primary" @click="closeDepartmentDetails"></DefaultButton>
@@ -167,56 +194,59 @@
     </Modal>
   </div>
 </template>
-
 <script>
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import Modal from "@/modules/faculty/components/Modal.vue";
+import Modal from "@/modules/department/components/Modal.vue";
 
 export default {
   name: "Department",
-  components: {DefaultButton, Modal},
+  components: { Modal, DefaultButton },
   data() {
     return {
       faculties: [
         { id: 1, name: "Факультет информационных технологий" },
         { id: 2, name: "Факультет математики и механики" },
         { id: 3, name: "Факультет медицины" },
+        { id: 4, name: "Факультет экономики и бизнеса" },
+        { id: 5, name: "Факультет иностранных языков" },
+        { id: 6, name: "Факультет физики и астрономии" },
+        { id: 7, name: "Факультет химии и биологии" }
       ],
       departments: [
         {
           name: "Кафедра программирования",
           description: "Кафедра, занимающаяся подготовкой специалистов в области программирования.",
-          facultyId: 1,
+          faculty: { id: 1, name: "Факультет информационных технологий" },
         },
         {
           name: "Кафедра кибербезопасности",
-          description: "Кафедра, занимающаяся подготовкой специалистов в области кибербезопасности.",
-          facultyId: 1,
+          description: "Кафедра, обеспечивающая подготовку специалистов в области информационной безопасности.",
+          faculty: { id: 1, name: "Факультет информационных технологий" },
         },
         {
           name: "Кафедра искусственного интеллекта",
-          description: "Кафедра, занимающаяся подготовкой специалистов в области искусственного интеллекта.",
-          facultyId: 1,
+          description: "Кафедра, занимающаяся исследованием и разработкой технологий искусственного интеллекта.",
+          faculty: { id: 1, name: "Факультет информационных технологий" },
         },
       ],
-      newDepartment: { name: "", description: "", facultyId: null },
+      newDepartment: { name: "", description: "", faculty: null },
       isAddPanelOpen: false,
       isEditPanelOpen: false,
       isDepartmentDetailsOpen: false,
       isDeleteConfirmationOpen: false,
-      editedDepartment: { name: "", description: "", facultyId: null },
+      editedDepartment: { name: "", description: "", faculty: null },
       editIndex: null,
-      selectedDepartment: { name: "", description: "", facultyId: null },
+      selectedDepartment: { name: "", description: "", faculty: null },
       deleteIndex: null,
       facultySearchQuery: "",
       selectedFaculty: null,
+      isFacultyListOpen: false,
     };
   },
   computed: {
-    // Qidiruv natijasiga ko'ra fakultetlarni filtrlash
     filteredFaculties() {
       if (this.facultySearchQuery) {
-        return this.faculties.filter(faculty =>
+        return this.faculties.filter((faculty) =>
             faculty.name.toLowerCase().includes(this.facultySearchQuery.toLowerCase())
         );
       }
@@ -231,21 +261,26 @@ export default {
     },
     closeAddPanel() {
       this.isAddPanelOpen = false;
-      this.newDepartment = { name: "", description: "", facultyId: null };
+      this.newDepartment = { name: "", description: "", faculty: null };
     },
-    // Fakultetni tanlash
     selectFaculty(faculty) {
       this.selectedFaculty = faculty;
-      this.newDepartment.facultyId = faculty.id;
-      this.facultySearchQuery = ""; // Qidiruv maydonini tozalash
+      this.newDepartment.faculty = faculty; // Fakultetni yangi kafedraga biriktirish
+      this.facultySearchQuery = faculty.name; // Qidiruv maydoniga fakultet nomini yozish
+      this.isFacultyListOpen = false; // Ro'yxatni yopish
     },
-    // Bo'lim qo'shish
+    closeFacultyList() {
+      setTimeout(() => {
+        this.isFacultyListOpen = false;
+      }, 200);
+    },
     addDepartment() {
-      if (this.newDepartment.name.trim() && this.newDepartment.description.trim() && this.newDepartment.facultyId) {
+      if (this.newDepartment.name.trim() && this.newDepartment.description.trim() && this.newDepartment.faculty) {
         this.departments.push({ ...this.newDepartment });
         this.closeAddPanel();
       } else {
-        alert("Iltimos, barcha maydonlarni to'ldiring va fakultetni tanlang.");
+        alert("Пожалуйста, заполните все поля и выберите факультет.");
+
       }
     },
     openEditPanel(index) {
@@ -255,7 +290,7 @@ export default {
     },
     closeEditPanel() {
       this.isEditPanelOpen = false;
-      this.editedDepartment = { name: "", description: "", facultyId: null };
+      this.editedDepartment = { name: "", description: "", faculty: null };
       this.editIndex = null;
     },
     saveDepartment() {
@@ -270,7 +305,7 @@ export default {
     },
     closeDepartmentDetails() {
       this.isDepartmentDetailsOpen = false;
-      this.selectedDepartment = { name: "", description: "", facultyId: null };
+      this.selectedDepartment = { name: "", description: "", faculty: null };
     },
     openDeleteConfirmation(index) {
       this.deleteIndex = index;
@@ -289,12 +324,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Qo'shimcha stil */
-ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-</style>
