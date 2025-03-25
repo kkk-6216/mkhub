@@ -74,7 +74,7 @@
             <div class="col-span-full">
               <label for="about" class="block text-sm/6 font-medium text-gray-900">Описание</label>
               <div class="mt-2">
-                <textarea v-model="newFaculty.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+                <textarea v-model="newFaculty.description" name="about" id="about" rows="3" style="resize: none;" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
               </div>
             </div>
             <div class="col-span-full">
@@ -105,7 +105,7 @@
             <div class="col-span-full">
               <label for="about" class="block text-sm/6 font-bold text-gray-900">Описание</label>
               <div class="mt-2">
-                <textarea v-model="editedFaculty.description" name="about" id="about" rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
+                <textarea v-model="editedFaculty.description" name="about" id="about" style="resize: none;"  rows="3" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-main sm:text-sm/6"></textarea>
               </div>
             </div>
             <div class="col-span-full">
@@ -178,39 +178,91 @@ export default {
     return {
       faculties: [
         {
+          id: 1,
           name: "Факультет информационных технологий",
           description: "Подготовка специалистов в области IT и программирования.",
           departments: [
-            {id: 1, name: "Кафедра программирования"},
-            {id: 2, name: "Кафедра кибербезопасности"},
-            {id: 3, name: "Кафедра искусственного интеллекта"},
-            {id: 4, name: "Кафедра веб-разработки"},
-            {id: 5, name: "Кафедра мобильной разработки"},
+            { id: 101, name: "Кафедра программирования" },
+            { id: 102, name: "Кафедра кибербезопасности" },
+            { id: 103, name: "Кафедра искусственного интеллекта" },
+            { id: 104, name: "Кафедра веб-разработки" },
+            { id: 105, name: "Кафедра мобильной разработки" },
           ],
         },
         {
+          id: 2,
           name: "Факультет математики и механики",
           description: "Исследования в области математики и механики.",
           departments: [
-            {id: 1, name: "Кафедра алгебры"},
-            {id: 2, name: "Кафедра механики"},
-            {id: 3, name: "Кафедра теории чисел"},
-            {id: 4, name: "Кафедра статистики"},
-            {id: 5, name: "Кафедра математического моделирования"},
+            { id: 201, name: "Кафедра алгебры" },
+            { id: 202, name: "Кафедра механики" },
+            { id: 203, name: "Кафедра теории чисел" },
+            { id: 204, name: "Кафедра статистики" },
+            { id: 205, name: "Кафедра математического моделирования" },
           ],
         },
         {
+          id: 3,
           name: "Факультет медицины",
           description: "Подготовка квалифицированных врачей и медицинских специалистов.",
           departments: [
-            {id: 1, name: "Кафедра хирургии"},
-            {id: 2, name: "Кафедра кардиологии"},
-            {id: 3, name: "Кафедра неврологии"},
-            {id: 4, name: "Кафедра педиатрии"},
-            {id: 5, name: "Кафедра реабилитации"},
+            { id: 301, name: "Кафедра хирургии" },
+            { id: 302, name: "Кафедра кардиологии" },
+            { id: 303, name: "Кафедра неврологии" },
+            { id: 304, name: "Кафедра педиатрии" },
+            { id: 305, name: "Кафедра реабилитации" },
           ],
         },
+        {
+          id: 4,
+          name: "Факультет экономики и бизнеса",
+          description: "Подготовка специалистов в области экономики и управления.",
+          departments: [
+            { id: 401, name: "Кафедра микроэкономики" },
+            { id: 402, name: "Кафедра макроэкономики" },
+            { id: 403, name: "Кафедра финансов" },
+            { id: 404, name: "Кафедра менеджмента" },
+            { id: 405, name: "Кафедра маркетинга" },
+          ],
+        },
+        {
+          id: 5,
+          name: "Факультет иностранных языков",
+          description: "Изучение иностранных языков и межкультурной коммуникации.",
+          departments: [
+            { id: 501, name: "Кафедра английского языка" },
+            { id: 502, name: "Кафедра немецкого языка" },
+            { id: 503, name: "Кафедра французского языка" },
+            { id: 504, name: "Кафедра восточных языков" },
+            { id: 505, name: "Кафедра перевода" },
+          ],
+        },
+        {
+          id: 6,
+          name: "Факультет физики и астрономии",
+          description: "Исследования в области физики и астрономических наук.",
+          departments: [
+            { id: 601, name: "Кафедра теоретической физики" },
+            { id: 602, name: "Кафедра ядерной физики" },
+            { id: 603, name: "Кафедра астрофизики" },
+            { id: 604, name: "Кафедра квантовой механики" },
+            { id: 605, name: "Кафедра оптики" },
+          ],
+        },
+        {
+          id: 7,
+          name: "Факультет химии и биологии",
+          description: "Исследования в области химических и биологических наук.",
+          departments: [
+            { id: 701, name: "Кафедра органической химии" },
+            { id: 702, name: "Кафедра неорганической химии" },
+            { id: 703, name: "Кафедра биохимии" },
+            { id: 704, name: "Кафедра молекулярной биологии" },
+            { id: 705, name: "Кафедра генетики" },
+          ],
+        }
       ],
+
       newFaculty: {name: "", description: "", departments: []},
       isAddPanelOpen: false,
       isEditPanelOpen: false,
