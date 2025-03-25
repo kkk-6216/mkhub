@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import MenuItem from '@/components/MenuItem.vue';
+
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
 import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
@@ -100,6 +100,7 @@ import ResourcesIcon from "@/components/icons/SidebarIcons/ResourcesIcon.vue";
 import MessagesIcon from "@/components/icons/SidebarIcons/MessagesIcon.vue";
 import SettingsIcon from "@/components/icons/SidebarIcons/SettingsIcon.vue";
 import { markRaw } from "vue";
+import MenuItem from "@/components/MenuItem.vue";
 
 export default {
   name: 'Sidebar',

@@ -90,7 +90,6 @@
 
 <script>
 
-import MenuItem from '@/components/MenuItem.vue';
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
 import MonitoringIcon from "@/components/icons/AdminSidebarIcons/MonitoringIcon.vue";
@@ -98,6 +97,7 @@ import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
 import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
 import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
 import {markRaw} from "vue";
+import MenuItem from "@/components/MenuItem.vue";
 
 export default {
   name: 'AdminSidebar',
