@@ -1,16 +1,16 @@
 <template>
-  <div class="flex h-screen ">
+  <div class="container mx-auto flex h-auto ">
     <!-- Sidebar -->
     <Sidebar class="min-w-[8rem] max-w-[10rem] h-full"/>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Topbar -->
-      <TopBar class="bg-white p-4 m-4"/>
+      <TopBar class="p-4 m-4"/>
 
       <!-- Page Content -->
       <main class="flex-1 overflow-x-hidden overflow-y-auto m-4">
-        <div class="container mx-auto px-6">
+        <div class="px-6">
           <router-view />
         </div>
       </main>
@@ -20,7 +20,7 @@
 
 <script>
 import Sidebar from '../components/Sidebar/Sidebar.vue';
-import TopBar from '../pages/profile/components/TopBar.vue';
+import TopBar from '../modules/profile/components/TopBar.vue';
 
 export default {
   components: {

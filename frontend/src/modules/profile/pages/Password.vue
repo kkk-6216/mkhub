@@ -62,7 +62,7 @@
 
 <script>
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import ConfirmationModal from "@/pages/profile/components/ConfirmationModal.vue";  // Import
+import ConfirmationModal from "@/modules/profile/components/ConfirmationModal.vue";  // Import
 
 export default {
   name: 'Password',

@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', {
       : null,
     accessToken: localStorage.getItem('accessToken') || null,
     refreshToken: localStorage.getItem('refreshToken') || null,
+    userAvatar: localStorage.getItem('userAvatar') || null,
   }),
 
   actions: {
@@ -95,11 +96,56 @@ export const useAuthStore = defineStore('auth', {
       this.user = null;
       this.accessToken = null;
       this.refreshToken = null;
+      this.userAvatar = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('userAvatar');
 
       if (router.currentRoute.value.path !== "/login") {
         await router.push("/login");
+      }
+    },
+
+    async uploadAvatar(formData) {
+      try {
+        const response = await apiClient.post("/files/avatar", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log(response);
+
+        this.userAvatar = response.data.imageUrl;
+        localStorage.setItem('userAvatar', this.userAvatar);
+
+      } catch (error) {
+        console.error("Ошибка загрузки файла:", error);
+      }
+    },
+
+    async updateAvatar(formData) {
+      try {
+        const response = await apiClient.put("/files/avatar", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log(response);
+
+        this.userAvatar = response.data.imageUrl;
+        localStorage.setItem('userAvatar', this.userAvatar);
+
+      } catch (error) {
+        console.error("Ошибка загрузки файла:", error);
+      }
+    },
+
+    async getAvatar() {
+      try {
+        const response = await apiClient.get("/files/avatar/link");
+        console.log(response);
+
+        this.userAvatar = response.data.imageUrl;
+        localStorage.setItem('userAvatar', this.userAvatar);
+
+      } catch (error) {
+        console.error("Ошибка загрузки файла:", error);
       }
     }
 

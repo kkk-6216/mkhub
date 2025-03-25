@@ -8,15 +8,10 @@ import Messages from '../pages/student/Messages.vue';
 import Settings from '../pages/student/Settings.vue';
 import {useAuthStore} from "@/store/auth.js";
 
-
-import MyDetails from '../pages/profile/MyDetails.vue';
-import EditMyDetails from '../pages/profile/EditMyDetails.vue';
-import Profile from '../pages/profile/Profile.vue';
-import EditProfile from '../pages/profile/EditProfile.vue';
-import Password from '../pages/profile/Password.vue';
-import Notifications from '../pages/profile/Notifications.vue';
-
-import UsersAdminPage from '../pages/admin/UsersAdminPage.vue';
+import UsersPage from '../pages/admin/UsersPage.vue';
+import ContentPage from '../pages/admin/ContentPage.vue';
+import FacultiesPage from '../pages/admin/FacultiesPage.vue';
+import DepartmentPage from '../pages/admin/DepartmentPage.vue';
 import MonitoringPage from '../pages/admin/MonitoringPage.vue';
 import ApiGatewayPage from '../pages/admin/ApiGatewayPage.vue';
 
@@ -28,9 +23,11 @@ import ModerationPage from '../pages/moderator/ModerationPage.vue';
 import RequestsPage from '../pages/moderator/RequestsPage.vue';
 
 import authRoutes from '@/modules/auth/router/index.js';
+import profileRoutes from '@/modules/profile/router/index.js';
 
 const routes = [
     ...authRoutes,
+    ...profileRoutes,
     {
         path: '/',
         component: () => import("@/layouts/DefaultLayout.vue"),
@@ -45,21 +42,25 @@ const routes = [
                 path: 'courses',
                 name: 'Courses',
                 component: Courses,
+                meta: { requiresAuth: true }
             },
             {
                 path: 'resources',
                 name: 'Resources',
                 component: Resources,
+                meta: { requiresAuth: true }
             },
             {
                 path: 'messages',
                 name: 'Messages',
                 component: Messages,
+                meta: { requiresAuth: true }
             },
             {
                 path: 'settings',
                 name: 'Settings',
                 component: Settings,
+                meta: { requiresAuth: true }
             },
             {
                 path: '',
@@ -135,46 +136,6 @@ const routes = [
         ]
     },
     {
-        path: '/',
-        component: () => import("@/layouts/ProfileLayout.vue"),
-        children: [ // Define nested routes for settings pages
-            {
-                path: 'my-details',
-                name: 'MyDetails',
-                component: MyDetails,
-            },
-            {
-                path: '/edit/my-details',
-                name: 'EditMyDetails',
-                component: EditMyDetails,
-            },
-            {
-                path: 'profile',
-                name: 'Profile',
-                component: Profile,
-            },
-            {
-                path: '/profile/edit',
-                name: 'EditProfile',
-                component: EditProfile,
-            },
-            {
-                path: 'password',
-                name: 'Password',
-                component: Password,
-            },
-            {
-                path: 'notifications',
-                name: 'Notifications',
-                component: Notifications,
-            },
-            {
-                path: '',
-                redirect: '/profile'
-            },
-        ]
-    },
-    {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: () => import("@/pages/NotFound.vue"),
@@ -198,7 +159,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
     const user = authStore.user;
 
@@ -215,6 +176,5 @@ router.beforeEach((to, from, next) => {
         next();
     }
 });
-
 
 export default router;

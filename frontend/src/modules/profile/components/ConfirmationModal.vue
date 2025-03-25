@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import DefaultButton from  "@/components/buttons/DefaultButton.vue";
+import DefaultButton from "@/components/buttons/DefaultButton.vue";
 
 export default {
   name: 'ConfirmationModal',
