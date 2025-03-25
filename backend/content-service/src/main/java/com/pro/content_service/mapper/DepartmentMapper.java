@@ -12,7 +12,7 @@ public class DepartmentMapper {
                 .id(department.getId())
                 .name(department.getName())
                 .description(department.getDescription())
-                .facultyDto(DepartmentDto.FacultyDto.builder()
+                .faculty(DepartmentDto.FacultyDto.builder()
                         .id(department.getFaculty().getId())
                         .name(department.getFaculty().getName())
                         .build())
