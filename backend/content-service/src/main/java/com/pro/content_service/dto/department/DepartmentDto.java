@@ -10,7 +10,7 @@ public class DepartmentDto {
     private Long id;
     private String name;
     private String description;
-    private FacultyDto facultyDto;
+    private FacultyDto faculty;
 
     @Data
     @Builder
