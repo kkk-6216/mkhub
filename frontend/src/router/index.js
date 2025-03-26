@@ -12,9 +12,9 @@ import moderatorRouters from '@/modules/moderator/router/index.js'
 const routes = [
     ...authRoutes,
     ...profileRoutes,
-    ...studentRouters,
-    ...adminRouters,
-    ...moderatorRouters,
+    studentRouters,
+    adminRouters,
+    moderatorRouters,
     {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
