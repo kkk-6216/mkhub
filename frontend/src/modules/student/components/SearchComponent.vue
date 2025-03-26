@@ -3,8 +3,8 @@
     <!-- Основной контейнер -->
     <div
         :class="{
-      'bg-white rounded-full shadow-sm border border-gray-500 overflow-hidden': !isFocused,
-      'bg-white rounded-xl shadow-sm border border-gray-500 overflow-hidden': isFocused
+      'bg-white rounded-full shadow-sm border border-gray-500 overflow-hidden': !showResults,
+      'bg-white rounded-xl shadow-sm border border-gray-500 overflow-hidden': showResults
     }"
     >
       <!-- Поле поиска -->
@@ -243,8 +243,8 @@ export default {
       }
       return []; // Возвращаем пустой массив, если тип поиска не соответствует
     },
-   hasResults() {
-      return this.filteredProjects.length > 0 || this.filteredUsers.length > 0;
+    hasResults() {
+      return this.filteredProjects.length > 0 || this.filteredUsers.length > 0 || this.filteredDepartments.length > 0;
     },
   },
   watch: {
@@ -253,6 +253,8 @@ export default {
         this.searchType = 'projects';
       } else if (newValue.startsWith('>')) {
         this.searchType = 'users';
+      } else if (newValue.startsWith('!')) {
+        this.searchType = 'departments';
       } else {
         this.searchType = '';
       }
@@ -266,11 +268,8 @@ export default {
     },
     handleBlur() {
       this.isFocused = false;
-      // Задержка перед скрытием результатов, чтобы успеть кликнуть на элемент
-      setTimeout(() => {
-        this.showResults = false;
-        this.searchTerm = '';
-      }, 100);
+      this.showResults = false;
+      this.searchTerm = '';
     },
     moveHighlight(direction) {
       let maxIndex = 0;
@@ -278,6 +277,8 @@ export default {
         maxIndex = this.filteredProjects.length - 1;
       } else if (this.searchType === 'users') {
         maxIndex = this.filteredUsers.length - 1;
+      } else if (this.searchType === 'departments') {
+        maxIndex = this.filteredDepartments.length - 1;
       }
       if (maxIndex === -1) {
         return;
@@ -296,6 +297,8 @@ export default {
           this.selectItem(this.filteredProjects[this.highlightedIndex], 'project');
         } else if (this.searchType === 'users') {
           this.selectItem(this.filteredUsers[this.highlightedIndex], 'user');
+        } else if (this.searchType === 'departments') {
+          this.selectItem(this.filteredDepartments[this.highlightedIndex], 'department');
         }
       }
     },
@@ -309,5 +312,3 @@ export default {
   },
 };
 </script>
-
-
