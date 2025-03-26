@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex flex-col overflow-hidden">
-    <!-- Sidebar -->
+    <!-- sidebar -->
     <aside
         class="border-r border-[#eaeaea] fixed left-0 top-5 bottom-5 h-auto transition-all duration-300 ease-in-out flex flex-col"
         :class="{ 'w-64 px-5': !isCollapsed, 'w-16 px-3': isCollapsed }"
@@ -97,7 +97,7 @@ import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
 import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
 import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
 import {markRaw} from "vue";
-import MenuItem from "@/components/MenuItem.vue";
+import MenuItem from "@/components/items/MenuItem.vue";
 
 export default {
   name: 'AdminSidebar',

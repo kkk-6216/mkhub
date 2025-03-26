@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar/Sidebar.vue';
+import Sidebar from '../components/sidebar/Sidebar.vue';
 
 export default {
   name: 'DefaultLayout',

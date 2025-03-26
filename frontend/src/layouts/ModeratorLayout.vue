@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import ModeratorSidebar from '../components/Sidebar/ModeratorSidebar.vue';
+import ModeratorSidebar from '../components/sidebar/ModeratorSidebar.vue';
 
 export default {
   name: 'ModeratorLayout',
