@@ -33,7 +33,7 @@
 
           <!-- Projects -->
           <div v-if="searchTerm !== '' && filteredProjects.length > 0">
-            <div class="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider text-left">Проекты</div>
+            <div class="px-4 pt-3 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider text-left">Темы</div>
             <div class="divide-y divide-gray-100">
               <div
                   v-for="(project, index) in filteredProjects"
@@ -117,7 +117,7 @@
               </svg>
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-1">Помощь в поиске</h3>
-            <p class="text-sm text-black">Используйте: # для поиска тем, > для поиска пользователей, ! для кафе поиска, ? для получения информации</p>
+            <p class="text-sm text-black">Используйте: # для поиска тем, > для поиска пользователей, ! для отделений поиска, ? для получения информации</p>
           </div>
         </div>
 

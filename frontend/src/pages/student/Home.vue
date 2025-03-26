@@ -11,6 +11,8 @@
 <script>
 import SearchComponent from '@/pages/student/SearchComponent.vue';
 
+
+
 export default {
   name: 'WelcomePage',
   components: {
