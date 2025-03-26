@@ -1,16 +1,15 @@
 <template>
   <div class="h-screen flex flex-col overflow-hidden">
-    <!-- Sidebar -->
+    <!-- sidebar -->
     <aside
         class="border-r border-[#eaeaea] fixed left-0 top-5 bottom-5 h-auto transition-all duration-300 ease-in-out flex flex-col"
         :class="{ 'w-64 px-5': !isCollapsed, 'w-16 px-3': isCollapsed }"
     >
       <!-- Logo -->
 
-      <div
-          @click="goTo('/home')"
-          class="flex items-center  mb-0  pt-2 cursor-pointer"
-          :class="{ 'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
+      <div @click="goTo('/admin/monitoring')"
+           class="flex items-center  mb-0  pt-2 cursor-pointer"
+           :class="{'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >
         <span class="text-[20px] text-main uppercase font-bold">
           <span v-if="isCollapsed">MK</span>
@@ -21,12 +20,11 @@
       <nav class="flex-grow flex flex-col justify-center min-w-0 overflow-y-auto">
         <ul>
           <MenuItem
-              v-for="item in filteredMenuItems"
+              v-for="item in menuItems"
               :key="item.to"
               :isCollapsed="isCollapsed"
               :isActive="isActive(item.to)"
               :iconClass="item.iconClass"
-              :icon="item.icon"
               :label="item.label"
               @click="goTo(item.to)"
           >
@@ -91,18 +89,18 @@
 </template>
 
 <script>
-import MenuItem from '@/components/MenuItem.vue';
+
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
-import CoursesIcon from "@/components/icons/SidebarIcons/CoursesIcon.vue";
-import ResourcesIcon from "@/components/icons/SidebarIcons/ResourcesIcon.vue";
-import MessagesIcon from "@/components/icons/SidebarIcons/MessagesIcon.vue";
-import SettingsIcon from "@/components/icons/SidebarIcons/SettingsIcon.vue";
-import { markRaw } from "vue";
+import MonitoringIcon from "@/components/icons/AdminSidebarIcons/MonitoringIcon.vue";
+import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
+import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
+import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
+import {markRaw} from "vue";
+import MenuItem from "@/components/items/MenuItem.vue";
 
 export default {
-  name: 'Sidebar',
+  name: 'AdminSidebar',
   components: {
     DefaultButton,
     MenuItem,
@@ -115,13 +113,10 @@ export default {
       initialWidth: window.innerWidth,
       isOpen: false,
       menuItems: [
-        { to: '/home', label: 'Главная', icon: markRaw(HomeIcon), iconClass: 'mdi-view-dashboard', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'], public: true },
-        { to: '/courses', label: 'Курсы', icon: markRaw(CoursesIcon), iconClass: 'mdi-book-open-variant', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'], public: true },
-        { to: '/resources', label: 'Ресурсы', icon: markRaw(ResourcesIcon), iconClass: 'mdi-folder-open', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'], public: true },
-        { to: '/messages', label: 'Сообщения', icon: markRaw(MessagesIcon), iconClass: 'mdi-message', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'] },
-        { to: '/settings', label: 'Настройки', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_STUDENT'] },
-        { to: '/admin/monitoring', label: 'Панель управления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_ADMIN'] },
-        { to: '/moderator/dashboard', label: 'Панель управления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_MODERATOR'] },
+        { to: '/admin/monitoring', label: 'Мониторинг', icon: markRaw(MonitoringIcon), iconClass: 'mdi-monitor' },
+        { to: '/admin/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
+        { to: '/admin/api-gateway', label: 'API Gateway', icon: markRaw(ApiGatewayIcon), iconClass: 'mdi-api' },
+        { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
       ]
     };
   },
@@ -173,17 +168,6 @@ export default {
     },
     user() {
       return this.authStore.user;
-    },
-    filteredMenuItems() {
-      if (!this.isAuthenticated) {
-        return this.menuItems.filter(item => item.public === true);
-      } else {
-        if (this.user && this.user.role) {
-          return this.menuItems.filter(item => item.roles && item.roles.includes(this.user.role));
-        } else {
-          return [];
-        }
-      }
     }
   },
 
@@ -192,3 +176,4 @@ export default {
   },
 };
 </script>
+

@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto flex h-auto ">
-    <!-- Sidebar -->
+    <!-- sidebar -->
     <Sidebar class="min-w-[8rem] max-w-[10rem] h-full"/>
 
     <!-- Main Content -->
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Sidebar from '../components/Sidebar/Sidebar.vue';
+import Sidebar from '../components/sidebar/Sidebar.vue';
 import TopBar from '../modules/profile/components/TopBar.vue';
 
 export default {

@@ -1,13 +1,13 @@
 <template>
   <div class="h-screen flex flex-col overflow-hidden">
-    <!-- Sidebar -->
+    <!-- sidebar -->
     <aside
         class="border-r border-[#eaeaea] fixed left-0 top-5 bottom-5 h-auto transition-all duration-300 ease-in-out flex flex-col"
         :class="{ 'w-64 px-5': !isCollapsed, 'w-16 px-3': isCollapsed }"
     >
       <!-- Logo -->
 
-      <div @click="goTo('/admin/monitoring')"
+      <div @click="goTo('/moderator/dashboard')"
            class="flex items-center  mb-0  pt-2 cursor-pointer"
            :class="{'justify-center pl-0': isCollapsed, 'pl-4': !isCollapsed }"
       >
@@ -90,17 +90,20 @@
 
 <script>
 
-import MenuItem from '@/components/MenuItem.vue';
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import MonitoringIcon from "@/components/icons/AdminSidebarIcons/MonitoringIcon.vue";
+import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
 import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
-import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
-import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
+import FacultiesIcon from "@/components/icons/AdminSidebarIcons/FacultiesIcon.vue";
+import DepartmentIcon from "@/components/icons/AdminSidebarIcons/DepartmentIcon.vue";
+import ModerationIcon from "@/components/icons/AdminSidebarIcons/ModerationIcon.vue";
+import RequestsIcon from "@/components/icons/AdminSidebarIcons/RequestsIcon.vue";
 import {markRaw} from "vue";
+import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
+import MenuItem from "@/components/items/MenuItem.vue";
 
 export default {
-  name: 'AdminSidebar',
+  name: 'ModeratorSidebar',
   components: {
     DefaultButton,
     MenuItem,
@@ -113,9 +116,12 @@ export default {
       initialWidth: window.innerWidth,
       isOpen: false,
       menuItems: [
-        { to: '/admin/monitoring', label: 'Мониторинг', icon: markRaw(MonitoringIcon), iconClass: 'mdi-monitor' },
-        { to: '/admin/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
-        { to: '/admin/api-gateway', label: 'API Gateway', icon: markRaw(ApiGatewayIcon), iconClass: 'mdi-api' },
+        { to: '/moderator/dashboard', label: 'Главная', icon: markRaw(HomeIcon), iconClass: 'mdi-home' },
+        { to: '/moderator/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
+        { to: '/moderator/faculties', label: 'Факультеты', icon: markRaw(FacultiesIcon), iconClass: 'mdi-school' },
+        { to: '/moderator/departments', label: 'Кафедры', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
+        { to: '/moderator/moderation', label: 'Модерации', icon: markRaw(ModerationIcon), iconClass: 'mdi-shield-check' },
+        { to: '/moderator/requests', label: 'Запросы', icon: markRaw(RequestsIcon), iconClass: 'mdi-message-question' },
         { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
       ]
     };
