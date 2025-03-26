@@ -21,6 +21,8 @@
             @blur="handleBlur"
             @keydown.down.prevent="moveHighlight(1)"
             @keydown.up.prevent="moveHighlight(-1)"
+            @keydown.pagedown.prevent="moveHighlight(visibleItemsCount)"
+            @keydown.pageup.prevent="moveHighlight(-visibleItemsCount)"
             @keydown.enter="selectHighlighted"
             class="w-full pl-9 pr-4 py-1 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 text-sm"
             placeholder="Поиск..."
@@ -28,8 +30,8 @@
       </div>
 
       <!-- Результаты поиска -->
-      <div v-if="showResults" class="divide-y divide-gray-100">
-        <div class="max-h-96 overflow-y-auto">
+      <div v-if="showResults" class="divide-y divide-gray-100" ref="resultsContainer">
+        <div class="max-h-96 overflow-y-auto" ref="scrollableContent">
 
           <!-- Projects -->
           <div v-if="searchTerm !== '' && filteredProjects.length > 0">
@@ -140,16 +142,20 @@ export default {
       isFocused: false,
       showResults: false,
       highlightedIndex: -1,
-      searchType: '',  // Тип поиска: '', 'projects', 'users'
+      searchType: '',
       projects: [
         { name: 'Workflow Inc. / Редизайн Веб-сайта' },
         { name: 'Workflow Inc. / Открытое Графическое Изображение' },
-        { name: 'Workflow Inc. / Дизайн Логотипа' },
-        { name: 'Workflow Inc. / Рекламная Кампания' },
+        { name: 'Дизайн Логотипа' },
+        { name: 'Рекламная Кампания' },
         { name: 'Conglomerate Inc. / ТВ Рекламная Кампания' },
-        { name: 'Conglomerate Inc. / Мобильное Приложение' },
-        { name: 'Conglomerate Inc. / Дизайн Продукта' },
-        { name: 'Другой Пример Проекта С Очень Длинным Именем для Проверки Прокрутки' },
+        { name: 'Мобильное Приложение' },
+        { name: 'Дизайн Продукта' },
+        { name: 'Еще Один Пример Проекта С Очень Длинным Именем' },
+        { name: 'Финальный Проект С Очень Длинным Названием' },
+        { name: 'Conglomerate Inc. / ТВ Рекламная Кампания' },
+        { name: 'Мобильное Приложение' },
+        { name: 'Дизайн Продукта' },
         { name: 'Еще Один Пример Проекта С Очень Длинным Именем' },
         { name: 'Финальный Проект С Очень Длинным Названием' }
       ],
@@ -169,19 +175,19 @@ export default {
       departments: [
         { name: 'Кафедра Информационных Технологий' },
         { name: 'Кафедра Математики и Моделирования' },
-        { name: 'Кафедра Экономики и Управления' },
-        { name: 'Кафедра Информационных Технологий' },
-        { name: 'Кафедра Математики и Моделирования' },
-        { name: 'Кафедра Экономики и Управления' },
-        { name: 'Кафедра Информационных Технологий' },
-        { name: 'Кафедра Математики и Моделирования' },
-        { name: 'Кафедра Экономики и Управления' },
-        { name: 'Кафедра Информационных Технологий' },
-        { name: 'Кафедра Математики и Моделирования' },
-        { name: 'Кафедра Экономики и Управления' },
-        { name: 'Кафедра Информационных Технологий' },
-        { name: 'Кафедра Математики и Моделирования' },
-        { name: 'Кафедра Экономики и Управления' }
+        { name: 'Экономики и Управления' },
+        { name: 'Информационных Технологий' },
+        { name: 'Математики и Моделирования' },
+        { name: 'Экономики и Управления' },
+        { name: 'Информационных Технологий' },
+        { name: 'Математики и Моделирования' },
+        { name: 'Экономики и Управления' },
+        { name: 'Информационных Технологий' },
+        { name: 'Математики и Моделирования' },
+        { name: 'Экономики и Управления' },
+        { name: 'Информационных Технологий' },
+        { name: 'Математики и Моделирования' },
+        { name: 'Экономики и Управления' }
       ]
     };
   },
@@ -196,14 +202,14 @@ export default {
       } else if (
           !this.searchTerm.startsWith('#') &&
           !this.searchTerm.startsWith('>') &&
-          !this.searchTerm.startsWith('!') && // Добавлено исключение для '!'
+          !this.searchTerm.startsWith('!') &&
           this.searchTerm !== '?'
       ) {
         return this.projects.filter((project) =>
             project.name.toLowerCase().includes(term)
         );
       }
-      return []; // Возвращаем пустой массив, если тип поиска не соответствует
+      return [];
     },
     filteredUsers() {
       const term = this.searchTerm.toLowerCase();
@@ -215,14 +221,14 @@ export default {
       } else if (
           !this.searchTerm.startsWith('#') &&
           !this.searchTerm.startsWith('>') &&
-          !this.searchTerm.startsWith('!') && // Добавлено исключение для '!'
+          !this.searchTerm.startsWith('!') &&
           this.searchTerm !== '?'
       ) {
         return this.users.filter((user) =>
             user.name.toLowerCase().includes(term)
         );
       }
-      return []; // Возвращаем пустой массив, если тип поиска не соответствует
+      return [];
     },
     filteredDepartments() {
       const term = this.searchTerm.toLowerCase();
@@ -234,17 +240,25 @@ export default {
       } else if (
           !this.searchTerm.startsWith('#') &&
           !this.searchTerm.startsWith('>') &&
-          !this.searchTerm.startsWith('!') && // Добавлено исключение для '!'
+          !this.searchTerm.startsWith('!') &&
           this.searchTerm !== '?'
       ) {
         return this.departments.filter(department =>
             department.name.toLowerCase().includes(term)
         );
       }
-      return []; // Возвращаем пустой массив, если тип поиска не соответствует
+      return [];
     },
     hasResults() {
       return this.filteredProjects.length > 0 || this.filteredUsers.length > 0 || this.filteredDepartments.length > 0;
+    },
+    visibleItemsCount() {
+      if (!this.$refs.scrollableContent) {
+        return 5; // Значение по умолчанию
+      }
+      const containerHeight = this.$refs.scrollableContent.clientHeight;
+      const itemHeight = 34; //  Примерная высота, нужно замерить динамически
+      return Math.floor(containerHeight / itemHeight);
     },
   },
   watch: {
@@ -258,18 +272,21 @@ export default {
       } else {
         this.searchType = '';
       }
-      this.highlightedIndex = -1; // Сброс индекса при изменении поискового запроса
+      this.highlightedIndex = -1;
     },
   },
   methods: {
     handleFocus() {
       this.isFocused = true;
-      this.showResults = true;  // Добавляем эту строку
+      this.showResults = true;
     },
     handleBlur() {
       this.isFocused = false;
       this.showResults = false;
       this.searchTerm = '';
+      if (this.$refs.scrollableContent) {
+        this.$refs.scrollableContent.scrollTop = 0; // Сброс scrollTop
+      }
     },
     moveHighlight(direction) {
       let maxIndex = 0;
@@ -290,6 +307,16 @@ export default {
               : this.highlightedIndex + direction > maxIndex
                   ? 0
                   : this.highlightedIndex + direction;
+
+      this.$nextTick(() => {
+        const highlightedElement = this.$refs.scrollableContent?.querySelector('.bg-main');
+        if (highlightedElement) {
+          highlightedElement.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth',
+          });
+        }
+      });
     },
     selectHighlighted() {
       if (this.highlightedIndex !== -1) {
