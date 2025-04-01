@@ -12,7 +12,7 @@
 
     <div
         v-if="showCommandMenu"
-        class="absolute left-0 bg-white border border-gray-200 rounded-md shadow-lg w-64 z-50"
+        class="absolute left-0 bg-white border border-gray-200 rounded-md shadow-lg w-50 z-50"
         :style="{ top: commandMenuTop }"
     >
       <div class="p-2 space-y-1">

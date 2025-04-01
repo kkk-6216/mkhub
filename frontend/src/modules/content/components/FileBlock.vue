@@ -16,17 +16,38 @@
         </svg>
       </button>
 
-      <div v-if="showOptions" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-        <a href="#" @click.prevent="handleDelete" class="block py-2 px-4 text-sm text-main hover:bg-gray-100">Delete</a>
-        <a href="#" @click.prevent="handleCopy" class="block py-2 px-4 text-sm text-main hover:bg-gray-100">Copy Link</a>
-        <a href="#" @click.prevent="handleDownload" class="block py-2 px-4 text-sm text-main hover:bg-gray-100">Download</a>
+      <div v-if="showOptions" class="absolute right-0 bg-white border border-gray-200 rounded-md shadow-lg w-50">
+        <!-- Delete Option -->
+        <button @click.prevent="handleDelete" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
+          <DeleteIcon class="w-5 h-5 mr-3"/>
+          Delete
+        </button>
+        <!-- Copy Image URL Option -->
+        <button @click.prevent="handleCopy" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
+          <CopyIcon class="w-5 h-5 mr-3"/>
+          Copy Image URL
+        </button>
+        <!-- Download Option -->
+        <button @click.prevent="handleDownload" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
+          <DownloadIcon class="w-5 h-5 mr-3"/>
+          Download
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import DownloadIcon from "@/modules/content/components/icons/DownloadIcon.vue";
+import DeleteIcon from "@/modules/content/components/icons/DeleteIcon.vue";
+import CopyIcon from "@/modules/content/components/icons/CopyIcon.vue";
+
 export default {
+  name: "FileBlock",
+  components: {
+    CopyIcon,
+    DeleteIcon,
+    DownloadIcon},
   props: {
     data: {
       type: Object,
