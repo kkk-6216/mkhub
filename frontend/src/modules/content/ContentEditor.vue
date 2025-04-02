@@ -1,6 +1,21 @@
 <template>
-  <div class="relative w-full" @mouseover="showPlus" @mouseleave="hidePlus">
-    <div
+  <div class="relative w-full p-5" @mouseover="showPlus" @mouseleave="hidePlus">
+    <!-- Input elements remain the same -->
+    <input type="file" ref="imageInput" @change="handleImageUpload" accept="image/*" class="hidden" />
+    <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden" />
+    
+    <component 
+      v-for="(block, index) in contentBlocks" 
+      :key="index" 
+      :is="block.component" 
+      :data="block.data" 
+      @delete="deleteBlock(index)" 
+      :index="index"
+    />
+
+    <!-- Editor div with relative positioning -->
+    <div class="relative">
+      <div
         ref="editor"
         class="w-full p-4 focus:outline-none"
         contenteditable="true"
@@ -8,41 +23,38 @@
         @click="handleClick"
         @keydown="handleKeyDown"
         placeholder="Type '/' for commands..."
-    ></div>
+      ></div>
 
-    <div
+      <!-- Command menu positioned relative to editor -->
+      <div
         v-if="showCommandMenu"
         class="absolute left-0 bg-white border border-gray-200 rounded-md shadow-lg w-50 z-50"
         :style="{ top: commandMenuTop }"
-    >
-      <div class="p-2 space-y-1">
-        <div v-if="filteredCommands.length > 0">
-          <button
-              v-for="command in filteredCommands"
-              :key="command.text"
-              class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
-              @click="command.action"
-          >
-            <span class="flex items-center justify-center w-6 h-6 mr-2 hover:text-white">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path :d="command.icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </span>
-            <span>
-              <span  class="text-sm font-medium">{{ command.label }}</span>
-            </span>
-          </button>
-        </div>
-        <div v-else class="p-2 text-sm text-red-500">
-          No matching commands found. Type /image or /file
+      >
+        <div class="p-2 space-y-1">
+          <div v-if="filteredCommands.length > 0">
+            <button
+                v-for="command in filteredCommands"
+                :key="command.text"
+                class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
+                @click="command.action"
+            >
+              <span class="flex items-center justify-center w-6 h-6 mr-2 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path :d="command.icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+              </span>
+              <span>
+                <span class="text-sm font-medium">{{ command.label }}</span>
+              </span>
+            </button>
+          </div>
+          <div v-else class="p-2 text-sm text-red-500">
+            No matching commands found. Type /image or /file
+          </div>
         </div>
       </div>
     </div>
-
-    <input type="file" ref="imageInput" @change="handleImageUpload" accept="image/*" class="hidden" />
-    <input type="file" ref="fileInput" @change="handleFileUpload" class="hidden" />
-
-    <component v-for="(block, index) in contentBlocks" :key="index" :is="block.component" :data="block.data" @delete="deleteBlock(index)" :index="index"/>
   </div>
 </template>
 
@@ -91,6 +103,15 @@ export default {
         this.commandText = '/';
         this.showCommandMenu = true;
         document.execCommand('insertText', false, '/');
+
+        const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        const editorRect = this.$refs.editor.getBoundingClientRect();
+        this.commandMenuTop = `${rect.top - editorRect.top + rect.height}px`;
+      }
+
         event.preventDefault();
       } else if (event.key === 'Escape') {
         this.resetCommandMenu();
@@ -109,6 +130,9 @@ export default {
             component: 'image-block',
             data: { src: e.target.result, caption: 'Uploaded Image' }
           });
+          // Очищаем значение input
+          event.target.value = '';
+          this.$nextTick(() => window.scrollTo(0, document.body.scrollHeight));
         };
         reader.readAsDataURL(file);
       }
@@ -123,6 +147,9 @@ export default {
             component: 'file-block',
             data: { name: file.name, size: file.size, fileUrl: url }
           });
+          // Очищаем значение input
+          event.target.value = '';
+          this.$nextTick(() => window.scrollTo(0, document.body.scrollHeight));
         }, 1000);
       }
       this.resetCommandMenu();
@@ -149,4 +176,5 @@ export default {
   position: absolute;
   pointer-events: none;
 }
-</style>
+
+</style> 
