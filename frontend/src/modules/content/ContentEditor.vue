@@ -132,7 +132,6 @@ export default {
           });
           // Очищаем значение input
           event.target.value = '';
-          this.$nextTick(() => window.scrollTo(0, document.body.scrollHeight));
         };
         reader.readAsDataURL(file);
       }
@@ -149,7 +148,6 @@ export default {
           });
           // Очищаем значение input
           event.target.value = '';
-          this.$nextTick(() => window.scrollTo(0, document.body.scrollHeight));
         }, 1000);
       }
       this.resetCommandMenu();
@@ -176,5 +174,4 @@ export default {
   position: absolute;
   pointer-events: none;
 }
-
 </style> 
