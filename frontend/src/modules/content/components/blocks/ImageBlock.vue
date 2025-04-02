@@ -90,6 +90,7 @@ export default {
       document.body.removeChild(link);
       this.showOptions = false;
     },
+    
   },
 };
 </script>
