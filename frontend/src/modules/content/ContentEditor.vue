@@ -95,6 +95,7 @@ export default {
       isCommandTyping: false,
       commandMenuPosition: { top: '100%', left: '0px' },
       activeCommandIndex: 0,
+      isDirectlyTyping: false, // Новый флаг для отслеживания прямого ввода
       commands: [
         { text: '/text', label: 'Текст', icon: 'M3 17h18M3 12h18M3 7h18', action: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length) },
         { text: '/image', label: 'Изображение', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', action: () => this.$refs.imageInputRef?.click() },
@@ -118,7 +119,7 @@ export default {
       );
     },
     inputPlaceholder() {
-      return "Напишите что-нибудь или введите '/' для команд...";
+      return "Введите '/' для команд...";
     }
   },
   watch: {
@@ -157,18 +158,31 @@ export default {
 
     handleInput(event) {
       const text = event.target.innerText;
-      this.isCommandTyping = text.startsWith('/');
-      if (this.isCommandTyping) {
+      
+      // Если начинается с '/', это команда
+      if (text.startsWith('/')) {
+        this.isCommandTyping = true;
+        this.isDirectlyTyping = false;
         this.commandText = text;
         this.activeCommandIndex = 0;
         this.showCommandMenu = true;
-        this.calculateCommandMenuPosition(); // <-- Важно вызывать здесь
-      } else {
+        this.calculateCommandMenuPosition();
+      } 
+      // Если первый символ не '/' - начинаем прямой ввод текста
+      else if (text && !this.isCommandTyping) {
+        this.isDirectlyTyping = true;
+      }
+      // Если ранее была команда, но теперь текст не содержит '/' в начале
+      else if (this.isCommandTyping && !text.startsWith('/')) {
         this.resetCommandState();
+        if (text) {
+          this.isDirectlyTyping = true;
+        }
       }
     },
 
     handleKeyDown(event) {
+      // Обработка событий для меню команд
       if (this.showCommandMenu) {
         const commandsCount = this.filteredCommands.length;
         if (!commandsCount && !['Escape', 'Backspace', 'Enter', 'Tab'].includes(event.key)) return;
@@ -208,26 +222,45 @@ export default {
                 const currentText = this.$refs.editorInputRef?.innerText || '';
                 if (this.isCommandTyping && !currentText.startsWith('/')) {
                     this.resetCommandState();
+                    if (currentText) {
+                      this.isDirectlyTyping = true;
+                    }
                 } else if (this.isCommandTyping && currentText !== this.commandText) {
                     this.commandText = currentText;
                     this.activeCommandIndex = 0;
-                    this.calculateCommandMenuPosition(); // Обновляем позицию при изменении текста команды
+                    this.calculateCommandMenuPosition();
                 }
             });
             break;
         }
-      } else if (event.key === 'Enter') {
+      } 
+      // Обработка при прямом вводе текста или нажатии Enter
+      else if (event.key === 'Enter') {
         event.preventDefault();
         const editor = this.$refs.editorInputRef;
         if (editor?.innerText.trim()) {
+          // Добавляем текстовый блок с текущим содержимым
           this.addTextBlock(editor.innerHTML, this.contentBlocks.length);
           this.clearEditorInput();
+          this.isDirectlyTyping = false;
           this.scrollToInput();
         } else {
           this.clearEditorInput();
         }
       }
-      // Другие обработки клавиш (например, Backspace вне режима команд) можно добавить здесь
+      // Обработка для обычного ввода текста или нажатия . (точка)
+      else if (this.isDirectlyTyping && event.key === '.') {
+        // Позволяем точке добавиться в текст, но затем создаем текстовый блок
+        setTimeout(() => {
+          const editor = this.$refs.editorInputRef;
+          if (editor?.innerText.trim()) {
+            this.addTextBlock(editor.innerHTML, this.contentBlocks.length);
+            this.clearEditorInput();
+            this.isDirectlyTyping = false;
+            this.scrollToInput();
+          }
+        }, 0);
+      }
     },
 
     handleClickOnInput() {
@@ -250,7 +283,6 @@ export default {
       this.activeCommandIndex = 0;
     },
 
-    // --- ОБНОВЛЕННЫЙ МЕТОД ---
     calculateCommandMenuPosition() {
       this.$nextTick(() => {
         const inputEl = this.$refs.editorInputRef;
@@ -298,7 +330,6 @@ export default {
         };
       });
     },
-    // --- КОНЕЦ ОБНОВЛЕННОГО МЕТОДА ---
 
     scrollCommandIntoView() {
       this.$nextTick(() => {
@@ -313,6 +344,13 @@ export default {
       const input = this.$refs.editorInputRef;
       if (this.showCommandMenu && menu && !menu.contains(event.target) && input && !input.contains(event.target)) {
         this.resetCommandState();
+      }
+      
+      // Если кликнули вне инпута и в инпуте есть текст, создаем блок
+      if (input && !input.contains(event.target) && input.innerText.trim() && this.isDirectlyTyping) {
+        this.addTextBlock(input.innerHTML, this.contentBlocks.length);
+        this.clearEditorInput();
+        this.isDirectlyTyping = false;
       }
     },
 
