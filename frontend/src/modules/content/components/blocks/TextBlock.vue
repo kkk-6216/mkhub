@@ -1,104 +1,217 @@
 <template>
   <div
     ref="wrapperRef"
-    class="relative group mb-2 tiptap-block-wrapper"
-    :class="{ 'is-focused': isFocused }"
-    tabindex="-1"
-    @focusin="handleFocusIn"
+    class="relative rounded-md p-4 hover:bg-gray-50 group"
+    @focusin="isFocused = true"
     @focusout="handleFocusOut"
   >
-    <!-- Toolbar -->
+    <!-- Панель инструментов (позиционирование относительно курсора) -->
     <div
-      v-if="editor && isFocused"
+      v-if="isFocused && editor"
       ref="toolbarRef"
-      class="toolbar absolute bottom-full left-0 mb-1 flex flex-wrap items-center space-x-1 p-1 bg-white rounded shadow-md z-20 max-w-full"
-      style="min-width: 300px;"
+      class="fixed bg-white shadow-md rounded-md flex space-x-2 items-center z-10 p-2"
+      :style="toolbarPosition"
       @mousedown.prevent
     >
-      <!-- Bold -->
-      <button @click="editor.chain().focus().toggleBold().run()" :disabled="!editorCan('toggleBold')" :class="{ 'is-active': editorIsActive('bold') }" class="p-1 rounded hover:bg-gray-600 hover:text-white" title="Жирный">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
-      </button>
-      <!-- Italic -->
-      <button @click="editor.chain().focus().toggleItalic().run()" :disabled="!editorCan('toggleItalic')" :class="{ 'is-active': editorIsActive('italic') }" class="p-1 rounded hover:bg-gray-600 hover:text-white" title="Курсив">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M10 5.5c0 .83.67 1.5 1.5 1.5h.71l-3.42 8H7.5c-.83 0-1.5.67-1.5 1.5S6.67 18 7.5 18h5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5h-.71l3.42-8H16.5c.83 0 1.5-.67 1.5-1.5S17.33 4 16.5 4h-5c-.83 0-1.5.67-1.5 1.5z"/></svg>
-      </button>
-      <!-- Underline -->
-      <button @click="editor.chain().focus().toggleUnderline().run()" :disabled="!editorCan('toggleUnderline')" :class="{ 'is-active': editorIsActive('underline') }" class="p-1 rounded hover:bg-gray-600ho ver:text-white" title="Подчеркнутый">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"/></svg>
-      </button>
-      <!-- Headings -->
-      <button @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'is-active': editorIsActive('heading', { level: 1 }) }" class="p-1 rounded hover:bg-gray-600 hover:text-white font-bold text-base" title="H1">H1</button>
-      <button @click="editor.chain().focus().toggleHeading({ level: 2 }).run()" :class="{ 'is-active': editorIsActive('heading', { level: 2 }) }" class="p-1 rounded hover:bg-gray-600 hover:text-white font-bold text-sm" title="H2">H2</button>
-      <button @click="editor.chain().focus().toggleHeading({ level: 3 }).run()" :class="{ 'is-active': editorIsActive('heading', { level: 3 }) }" class="p-1 rounded hover:bg-gray-600 hover:text-white font-bold text-xs" title="H3">H3</button>
-      <!-- Align Left -->
-      <button @click="editor.chain().focus().setTextAlign('left').run()" :class="{ 'is-active': editorIsActive({ textAlign: 'left' }) }" class="p-1 rounded hover:bg-gray-600 hover:text-white" title="По левому краю">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"/></svg>
-      </button>
-      <!-- Align Center -->
-      <button @click="editor.chain().focus().setTextAlign('center').run()" :class="{ 'is-active': editorIsActive({ textAlign: 'center' }) }" class="p-1 rounded hover:bg-gray-600 hover:text-white" title="По центру">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"/></svg>
-      </button>
-      <!-- Align Right -->
-      <button @click="editor.chain().focus().setTextAlign('right').run()" :class="{ 'is-active': editorIsActive({ textAlign: 'right' }) }" class="p-1 rounded hover:bg-gray-600" title="По правому краю">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"/></svg>
-      </button>
-
-      
-      <!-- Color Picker Trigger -->
-      <div class="relative inline-block flex-shrink-0">
-    <button @click.stop="toggleColorPalette" class="p-1 rounded hover:bg-gray-600 flex items-center justify-center w-8 h-8" :class="{ 'is-active': editorIsActive('textStyle') }" title="Цвет текста">
-        <!-- Иконка "А" с подчёркиванием (более подходящая для выбора цвета текста) -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-            <path d="M12 3L4 21h2l2.5-6h7L18 21h2L12 3zm0 4.6L14.5 13h-5L12 7.6z"/>
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('bold') }"
+        @click="editor.chain().focus().toggleBold().run()"
+        :disabled="!editor.can().chain().focus().toggleBold().run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+          <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
         </svg>
-    </button>
-    
-    <!-- Color Palette Dropdown -->
-    <div v-if="showColorPalette" ref="colorPaletteRef" class="absolute left-0 mt-1 p-2 bg-white  rounded shadow-lg z-30 grid grid-cols-4 gap-1 w-max" style="top: 100%; margin-top: 4px;" @mousedown.prevent>
-          <button @click="selectColor('#ec4899')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Розовый"><span class="block w-4 h-4 bg-pink-500 rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#f97316')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Оранжевый"><span class="block w-4 h-4 bg-orange-500 rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#854d0e')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Коричневый"><span class="block w-4 h-4 rounded-full border border-gray-400" style="background-color: #854d0e;"></span></button>
-          <button @click="selectColor('#000000')" :class="{ 'ring-1 ring-white': editorIsActive('textStyle', { color: '#000000' }) || editorIsActive('textStyle', { color: 'rgb(0, 0, 0)' }) }" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Черный"><span class="block w-4 h-4 bg-black rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#fbcfe8')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Светло-розовый"><span class="block w-4 h-4 bg-pink-200 rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#a855f7')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Фиолетовый"><span class="block w-4 h-4 bg-purple-500 rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#22c55e')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Зеленый"><span class="block w-4 h-4 bg-green-500 rounded-full border border-gray-400"></span></button>
-          <button @click="selectColor('#3b82f6')" class="p-1 rounded hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-white" title="Синий"><span class="block w-4 h-4 bg-blue-500 rounded-full border border-gray-400"></span></button>
-          <button @click="resetColor()" class="p-1 rounded col-span-4 text-xs text-center hover:bg-main hover:text-white focus:outline-none focus:ring-1 focus:ring-white" title="Сбросить цвет">Сбросить</button>
-        </div>
-</div>
+      </button>
 
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('italic') }"
+        @click="editor.chain().focus().toggleItalic().run()"
+        :disabled="!editor.can().chain().focus().toggleItalic().run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <line x1="19" y1="4" x2="10" y2="4"></line>
+          <line x1="14" y1="20" x2="5" y2="20"></line>
+          <line x1="15" y1="4" x2="9" y2="20"></line>
+        </svg>
+      </button>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('underline') }"
+        @click="editor.chain().focus().toggleUnderline().run()"
+        :disabled="!editor.can().chain().focus().toggleUnderline().run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+          <line x1="4" y1="21" x2="20" y2="21"></line>
+        </svg>
+      </button>
+
+      <div class="border-r border-gray-300 h-6 mx-1"></div>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('heading', { level: 1 }) }"
+        @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+      >
+        <span class="font-bold">H1</span>
+      </button>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('heading', { level: 2 }) }"
+        @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+      >
+        <span class="font-bold">H2</span>
+      </button>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive('heading', { level: 3 }) }"
+        @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+      >
+        <span class="font-bold">H3</span>
+      </button>
+
+      <div class="border-r border-gray-300 h-6 mx-1"></div>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'left' }) }"
+        @click="editor.chain().focus().setTextAlign('left').run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <line x1="17" y1="10" x2="3" y2="10"></line>
+          <line x1="21" y1="6" x2="3" y2="6"></line>
+          <line x1="21" y1="14" x2="3" y2="14"></line>
+          <line x1="17" y1="18" x2="3" y2="18"></line>
+        </svg>
+      </button>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'center' }) }"
+        @click="editor.chain().focus().setTextAlign('center').run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <line x1="21" y1="10" x2="3" y2="10"></line>
+          <line x1="21" y1="6" x2="3" y2="6"></line>
+          <line x1="21" y1="14" x2="3" y2="14"></line>
+          <line x1="21" y1="18" x2="3" y2="18"></line>
+        </svg>
+      </button>
+
+      <button
+        class="p-1 rounded hover:bg-gray-100"
+        :class="{ 'bg-gray-200': editor.isActive({ textAlign: 'right' }) }"
+        @click="editor.chain().focus().setTextAlign('right').run()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <line x1="21" y1="10" x2="7" y2="10"></line>
+          <line x1="21" y1="6" x2="3" y2="6"></line>
+          <line x1="21" y1="14" x2="3" y2="14"></line>
+          <line x1="21" y1="18" x2="7" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="border-r border-gray-300 h-6 mx-1"></div>
+
+      <div class="relative">
+        <button
+          class="p-1 rounded hover:bg-gray-100 relative"
+          @click.prevent="toggleColorPalette"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
+            <path d="M8 12L16 12"></path>
+            <path d="M12 8L12 16"></path>
+          </svg>
+          <div
+            v-if="currentTextColor"
+            class="absolute w-3 h-3 rounded-full"
+            :style="`background-color: ${currentTextColor}; bottom: 0; right: 0;`"
+          ></div>
+        </button>
+
+        <!-- Палитра цветов -->
+        <div
+          v-if="showColorPalette"
+          ref="colorPaletteRef"
+          class="absolute mt-1 p-2 bg-white shadow-md rounded-md z-20 w-max"
+          @mousedown.prevent
+        >
+          <div class="grid grid-cols-5 gap-2">
+            <button
+              v-for="color in colorPalette"
+              :key="color.value"
+              class="w-6 h-6 rounded-full cursor-pointer"
+              :style="`background-color: ${color.value};`"
+              @click="setTextColor(color.value)"
+            ></button>
+          </div>
+          <button
+            class="w-full mt-2 py-1 text-sm text-center rounded-md bg-main text-white"
+            @click="resetTextColor"
+          >
+            Сбросить
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Editor Content -->
-    <editor-content :editor="editor" class="tiptap-editor-content focus:outline-none min-h-[20px]" />
+    <!-- Кнопка опций -->
+    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+    <button
+      class="text-gray-500 hover:text-gray-700 focus:outline-none p-1"
+      @click.prevent="toggleOptions"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+        <circle cx="5" cy="12" r="1"></circle>
+      </svg>
+    </button>
 
-     <!-- Options Button Trigger -->
-     <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-      <button @click.stop="toggleOptions" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-        </svg>
+    <!-- Меню опций -->
+    <div
+      v-if="showOptions"
+      ref="optionsMenuRef"
+      class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-48"
+      @mousedown.prevent
+    >
+      <button
+        class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
+        @click="copyContent"
+      >
+      <CopyIcon class="w-5 h-5 mr-3"/>
+        Копировать
       </button>
-       <!-- Options Menu Dropdown -->
-       <div v-if="showOptions" class="absolute right-0 bg-white border border-gray-200 rounded-md shadow-lg w-50">
-        <!-- Delete Option -->
-        <button @click.prevent="handleDelete" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
-          <DeleteIcon class="w-5 h-5 mr-3"/>
-          Удалить
-        </button>
-        <!-- Copy Image URL Option -->
-        <button @click.prevent="handleCopy" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
-          <CopyIcon class="w-5 h-5 mr-3"/>
-          Копировать
-        </button>
-        <!-- Download Option -->
-        <button @click.prevent="handleDownload" class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white">
-          <DownloadIcon class="w-5 h-5 mr-3"/>
-          Скачать
-        </button>
-      </div>
-     </div>
+      <button
+        class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
+        @click="downloadContent"
+      >
+      <DownloadIcon class="w-5 h-5 mr-3"/>
+        Скачать
+      </button>
+      <button
+        class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
+        @click="deleteBlock"
+      >
+      <DeleteIcon class="w-5 h-5 mr-3"/>
+        Удалить
+      </button>
+    </div>
+    </div>
+
+    <!-- Редактор Tiptap -->
+    <editor-content
+      v-if="editor"
+      :editor="editor"
+      class="prose max-w-none focus:outline-none"
+    />
   </div>
 </template>
 
@@ -111,295 +224,354 @@ import Color from '@tiptap/extension-color';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
 
-// --- ИМПОРТ ИКОНОК ДЛЯ МЕНЮ ОПЦИЙ ---
-// Убедитесь, что пути правильные
-import CopyIcon from '@/modules/content/components/icons/CopyIcon.vue';
-import DeleteIcon from '@/modules/content/components/icons/DeleteIcon.vue';
-import DownloadIcon from '@/modules/content/components/icons/DownloadIcon.vue';
-// --- ---
+import DownloadIcon from "@/modules/content/components/icons/DownloadIcon.vue";
+import DeleteIcon from "@/modules/content/components/icons/DeleteIcon.vue";
+import CopyIcon from "@/modules/content/components/icons/CopyIcon.vue";
 
 export default {
-  name: "TextBlock",
+  name: 'TextBlock',
+  
   components: {
     EditorContent,
-    // --- Регистрация иконок ---
     CopyIcon,
     DeleteIcon,
     DownloadIcon
-    // --- ---
   },
+  
   props: {
-    data: { type: Object, required: true, default: () => ({ text: '' }) },
-    index: { type: Number, required: true }
+    data: {
+      type: Object,
+      required: true,
+      default: () => ({ text: '' }),
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
   },
-  emits: ['update', 'delete', 'request-new-block-after'],
+  
   data() {
     return {
       editor: null,
-      showOptions: false,
-      showColorPalette: false,
       isFocused: false,
-      // Refs будут доступны через this.$refs после монтирования
+      showColorPalette: false,
+      showOptions: false,
+      currentTextColor: null,
+      cursorPosition: { x: 0, y: 0 },
+      toolbarOffsetY: 10, 
+      colorPalette: [
+        { name: 'Red', value: '#EF4444' },
+        { name: 'Pink', value: '#EC4899' },
+        { name: 'Purple', value: '#8B5CF6' },
+        { name: 'Blue', value: '#3B82F6' },
+        { name: 'Green', value: '#10B981' },
+        { name: 'Yellow', value: '#F59E0B' },
+        { name: 'Orange', value: '#F97316' },
+        { name: 'Brown', value: '#92400E' },
+        { name: 'Gray', value: '#6B7280' },
+        { name: 'Black', value: '#000000' },
+        { name: 'Light Red', value: '#FEE2E2' },
+        { name: 'Light Pink', value: '#FCE7F3' },
+        { name: 'Light Purple', value: '#EDE9FE' },
+        { name: 'Light Blue', value: '#DBEAFE' },
+        { name: 'Light Green', value: '#D1FAE5' },
+      ]
     };
   },
+  
+  computed: {
+    toolbarPosition() {
+    return {
+      left: `${this.cursorPosition.x}px`,
+      top: `${this.cursorPosition.y - this.toolbarOffsetY - (this.$refs.toolbarRef ? this.$refs.toolbarRef.offsetHeight : 0)}px`,
+    };
+  }
+  },
+  
+  emits: ['update', 'delete', 'request-new-block-after'],
+  
   watch: {
-    'data.text'(newVal) {
-      if (this.editor && !this.editor.isDestroyed) {
-        const editorHTML = this.editor.getHTML();
-        if (newVal !== editorHTML && !this.editor.isFocused) {
-          if (this.editor.commands) {
-            this.editor.commands.setContent(newVal || '', false);
-          }
-        }
+    'data.text': function(newText) {
+      if (this.editor && !this.isFocused && this.editor.getHTML() !== newText) {
+        this.editor.commands.setContent(newText);
+      }
+    },
+    isFocused(newValue) {
+      if (newValue) {
+        document.addEventListener('selectionchange', this.updateCursorPosition);
+        this.$nextTick(() => {
+          this.updateCursorPosition();
+        });
+      } else {
+        document.removeEventListener('selectionchange', this.updateCursorPosition);
       }
     }
   },
+  
   mounted() {
-    this.editor = new Editor({
-      content: this.data.text || '',
-      extensions: [
-        StarterKit.configure({
-           hardBreak: false,
-           heading: { levels: [1, 2, 3] },
-        }),
-        Placeholder.configure({ placeholder: 'Введите текст...' }),
-        TextStyle,
-        Color,
-        TextAlign.configure({
-          types: ['heading', 'paragraph'],
-          defaultAlignment: 'left',
-        }),
-        Underline,
-      ],
-      onUpdate: ({ editor: currentEditor }) => {
-        if (currentEditor && !currentEditor.isDestroyed) {
-           this.$emit('update', { index: this.index, newData: { text: currentEditor.getHTML() } });
-        }
-      },
-      onFocus: () => {
-        this.isFocused = true;
-      },
-      onBlur: ({ event }) => {
-         setTimeout(() => {
-              const relatedTarget = event?.relatedTarget;
-              const wrapperEl = this.$refs.wrapperRef;
-              const toolbarEl = this.$refs.toolbarRef;
-              const paletteEl = this.$refs.colorPaletteRef;
-              const optionsEl = this.$refs.optionsMenuRef;
-
-              if (
-                  wrapperEl && !wrapperEl.contains(relatedTarget) &&
-                  (!toolbarEl || !toolbarEl.contains(relatedTarget)) &&
-                  (!paletteEl || !paletteEl.contains(relatedTarget)) &&
-                  (!optionsEl || !optionsEl.contains(relatedTarget))
-              ) {
-                   if (this.editor && !this.editor.isDestroyed) {
-                       this.isFocused = false;
-                   }
-                   this.showOptions = false;
-                   this.showColorPalette = false;
-              }
-         }, 150);
-      },
-      editorProps: {
-          handleKeyDown: (view, event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-               event.preventDefault();
-               this.$emit('request-new-block-after', this.index);
-               return true;
-            }
-            return false;
-          },
-      }
-    });
-
+    this.initEditor();
     document.addEventListener('click', this.handleClickOutside);
   },
-  beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
-    if (this.editor && !this.editor.isDestroyed) {
+  
+  beforeDestroy() {
+    if (this.editor) {
       this.editor.destroy();
-      this.editor = null;
     }
+    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener('selectionchange', this.updateCursorPosition);
   },
+  
   methods: {
-    // --- Editor State Checkers ---
-    editorIsActive(name, attributes = {}) {
-        return this.editor && !this.editor.isDestroyed && this.editor.isActive(name, attributes);
-    },
-    editorCan(action, attributes = {}) {
-        // Simple check, Tiptap 'can' is more complex potentially
-        return this.editor && !this.editor.isDestroyed && this.editor.can()?.[action]?.(attributes);
-    },
-
-    // --- Focus Handling ---
-    handleFocusIn() {
-        if (!this.isFocused) {
-            this.isFocused = true;
-        }
-    },
-    // Note: handleFocusOut logic is inside onBlur with a timeout
-
-    // --- Menu Toggles & Outside Click ---
-    handleClickOutside(event) {
-      const target = event.target;
-      const wrapperEl = this.$refs.wrapperRef;
-
-      if (!target || !wrapperEl || wrapperEl.contains(target)) {
-         return;
-      }
-
-      // Close Options Menu
-      const optionsEl = this.$refs.optionsMenuRef;
-      if (this.showOptions && optionsEl && !optionsEl.contains(target)) {
-          const optionsToggleButton = wrapperEl.querySelector('button > svg[viewBox="0 0 24 24"] > path[d^="M12 8c1.1"]');
-          if (!optionsToggleButton || !optionsToggleButton.closest('button').contains(target)) {
-             this.showOptions = false;
+    initEditor() {
+      this.editor = new Editor({
+        content: this.data.text || '',
+        extensions: [
+          StarterKit.configure({
+            heading: {
+              levels: [1, 2, 3],
+            },
+          }),
+          Placeholder.configure({
+            placeholder: 'Введите текст...',
+          }),
+          TextStyle,
+          Color,
+          TextAlign.configure({
+            types: ['heading', 'paragraph'],
+            alignments: ['left', 'center', 'right'],
+          }),
+          Underline,
+        ],
+        onUpdate: ({ editor }) => {
+          this.$emit('update', {
+            index: this.index,
+            newData: { text: editor.getHTML() },
+          });
+        },
+        onSelectionUpdate: ({ editor }) => {
+        
+          this.updateCursorPosition();
+          
+          const marks = editor.view.state.selection.$head.marks();
+          for (const mark of marks) {
+            if (mark.type.name === 'textStyle' && mark.attrs.color) {
+              this.currentTextColor = mark.attrs.color;
+              return;
+            }
           }
-      }
+          this.currentTextColor = null;
+        },
+        onFocus: () => {
+          this.isFocused = true;
+        },
+        onBlur: () => {
+         
+        },
+        editorProps: {
+          handleKeyDown: (view, event) => {
+          
+            if (event.key === 'Enter' && !event.shiftKey) {
+              this.$emit('request-new-block-after', this.index);
+              return true; 
+            }
+            return false; 
+          },
+        },
+      });
+    },
+    
+ 
+    updateCursorPosition() {
+  if (!this.editor || !this.isFocused) return;
 
-      // Close Color Palette
-      const paletteEl = this.$refs.colorPaletteRef;
-      if (this.showColorPalette && paletteEl && !paletteEl.contains(target)) {
-           const colorToggleButton = wrapperEl.querySelector('button > svg[viewBox="0 0 24 24"] > g > path[d^="M2.25,18.25"]');
-           if (!colorToggleButton || !colorToggleButton.closest('button').contains(target)) {
-             this.showColorPalette = false;
-           }
+  const { state, view } = this.editor;
+  const { from, to } = state.selection; 
+
+  
+  const startCoords = view.coordsAtPos(from);
+
+
+  let targetLeft = startCoords.left;
+  if (from !== to) {
+      const endCoords = view.coordsAtPos(to);
+      targetLeft = (startCoords.left + endCoords.left) / 2;
+  }
+
+  this.$nextTick(() => {
+      const toolbarWidth = this.$refs.toolbarRef ? this.$refs.toolbarRef.offsetWidth : 0;
+
+      this.cursorPosition = {
+          x: targetLeft - (toolbarWidth / 2),
+          y: startCoords.top
+      };
+      this.adjustToolbarPosition(); 
+  });
+},
+
+toolbarPosition() {
+  const toolbarHeight = this.$refs.toolbarRef ? this.$refs.toolbarRef.offsetHeight : 0;
+  const finalTop = this.cursorPosition.y - this.toolbarOffsetY - toolbarHeight;
+
+  return {
+    left: `${this.cursorPosition.x}px`,
+    top: `${finalTop}px`,
+  };
+},
+    
+  
+    adjustToolbarPosition() {
+    if (!this.$refs.toolbarRef || !this.editor?.view.dom.isConnected) return; 
+
+    const toolbar = this.$refs.toolbarRef;
+  
+    requestAnimationFrame(() => {
+        const toolbarRect = toolbar.getBoundingClientRect();
+
+        let adjustedX = this.cursorPosition.x;
+        let adjustedY = this.cursorPosition.y; 
+        if (toolbarRect.right > window.innerWidth) {
+            const overflow = toolbarRect.right - window.innerWidth;
+            adjustedX = this.cursorPosition.x - overflow - 10; 
+        }
+        if (toolbarRect.left < 0) {
+            adjustedX = this.cursorPosition.x - toolbarRect.left + 10; 
+        }
+        const toolbarHeight = toolbar.offsetHeight;
+        let finalTop = adjustedY - this.toolbarOffsetY - toolbarHeight;
+        if (finalTop < 0) {
+             finalTop = adjustedY + 15;
+        }
+        toolbar.style.left = `${adjustedX}px`;
+        toolbar.style.top = `${finalTop}px`;
+   });
+},
+    
+    handleClickOutside(event) {
+      if (
+        this.$refs.wrapperRef && 
+        !this.$refs.wrapperRef.contains(event.target) &&
+        (!this.$refs.toolbarRef || !this.$refs.toolbarRef.contains(event.target)) &&
+        (!this.$refs.colorPaletteRef || !this.$refs.colorPaletteRef.contains(event.target)) &&
+        (!this.$refs.optionsMenuRef || !this.$refs.optionsMenuRef.contains(event.target))
+      ) {
+        this.showColorPalette = false;
+        this.showOptions = false;
       }
     },
-    toggleOptions() {
-        const newState = !this.showOptions;
-        this.showColorPalette = false; // Close other menu
-        this.showOptions = newState;
-        // Optional: Focus first item in menu when opened
-        // if (newState) {
-        //   this.$nextTick(() => this.$refs.optionsMenuRef?.querySelector('button')?.focus());
-        // }
+    
+    handleFocusOut(event) {
+      setTimeout(() => {
+        const isRelatedTargetInside = this.$refs.wrapperRef?.contains(event.relatedTarget) ||
+          this.$refs.toolbarRef?.contains(event.relatedTarget) ||
+          this.$refs.colorPaletteRef?.contains(event.relatedTarget) ||
+          this.$refs.optionsMenuRef?.contains(event.relatedTarget);
+          
+        if (!isRelatedTargetInside) {
+          this.isFocused = false;
+          this.showColorPalette = false;
+          this.showOptions = false;
+        }
+      }, 0);
     },
+    
     toggleColorPalette() {
-        const newState = !this.showColorPalette;
-        this.showOptions = false; // Close other menu
-        this.showColorPalette = newState;
+      this.showColorPalette = !this.showColorPalette;
+      this.showOptions = false;
     },
-
-    // --- Color Methods ---
-    selectColor(color) {
-      if (!this.editor || this.editor.isDestroyed) return;
+    
+    setTextColor(color) {
       this.editor.chain().focus().setColor(color).run();
+      this.currentTextColor = color;
       this.showColorPalette = false;
     },
-    resetColor() {
-      if (!this.editor || this.editor.isDestroyed) return;
+    
+    resetTextColor() {
       this.editor.chain().focus().unsetColor().run();
+      this.currentTextColor = null;
       this.showColorPalette = false;
     },
-
-    // --- Block Action Methods (from options menu) ---
-    handleDelete() {
+    
+    toggleOptions() {
+      this.showOptions = !this.showOptions;
+      this.showColorPalette = false;
+    },
+    
+    async copyContent() {
+      try {
+        await navigator.clipboard.writeText(this.editor.getText());
+        this.showOptions = false;
+      } catch (err) {
+        console.error('Не удалось скопировать текст: ', err);
+      }
+    },
+    
+    downloadContent() {
+      const text = this.editor.getText();
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `text-block-${this.index}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      this.showOptions = false;
+    },
+    
+    deleteBlock() {
       this.$emit('delete', this.index);
       this.showOptions = false;
-    },
-    handleCopyText() {
-      if (!this.editor || this.editor.isDestroyed) return;
-      const textToCopy = this.editor.getText(); // Get plain text
-      navigator.clipboard.writeText(textToCopy)
-          .then(() => {
-            alert('Текст скопирован в буфер обмена!'); // Or use a toast notification
-          })
-          .catch(err => {
-            console.error('Не удалось скопировать текст: ', err);
-            alert('Не удалось скопировать текст: ' + err);
-          });
-      this.showOptions = false;
-    },
-    handleDownloadText() {
-        if (!this.editor || this.editor.isDestroyed) return;
-        try {
-            const textContent = this.editor.getText(); // Get plain text
-            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `text_block_${this.index || 0}.txt`; // Filename
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href); // Clean up blob URL
-        } catch(err) {
-             console.error('Не удалось скачать файл: ', err);
-             alert('Не удалось скачать файл: ' + err);
-        }
-        this.showOptions = false;
-    },
-
-    // --- Focus Control Method (callable from parent via ref) ---
-    focusEditor() {
-      if (this.editor && !this.editor.isDestroyed && !this.editor.isFocused) {
-        this.editor.commands.focus('end');
-      }
-    },
+    }
   }
 };
 </script>
 
 <style>
-/* Стили остаются такими же, как в предыдущем ответе */
 .ProseMirror {
   outline: none;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  padding: 0.5rem;
-  min-height: 1.5em;
-  line-height: 1.5;
 }
+
+.ProseMirror p {
+  margin: 1em 0;
+}
+
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: #a0aec0;
+  color: #adb5bd;
   pointer-events: none;
   height: 0;
 }
-.toolbar button.is-active {
-  background-color: #4b5563;
+
+
+.ProseMirror .has-text-align-left {
+  text-align: left;
 }
-.toolbar button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+
+.ProseMirror .has-text-align-center {
+  text-align: center;
 }
-.ProseMirror p, .ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
-    margin: 0;
-    padding: 0.25em 0;
-    line-height: 1.4;
-}
-.ProseMirror h1 { font-size: 1.875em; font-weight: 700; }
-.ProseMirror h2 { font-size: 1.5em; font-weight: 600; }
-.ProseMirror h3 { font-size: 1.25em; font-weight: 600; }
-.ProseMirror u {
-    text-decoration: underline;
-}
-.ProseMirror [style*="text-align: center"] { text-align: center; }
-.ProseMirror [style*="text-align: right"] { text-align: right; }
-.ProseMirror [style*="text-align: left"] { text-align: left; }
-.toolbar button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2rem;
-    height: 2rem;
-}
-.toolbar span[class*="bg-"], .toolbar span[style*="background-color"] {
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
-}
-.tiptap-block-wrapper .toolbar,
-.tiptap-block-wrapper .absolute[ref="colorPaletteRef"],
-.tiptap-block-wrapper .absolute[ref="optionsMenuRef"] {
-    z-index: 20;
-}
-/* Добавление flex-shrink-0 к иконкам в меню опций, чтобы текст не смещал их */
-.absolute[ref="optionsMenuRef"] .flex-shrink-0 {
-    flex-shrink: 0;
+
+.ProseMirror .has-text-align-right {
+  text-align: right;
 }
 </style>
