@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full p-5">
+  <div class="relative w-full p-5 mt-10">
     <!-- Скрытые input для загрузки файлов -->
     <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
     <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
