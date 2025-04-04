@@ -25,6 +25,8 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/faculties/**").hasRole("MODERATOR")
+                        .requestMatchers("/departments/**").hasRole("MODERATOR")
                         .anyRequest().authenticated()
 
                 )
