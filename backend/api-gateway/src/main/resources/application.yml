@@ -28,6 +28,9 @@ spring:
     discovery:
       enabled: true
     gateway:
+      discovery:
+        locator:
+          enabled: true
       routes:
         - id: auth-service
           uri: lb://auth-service
@@ -46,7 +49,7 @@ spring:
         - id: content-service
           uri: lb://content-service
           predicates:
-            - Path=/api/**
+            - Path=/api/faculties/**
+            - Path=/api/departments/**
           filters:
             - StripPrefix=1
-
