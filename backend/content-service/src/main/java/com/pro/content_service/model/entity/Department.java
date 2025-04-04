@@ -22,6 +22,7 @@ public class Department {
 
     private String name;
 
+    @Column(columnDefinition = "text")
     private String description;
 
     @CreationTimestamp
