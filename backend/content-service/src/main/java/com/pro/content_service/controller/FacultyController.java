@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/faculties")
+@RequestMapping("/faculties")
 @RequiredArgsConstructor
 public class FacultyController {
 
@@ -30,10 +30,11 @@ public class FacultyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FacultyDto>> getAllFaculties() {
-        List<FacultyDto> facultyDtoList = facultyService.getAllFaculties();
+    public ResponseEntity<List<?>> getAllFaculties(@RequestParam(value = "verbose", defaultValue = "true") boolean verbose) {
+        List<?> facultyDtoList = facultyService.getAllFaculties(verbose);
         return ResponseEntity.ok(facultyDtoList);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<FacultyDto> updateFaculty(@PathVariable Long id, @RequestBody UpdateFacultyDto updateFacultyDto) {
