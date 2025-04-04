@@ -1,5 +1,6 @@
 package com.pro.auth_service.service;
 
+import com.pro.auth_service.dto.PasswordChangeDto;
 import com.pro.auth_service.dto.RegistrationRequest;
 import com.pro.auth_service.model.entity.User;
 import com.pro.auth_service.model.enums.Role;
@@ -13,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
 
@@ -37,5 +37,24 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void changePassword(PasswordChangeDto request) {
+        System.out.println(request);
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+        System.out.println(user);
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Старый пароль неверен");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new RuntimeException("Новый пароль и подтверждение не совпадают");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        System.out.println(user);
+        userRepository.save(user);
     }
 }
