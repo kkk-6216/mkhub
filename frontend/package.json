@@ -12,6 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@heroicons/vue": "^2.2.0",
     "@tailwindcss/vite": "^4.0.9",
     "@tiptap/extension-color": "^2.11.7",
     "@tiptap/extension-placeholder": "^2.11.7",

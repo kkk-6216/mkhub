@@ -20,52 +20,13 @@
     </div>
 
     <!-- Область ввода текста и команд -->
-    <div class="relative command-input-area">
-      <div
-        ref="editorInputRef"
-        class="w-full p-2 focus:outline-none pt-2 text-gray-700"
-        contenteditable="true"
-        @input="handleInput"
-        @keydown="handleKeyDown"
-        :placeholder="inputPlaceholder"
-        @click="handleClickOnInput"
-      ></div>
-
-      <!-- Выпадающее меню команд -->
-      <div
-        v-if="showCommandMenu"
-        ref="commandMenuRef"
-        class="absolute left-0 bg-white rounded-md shadow-lg w-52 z-30"
-        :style="commandMenuPosition"
-      >
-        <div class="p-1 max-h-60 overflow-y-auto">
-          <template v-if="filteredCommands.length">
-            <button
-              v-for="(command, cmdIndex) in filteredCommands"
-              :key="command.text"
-              :ref="(el) => { if (el) commandRefs[cmdIndex] = el; }"
-              :class="{ 'bg-main text-white': cmdIndex === activeCommandIndex }"
-              class="flex items-center w-full p-2 text-left rounded hover:bg-main hover:text-white"
-              @click="executeCommand(command)"
-              @mouseover="activeCommandIndex = cmdIndex"
-            >
-              <span
-                class="flex items-center justify-center w-6 h-6 mr-2 flex-shrink-0"
-                :class="{ 'text-white': cmdIndex === activeCommandIndex, 'hover:text-white': cmdIndex !== activeCommandIndex }"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path :d="command.icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </span>
-              <span class="font-medium">{{ command.label }}</span>
-            </button>
-          </template>
-          <div v-else class="p-2 text-sm text-red-500">
-            Нет подходящих команд.
-          </div>
-        </div>
-      </div>
-    </div>
+    <EditorInput
+      ref="editorInputRef"
+      @command-typed="handleCommandTyped"
+      @direct-input="handleDirectInput"
+      @text-entered="handleTextEntered"
+      @clear-requested="clearEditorInput"
+    />
   </div>
 </template>
 
@@ -73,34 +34,29 @@
 import TextBlock from '@/modules/content/components/blocks/TextBlock.vue';
 import ImageBlock from '@/modules/content/components/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/components/blocks/FileBlock.vue';
+import EditorInput from '@/modules/content/components/com/EditorInput.vue';
+import { useCommands } from '@/modules/content/components/com/useCommands';
 
 export default {
   name: "ContentEditor",
   components: {
     TextBlock,
     ImageBlock,
-    FileBlock
+    FileBlock,
+    EditorInput
   },
   props: {
     initialContent: { type: Array, default: () => [] }
   },
-  emits: ['update:content'], // Используем update:content для v-model стиля
+  emits: ['update:content'],
+  setup() {
+    const { commands } = useCommands();
+    return { commands };
+  },
   data() {
     return {
       contentBlocks: [],
       blockRefs: {},
-      commandRefs: [],
-      showCommandMenu: false,
-      commandText: '',
-      isCommandTyping: false,
-      commandMenuPosition: { top: '100%', left: '0px' },
-      activeCommandIndex: 0,
-      isDirectlyTyping: false, // Новый флаг для отслеживания прямого ввода
-      commands: [
-        { text: '/text', label: 'Текст', icon: 'M3 17h18M3 12h18M3 7h18', action: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length) },
-        { text: '/image', label: 'Изображение', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', action: () => this.$refs.imageInputRef?.click() },
-        { text: '/file', label: 'Файл', icon: 'M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13', action: () => this.$refs.fileInputRef?.click() }
-      ],
       blockComponents: {
         'text-block': TextBlock,
         'image-block': ImageBlock,
@@ -109,17 +65,12 @@ export default {
     };
   },
   computed: {
-    filteredCommands() {
-      if (!this.isCommandTyping || !this.commandText.startsWith('/')) return [];
-      if (this.commandText === '/') return this.commands;
-      const query = this.commandText.substring(1).toLowerCase();
-      return this.commands.filter(cmd =>
-        cmd.text.substring(1).toLowerCase().includes(query) ||
-        cmd.label.toLowerCase().includes(query)
-      );
-    },
-    inputPlaceholder() {
-      return "Введите '/' для команд...";
+    commandActions() {
+      return {
+        text: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length),
+        image: () => this.$refs.imageInputRef?.click(),
+        file: () => this.$refs.fileInputRef?.click()
+      };
     }
   },
   watch: {
@@ -141,13 +92,6 @@ export default {
   },
   beforeUpdate() {
     this.blockRefs = {};
-    this.commandRefs = [];
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutsideCommandMenu);
-  },
-  beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutsideCommandMenu);
   },
   methods: {
     prepareBlocks(blocks) {
@@ -156,202 +100,26 @@ export default {
         : [];
     },
 
-    handleInput(event) {
-      const text = event.target.innerText;
-      
-      // Если начинается с '/', это команда
-      if (text.startsWith('/')) {
-        this.isCommandTyping = true;
-        this.isDirectlyTyping = false;
-        this.commandText = text;
-        this.activeCommandIndex = 0;
-        this.showCommandMenu = true;
-        this.calculateCommandMenuPosition();
-      } 
-      // Если первый символ не '/' - начинаем прямой ввод текста
-      else if (text && !this.isCommandTyping) {
-        this.isDirectlyTyping = true;
-      }
-      // Если ранее была команда, но теперь текст не содержит '/' в начале
-      else if (this.isCommandTyping && !text.startsWith('/')) {
-        this.resetCommandState();
-        if (text) {
-          this.isDirectlyTyping = true;
-        }
+    handleCommandTyped(commandType) {
+      const action = this.commandActions[commandType];
+      if (action) {
+        action();
+        this.$refs.editorInputRef.clearInput();
       }
     },
-
-    handleKeyDown(event) {
-      // Обработка событий для меню команд
-      if (this.showCommandMenu) {
-        const commandsCount = this.filteredCommands.length;
-        if (!commandsCount && !['Escape', 'Backspace', 'Enter', 'Tab'].includes(event.key)) return;
-
-        switch (event.key) {
-          case 'ArrowUp':
-            event.preventDefault();
-            this.activeCommandIndex = (this.activeCommandIndex - 1 + commandsCount) % commandsCount;
-            this.scrollCommandIntoView();
-            break;
-          case 'ArrowDown':
-            event.preventDefault();
-            this.activeCommandIndex = (this.activeCommandIndex + 1) % commandsCount;
-            this.scrollCommandIntoView();
-            break;
-          case 'Enter':
-          case 'Tab':
-            event.preventDefault();
-            const command = this.filteredCommands[this.activeCommandIndex];
-            if (command) {
-              this.executeCommand(command);
-            } else {
-                if (this.$refs.editorInputRef?.innerText === '/') {
-                    this.addTextBlock(this.$refs.editorInputRef.innerHTML, this.contentBlocks.length);
-                    this.clearEditorInput();
-                    this.scrollToInput();
-                }
-                this.resetCommandState();
-            }
-            break;
-          case 'Escape':
-            event.preventDefault();
-            this.resetCommandState();
-            break;
-          case 'Backspace':
-            this.$nextTick(() => {
-                const currentText = this.$refs.editorInputRef?.innerText || '';
-                if (this.isCommandTyping && !currentText.startsWith('/')) {
-                    this.resetCommandState();
-                    if (currentText) {
-                      this.isDirectlyTyping = true;
-                    }
-                } else if (this.isCommandTyping && currentText !== this.commandText) {
-                    this.commandText = currentText;
-                    this.activeCommandIndex = 0;
-                    this.calculateCommandMenuPosition();
-                }
-            });
-            break;
-        }
-      } 
-      // Обработка при прямом вводе текста или нажатии Enter
-      else if (event.key === 'Enter') {
-        event.preventDefault();
-        const editor = this.$refs.editorInputRef;
-        if (editor?.innerText.trim()) {
-          // Добавляем текстовый блок с текущим содержимым
-          this.addTextBlock(editor.innerHTML, this.contentBlocks.length);
-          this.clearEditorInput();
-          this.isDirectlyTyping = false;
-          this.scrollToInput();
-        } else {
-          this.clearEditorInput();
-        }
-      }
-      // Обработка для обычного ввода текста или нажатия . (точка)
-      else if (this.isDirectlyTyping && event.key === '.') {
-        // Позволяем точке добавиться в текст, но затем создаем текстовый блок
-        setTimeout(() => {
-          const editor = this.$refs.editorInputRef;
-          if (editor?.innerText.trim()) {
-            this.addTextBlock(editor.innerHTML, this.contentBlocks.length);
-            this.clearEditorInput();
-            this.isDirectlyTyping = false;
-            this.scrollToInput();
-          }
-        }, 0);
+    
+    handleDirectInput(content) {
+      if (content.trim()) {
+        this.addTextBlock(content, this.contentBlocks.length);
+        this.$refs.editorInputRef.clearInput();
+        this.scrollToInput();
       }
     },
-
-    handleClickOnInput() {
-      if (this.isCommandTyping && this.showCommandMenu) {
-        // Пересчитываем позицию при клике, т.к. каретка могла сместиться
-        this.calculateCommandMenuPosition();
-      }
-    },
-
-    executeCommand(command) {
-      command.action();
-      this.resetCommandState();
-      this.clearEditorInput();
-    },
-
-    resetCommandState() {
-      this.showCommandMenu = false;
-      this.isCommandTyping = false;
-      this.commandText = '';
-      this.activeCommandIndex = 0;
-    },
-
-    calculateCommandMenuPosition() {
-      this.$nextTick(() => {
-        const inputEl = this.$refs.editorInputRef;
-        const menuEl = this.$refs.commandMenuRef;
-
-        if (!inputEl || !menuEl) return;
-
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) return;
-
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect(); // Позиция каретки относительно viewport
-        const inputRect = inputEl.getBoundingClientRect(); // Позиция поля ввода относительно viewport
-
-        const menuHeight = menuEl.offsetHeight;
-        const menuWidth = menuEl.offsetWidth;
-
-        // --- Вертикальное позиционирование ---
-        let top;
-        const spaceBelow = window.innerHeight - rect.bottom; // Пространство от каретки до низа окна
-        const spaceAbove = rect.top; // Пространство от верха окна до каретки
-        const verticalMargin = 2; // Отступ между кареткой и меню
-
-        if (spaceBelow < menuHeight && spaceAbove >= menuHeight) {
-          // Места снизу НЕ хватает, а сверху ХВАТАЕТ: Позиционируем СВЕРХУ каретки
-          top = rect.top - inputRect.top - menuHeight - verticalMargin;
-        } else {
-          // Иначе (места снизу хватает ИЛИ места не хватает нигде): Позиционируем СНИЗУ (по умолчанию)
-          top = rect.bottom - inputRect.top + verticalMargin;
-        }
-
-        // --- Горизонтальное позиционирование ---
-        let left = rect.left - inputRect.left; // Позиция по левому краю каретки
-
-        // Если вылезает за правую границу ИНПУТА
-        if ((left + menuWidth) > inputRect.width) {
-           left = inputRect.width - menuWidth - 5; // Сдвигаем влево с отступом 5px
-        }
-        left = Math.max(left, 0); // Не уезжаем левее инпута
-
-        // Применяем рассчитанные стили
-        this.commandMenuPosition = {
-          top: `${top}px`,
-          left: `${left}px`,
-        };
-      });
-    },
-
-    scrollCommandIntoView() {
-      this.$nextTick(() => {
-        this.commandRefs[this.activeCommandIndex]?.scrollIntoView({
-          block: 'nearest'
-        });
-      });
-    },
-
-    handleClickOutsideCommandMenu(event) {
-      const menu = this.$refs.commandMenuRef;
-      const input = this.$refs.editorInputRef;
-      if (this.showCommandMenu && menu && !menu.contains(event.target) && input && !input.contains(event.target)) {
-        this.resetCommandState();
-      }
-      
-      // Если кликнули вне инпута и в инпуте есть текст, создаем блок
-      if (input && !input.contains(event.target) && input.innerText.trim() && this.isDirectlyTyping) {
-        this.addTextBlock(input.innerHTML, this.contentBlocks.length);
-        this.clearEditorInput();
-        this.isDirectlyTyping = false;
-      }
+    
+    handleTextEntered(htmlContent) {
+      this.addTextBlock(htmlContent, this.contentBlocks.length);
+      this.$refs.editorInputRef.clearInput();
+      this.scrollToInput();
     },
 
     addTextBlock(htmlContent, index) {
@@ -365,7 +133,7 @@ export default {
 
     addEmptyTextBlockAndFocus(index) {
       this.addTextBlock('', index);
-      this.scrollToInput(); // Прокручиваем к инпуту
+      this.scrollToInput();
     },
 
     insertNewBlockAfter(currentIndex) {
@@ -390,9 +158,9 @@ export default {
         if (this.contentBlocks.length > 0) {
              this.$nextTick(() => this.focusBlock(focusIndex));
         } else {
-            this.$nextTick(() => this.$refs.editorInputRef?.focus());
+            this.$nextTick(() => this.$refs.editorInputRef.focus());
         }
-        this.scrollToInput(); // Всегда прокручиваем к инпуту после удаления
+        this.scrollToInput();
       }
     },
 
@@ -406,7 +174,7 @@ export default {
           id: Math.random().toString(36).substring(2, 9),
           data: { src: e.target.result, caption: file.name, alt: file.name }
         });
-        this.scrollToInput(); // Прокручиваем к инпуту
+        this.scrollToInput();
       };
       reader.readAsDataURL(file);
       event.target.value = '';
@@ -424,13 +192,12 @@ export default {
             fileUrl: URL.createObjectURL(file)
         }
       });
-      this.scrollToInput(); // Прокручиваем к инпуту
+      this.scrollToInput();
       event.target.value = '';
     },
 
     clearEditorInput() {
-      const editor = this.$refs.editorInputRef;
-      if (editor) editor.innerHTML = '';
+      this.$refs.editorInputRef?.clearInput();
     },
 
     focusBlock(index) {
@@ -448,29 +215,9 @@ export default {
 
     scrollToInput() {
       this.$nextTick(() => {
-        this.$refs.editorInputRef?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-         // Опционально: фокусируемся после прокрутки
-         // this.$refs.editorInputRef?.focus();
+        this.$refs.editorInputRef.scrollToView();
       });
     }
   }
 };
 </script>
-
-<style scoped>
-[contenteditable][placeholder]:empty:before {
-  content: attr(placeholder);
-  color: #a0aec0; /* text-gray-500 */
-  cursor: text;
-  pointer-events: none;
-  display: block;
-}
-
-.command-input-area [contenteditable] {
-  min-height: 1.5em;
-  line-height: 1.5;
-}
-</style>
