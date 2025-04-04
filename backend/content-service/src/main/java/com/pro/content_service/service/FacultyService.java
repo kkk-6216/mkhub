@@ -55,10 +55,16 @@ public class FacultyService {
         facultyRepository.deleteById(id);
     }
 
-    public List<FacultyDto> getAllFaculties() {
+    public List<?> getAllFaculties(boolean verbose) {
         List<Faculty> facultyList = facultyRepository.findAll();
-        return facultyList.stream()
-                .map(facultyMapper::facultyToFacultyDto)
-                .toList();
+        if(verbose) {
+            return facultyList.stream()
+                    .map(facultyMapper::facultyToFacultyDto)
+                    .toList();
+        } else {
+            return facultyList.stream().
+                    map(facultyMapper::facultyToFacultyItemDto)
+                    .toList();
+        }
     }
 }
