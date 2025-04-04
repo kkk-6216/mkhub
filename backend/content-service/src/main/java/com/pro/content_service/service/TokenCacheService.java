@@ -16,13 +16,16 @@ public class TokenCacheService {
     private final RedisTemplate<String, UserInfoDto> redisTemplate;
 
     public void cacheToken(String token, UserInfoDto user) {
+
         Instant issuedAtInstant = user.getTokenExpirationAt().toInstant();
         Instant now = Instant.now();
         Duration duration = Duration.between(now, issuedAtInstant);
         if (duration.isNegative() || duration.isZero()) {
             duration = Duration.ofMinutes(10);
         }
+
         String key = "jwt:" + token;
+
         redisTemplate.opsForValue().set(key, user, duration.getSeconds(), TimeUnit.SECONDS);
     }
 
