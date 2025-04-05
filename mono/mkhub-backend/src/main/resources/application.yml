@@ -11,17 +11,22 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8080
+  port: 8000
 
 cors:
   allowed-origins:
     - http://localhost:5173
+
+google:
+  drive:
+    credentials: mkhub-storage-cred.json
+    root-folder-id: 1eaYCxnlVjiqshR_4pxjXgnju_etx2PBp
 
 jwt:
   token:
