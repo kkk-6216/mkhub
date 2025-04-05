@@ -1,6 +1,8 @@
 package com.pro.mkhub_backend.user.dto;
 
 import com.pro.mkhub_backend.auth.model.enums.Role;
+import com.pro.mkhub_backend.file_storage.model.entity.UserFileMetadata;
+import com.pro.mkhub_backend.file_storage.util.GoogleDriveLinkBuilder;
 import com.pro.mkhub_backend.user.model.entity.UserInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +29,7 @@ public class UserDetailsDto {
     private LocalDateTime updatedAt;
     private String imageUrl;
 
-    public UserDetailsDto(UserInfo userInfo, Role role) {
+    public UserDetailsDto(UserInfo userInfo, Role role, GoogleDriveLinkBuilder linkBuilder) {
         this.id = userInfo.getId();
         this.about = userInfo.getAbout();
         this.firstName = userInfo.getFirstName();
@@ -40,7 +42,12 @@ public class UserDetailsDto {
         this.github = userInfo.getGithubLink();
         this.createdAt = userInfo.getCreatedAt();
         this.updatedAt = userInfo.getUpdatedAt();
-        this.imageUrl = userInfo.getImageUrl();
+
+        UserFileMetadata avatar = userInfo.getUserFileMetadata();
+        if (avatar != null && avatar.getGoogleDriveFileId() != null && !avatar.getGoogleDriveFileId().isEmpty()) {
+            this.imageUrl = linkBuilder.buildThumbnailUrl(avatar.getGoogleDriveFileId());
+        }
     }
+
 
 }
