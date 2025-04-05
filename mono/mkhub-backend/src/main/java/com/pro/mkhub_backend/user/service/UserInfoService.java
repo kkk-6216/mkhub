@@ -2,6 +2,7 @@ package com.pro.mkhub_backend.user.service;
 
 import com.pro.mkhub_backend.auth.model.entity.User;
 import com.pro.mkhub_backend.auth.repository.UserRepository;
+import com.pro.mkhub_backend.file_storage.util.GoogleDriveLinkBuilder;
 import com.pro.mkhub_backend.user.dto.UserAbout;
 import com.pro.mkhub_backend.user.dto.UserData;
 import com.pro.mkhub_backend.user.dto.UserDetailsDto;
@@ -17,6 +18,7 @@ public class UserInfoService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserRepository userRepository;
+    private final GoogleDriveLinkBuilder googleDriveLinkBuilder;
 
     @Transactional
     public void updateAbout(UserAbout userAbout, Long id) {
@@ -67,6 +69,6 @@ public class UserInfoService {
                 () -> new RuntimeException("User with id: " + id + " not found")
         );
 
-        return new UserDetailsDto(userInfo, user.getRole());
+        return new UserDetailsDto(userInfo, user.getRole(), googleDriveLinkBuilder);
     }
 }
