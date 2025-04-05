@@ -12,6 +12,7 @@ import java.util.Collections;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MUserDetails implements UserDetails {
 
     private Long id;
