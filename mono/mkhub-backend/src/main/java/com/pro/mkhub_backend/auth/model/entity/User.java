@@ -1,6 +1,7 @@
 package com.pro.mkhub_backend.auth.model.entity;
 
 import com.pro.mkhub_backend.auth.model.enums.Role;
+import com.pro.mkhub_backend.user.model.entity.UserInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -50,6 +51,10 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_details_id", referencedColumnName = "id")
+    private UserInfo userInfo;
 
     @PrePersist
     public void prePersist() {
