@@ -1,11 +1,11 @@
 package com.pro.mkhub_backend.auth.controller;
 
-import com.pro.auth_service.dto.AuthResponse;
-import com.pro.auth_service.dto.RefreshRequest;
-import com.pro.auth_service.model.entity.RefreshToken;
-import com.pro.auth_service.model.entity.User;
-import com.pro.auth_service.service.RefreshTokenService;
-import com.pro.auth_service.util.JwtUtil;
+import com.pro.mkhub_backend.auth.dto.AuthResponse;
+import com.pro.mkhub_backend.auth.dto.RefreshRequest;
+import com.pro.mkhub_backend.auth.model.entity.RefreshToken;
+import com.pro.mkhub_backend.auth.model.entity.User;
+import com.pro.mkhub_backend.auth.service.RefreshTokenService;
+import com.pro.mkhub_backend.security.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
