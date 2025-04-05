@@ -1,6 +1,7 @@
 package com.pro.mkhub_backend.user.model.entity;
 
 import com.pro.mkhub_backend.auth.model.entity.User;
+import com.pro.mkhub_backend.file_storage.model.entity.UserFileMetadata;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +25,11 @@ public class UserInfo {
     private Long id;
     private String username;
     private String email;
-    private String imageUrl;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "file_id", referencedColumnName = "id")
+    private UserFileMetadata userFileMetadata;
+
     @Column(columnDefinition = "TEXT")
     private String about;
     private String phoneNumber;
