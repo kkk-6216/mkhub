@@ -2,6 +2,20 @@ spring:
   application:
     name: mkhub-backend
 
+  datasource:
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/mkhub-db
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 server:
   port: 8080
 
