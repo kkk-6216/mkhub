@@ -34,6 +34,7 @@ public class UserDetailsDto {
         this.lastName = userInfo.getLastName();
         this.username = userInfo.getUsername();
         this.role = role;
+        this.phone = userInfo.getPhoneNumber();
         this.email = userInfo.getEmail();
         this.instagram = userInfo.getInstagramLink();
         this.github = userInfo.getGithubLink();
