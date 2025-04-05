@@ -5,6 +5,8 @@ import com.pro.mkhub_backend.auth.dto.RegistrationRequest;
 import com.pro.mkhub_backend.auth.model.entity.User;
 import com.pro.mkhub_backend.auth.model.enums.Role;
 import com.pro.mkhub_backend.auth.repository.UserRepository;
+import com.pro.mkhub_backend.user.model.entity.UserInfo;
+import com.pro.mkhub_backend.user.repository.UserInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserInfoRepository userInfoRepository;
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -28,7 +31,6 @@ public class UserService {
     public User createUser(RegistrationRequest registrationRequest) {
         User user = new User();
         user.setUsername(registrationRequest.getUsername());
-        user.setEmail(registrationRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
         user.setRole(Role.ROLE_STUDENT);
         user.setCreatedAt(LocalDateTime.now());
@@ -36,7 +38,14 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // TODO
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUsername(savedUser.getUsername());
+        userInfo.setEmail(registrationRequest.getEmail());
+
+        savedUser.setUserInfo(userInfo);
+        userInfo.setUser(savedUser);
+
+        userInfoRepository.save(userInfo);
 
         return savedUser;
     }
