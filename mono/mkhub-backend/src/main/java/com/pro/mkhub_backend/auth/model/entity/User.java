@@ -54,6 +54,9 @@ public class User {
     @JoinColumn(name = "user_details_id", referencedColumnName = "id")
     private UserInfo userInfo;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshToken refreshToken;
+
     @PrePersist
     public void prePersist() {
         this.enabled = true;
