@@ -65,10 +65,9 @@ public class UserInfoService {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("User with id: " + id + " not found")
         );
-        UserInfo userInfo = userInfoRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("User with id: " + id + " not found")
-        );
 
-        return new UserDetailsDto(userInfo, user.getRole(), googleDriveLinkBuilder);
+        return new UserDetailsDto(user.getUserInfo(), user, googleDriveLinkBuilder);
     }
+
+
 }
