@@ -1,0 +1,23 @@
+<configuration>
+
+    <property name="LOG_PATH" value="logs"/>
+
+    <appender name="REQUEST_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/requests.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/requests.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="REQUEST_LOGGER" level="INFO" additivity="false">
+        <appender-ref ref="REQUEST_FILE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="REQUEST_FILE"/>
+    </root>
+</configuration>
