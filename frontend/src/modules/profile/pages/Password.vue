@@ -62,7 +62,8 @@
 
 <script>
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import ConfirmationModal from "@/modules/profile/components/ConfirmationModal.vue";  // Import
+import ConfirmationModal from "@/modules/profile/components/ConfirmationModal.vue";
+import {useAuthStore} from "@/store/auth.js";
 
 export default {
   name: 'Password',
@@ -70,6 +71,7 @@ export default {
     DefaultButton,
     ConfirmationModal,  // Register
   },
+  inject: ['showAlert'],
   data() {
     return {
       currentPassword: '',
@@ -81,7 +83,13 @@ export default {
       isFormValid: false,
     };
   },
+  beforeCreate() {
+    this.authStore = useAuthStore();
+  },
   computed: {
+    username() {
+      return this.authStore.user?.sub || 'Имя пользователя';
+    },
     isButtonDisabled() {
       return !this.isFormValid || !this.currentPassword || !this.newPassword || !this.confirmPassword;
     },
@@ -125,29 +133,61 @@ export default {
       if (this.isFormValid) {
         this.showConfirmationModal = true;
       } else {
-        // Do something, like display an error message.
-        alert('Пожалуйста, заполните форму корректно.'); // Or use a better notification.
+        this.showAlert('error', 'Пожалуйста, заполните форму корректно.');
       }
 
     },
     closeConfirmationModal() {
       this.showConfirmationModal = false;
     },
-    handleSubmit() {
-      // Here will be the form submission logic
-      console.log("Current Password:", this.currentPassword);
-      console.log("New Password:", this.newPassword);
-      console.log("Confirm Password:", this.confirmPassword);
-
-      // Reset form fields
-      this.currentPassword = '';
-      this.newPassword = '';
-      this.confirmPassword = '';
-      this.showConfirmationModal = false;
+    async handleSubmit() {
       this.newPasswordError = '';
       this.confirmPasswordError = '';
-      this.isFormValid = false;
-    }
+      this.isFormValid = true;
+
+      const passwordData = {
+        username: this.username,
+        oldPassword: this.currentPassword,
+        newPassword: this.newPassword,
+        confirmNewPassword: this.confirmPassword,
+      };
+
+      const result = await this.authStore.changePassword(passwordData);
+
+      if (result.success) {
+
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.showConfirmationModal = false;
+        this.newPasswordError = '';
+        this.confirmPasswordError = '';
+        this.isFormValid = false;
+
+        this.showAlert('success', 'Пароль успешно изменён.');
+      } else {
+
+        if (result.errors) {
+          if (result.errors.newPassword) {
+            this.newPasswordError = result.errors.newPassword;
+          }
+          if (result.errors.confirmNewPassword) {
+            this.confirmPasswordError = result.errors.confirmNewPassword;
+          }
+          if (result.errors.oldPassword) {
+            this.showAlert('error', result.errors.oldPassword);
+          }
+          if (result.errors.error) {
+            this.showAlert('error', result.errors.error);
+          }
+        } else {
+          this.showAlert('error', 'Произошла ошибка при смене пароля.');
+        }
+
+        this.closeConfirmationModal();
+      }
+    },
+
   },
 }
 </script>

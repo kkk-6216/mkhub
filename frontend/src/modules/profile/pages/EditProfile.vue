@@ -39,7 +39,7 @@
           <div class="mt-2">
             <div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
               <div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6"></div>
-              <input type="text" name="username" id="username" v-model="editableUserName" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="janesmith" />
+              <input type="text" name="username" id="username" readonly :value="username" class="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" placeholder="janesmith" />
             </div>
           </div>
         </div>
@@ -47,7 +47,7 @@
         <div class="col-span-full">
           <label for="about" class="block text-sm/6 font-medium text-dark">О себе</label>
           <div class="mt-2">
-            <textarea name="about" id="about" rows="3" v-model="editableAbout" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            <textarea name="about" id="about" rows="10" v-model.trim="editableAbout" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
           <p class="mt-3 text-sm/6 text-gray-600">Напишите несколько предложений о себе.</p>
         </div>
@@ -64,6 +64,7 @@
 <script>
 import { useAuthStore } from "@/store/auth.js";
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
+import { getUserAbout, updateUserAbout } from "@/modules/profile/service/user-details.js";
 
 export default {
   name: "EditProfile",
@@ -72,12 +73,16 @@ export default {
   },
   data() {
     return {
-      authStore: useAuthStore(),
-      editableUserName: '',
       editableAbout: '',
     };
   },
+  beforeCreate() {
+    this.authStore = useAuthStore();
+  },
   computed: {
+    username() {
+      return this.user?.sub || 'Имя пользователя';
+    },
     user() {
       return this.authStore.user;
     },
@@ -86,21 +91,17 @@ export default {
     },
   },
   mounted() {
-    this.editableUserName = this.user?.sub || '';
-    this.editableAbout = this.user?.about || '';
+    this.fetchUserDetails();
   },
   methods: {
     async saveChanges() {
       try {
-        await this.authStore.updateUserProfile({
-          userName: this.editableUserName,
-          about: this.editableAbout,
-        });
-        this.$router.push('/profile'); // Redirect to profile page
+        await updateUserAbout({about: this.editableAbout});
+        this.showAlert('success', 'Информация обновлена успешно!');
       } catch (error) {
-        console.error("Ошибка при сохранении профиля:", error);
-        // Add error handling logic here, e.g., display a notification to the user
+        this.showAlert('error', `Ошибка при обновлении информации: ${error}`);
       }
+      this.$router.push('/profile');
     },
     cancelEditing() {
       this.$router.push('/profile'); // Redirect to profile page
@@ -124,6 +125,17 @@ export default {
       }
 
     },
+    async fetchUserDetails() {
+      try {
+        const userData = await getUserAbout();
+
+        this.editableAbout = userData.about;
+
+      } catch (error) {
+        this.showAlert('error', `Ошибка при получении данных: ${error}`);
+      }
+    }
   },
+  inject: ['showAlert'],
 };
 </script>

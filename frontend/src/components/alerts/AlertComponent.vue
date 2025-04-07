@@ -2,7 +2,7 @@
   <div
       v-if="visible"
       :class="[
-      'fixed z-50 top-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center p-4 mb-4 rounded-lg',
+      'fixed z-100 top-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center p-4 mb-4 rounded-lg',
       alertColors.bg,
       alertColors.text,
       alertColors.border,

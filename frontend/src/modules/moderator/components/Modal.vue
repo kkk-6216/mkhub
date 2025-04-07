@@ -1,6 +1,7 @@
 <template>
   <div
-      class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
+      class="fixed inset-0 flex backdrop-blur-sm"
+      :class="position"
       @mousedown.self="$emit('close')"
   >
     <div class="bg-white bg-opacity-90 p-6 rounded-lg shadow-lg border border-gray-200" :class="width">
@@ -17,6 +18,10 @@ export default {
       type: String,
       default: "w-2/5",
       required: false,
+    },
+    position: {
+      type: String,
+      default: "items-center justify-center"
     }
   }
 };

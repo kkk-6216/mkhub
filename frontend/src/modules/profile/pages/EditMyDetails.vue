@@ -25,9 +25,16 @@
         </div>
 
         <div class="sm:col-span-4">
+          <label for="email" class="block text-sm/6 font-medium text-gray-900">Почта</label>
+          <div class="mt-2">
+            <input type="email" name="email" id="email" v-model="email" autocomplete="tel" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
+        </div>
+
+        <div class="sm:col-span-4">
           <label for="phone-number" class="block text-sm/6 font-medium text-gray-900">Номер телефона</label>
           <div class="mt-2">
-            <input type="tel" name="phone-number" id="phone-number" v-model="phoneNumber" autocomplete="tel" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            <input type="tel" name="phone-number" id="phone-number" v-model="phone" autocomplete="tel" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
 
@@ -59,6 +66,8 @@
 
 <script>
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
+import { updateUserData, getUserData } from '@/modules/profile/service/user-details.js';
+import {useAuthStore} from "@/store/auth.js";
 
 export default {
   name: "EditMyDetails",
@@ -69,40 +78,65 @@ export default {
     return {
       firstName: '',
       lastName: '',
-      phoneNumber: '',
+      email: '',
+      phone: '',
       instagram: '',
       github: '',
     };
   },
   mounted() {
-    // Simulate fetching data from an API or store
-    setTimeout(() => {
-      this.firstName = 'John';
-      this.lastName = 'Doe';
-      this.phoneNumber = '+15551234567';
-      this.instagram = 'johndoe';
-      this.github = 'johndoe';
-    }, 500);
+    this.fetchUserDetails();
   },
   methods: {
-    saveChanges() {
-      // Simulate saving data to an API or store
-      console.log('Saving changes:', {
-        firstName: this.firstName,
-        lastName: this.lastName,
-        phoneNumber: this.phoneNumber,
-        instagram: this.instagram,
-        github: this.github,
-      });
-      this.$router.push('/my-details');
+    async saveChanges() {
+      try {
+        const userData = {
+          firstName: this.firstName,
+          lastName: this.lastName,
+          email: this.email,
+          phone: this.phone,
+          instagram: this.instagram,
+          github: this.github,
+        }
+        await updateUserData(userData);
+        this.showAlert('success', 'Информация обновлена успешно!');
+      } catch (error) {
+        this.showAlert('error', `Ошибка при обновлении информации: ${error}`);
+      }
+      this.$router.push('/profile/my-details');
     },
     cancelEdit() {
-      this.$router.push('/my-details');
+      this.$router.push('/profile/my-details');
     },
+
+      async fetchUserDetails() {
+        try {
+          const userData = await getUserData();
+
+          if (userData) {
+            this.firstName = userData.firstName || '';
+            this.lastName = userData.lastName || '';
+            this.email = userData.email || '';
+            this.phone = userData.phone || '';
+            this.instagram = userData.instagram || '';
+            this.github = userData.github || '';
+          } else {
+            console.error('Получены пустые данные для пользователя');
+          }
+
+        } catch (error) {
+          this.showAlert('error', `Ошибка при обновлении информации: ${error}`);
+        }
+      }
+    },
+  inject: ['showAlert'],
+  beforeCreate() {
+    this.authStore = useAuthStore();
   },
+
 };
 </script>
 
 <style scoped>
-/* Styles for the page */
+
 </style>

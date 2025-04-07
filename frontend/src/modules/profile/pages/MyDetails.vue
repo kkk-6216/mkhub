@@ -83,10 +83,16 @@
 
 <script>
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
+import { getUserData } from "@/modules/profile/service/user-details.js";
+import { useAuthStore } from "@/store/auth.js";
+
 export default {
   name: "MyDetails",
   components: {
     DefaultButton,
+  },
+  beforeCreate() {
+    this.authStore = useAuthStore();
   },
   data() {
     return {
@@ -99,21 +105,34 @@ export default {
     };
   },
   mounted() {
-    // Simulate fetching data from an API or store
-    setTimeout(() => {
-      this.firstName = 'John';
-      this.lastName = 'Doe';
-      this.email = 'john.doe@example.com';
-      this.phoneNumber = '+15551234567';
-      this.instagram = 'johndoe';
-      this.github = 'johndoe';
-    }, 500);
+    this.fetchUserDetails();
   },
   methods: {
     goToEdit() {
-      this.$router.push('/edit/my-details');
+      this.$router.push('/profile/my-details/edit');
     },
+    async fetchUserDetails() {
+      try {
+        const userData = await getUserData(this.userId);
+
+        this.firstName = userData.firstName || 'Не указано';
+        this.lastName = userData.lastName || 'Не указано';
+        this.email = userData.email || 'Не указано';
+        this.phoneNumber = userData.phone || 'Не указано';
+        this.instagram = userData.instagram || 'Не указано';
+        this.github = userData.github || 'Не указано';
+
+      } catch (error) {
+        this.showAlert('error', `Ошибка при получении данных: ${error}`);
+      }
+    }
   },
+  inject: ['showAlert'],
+  computed: {
+    userId() {
+      return this.authStore.user?.id;
+    }
+  }
 };
 </script>
 

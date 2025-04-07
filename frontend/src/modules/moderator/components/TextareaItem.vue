@@ -1,6 +1,6 @@
 <template>
   <div class="relative mb-[20px]">
-    <label :for="computedId" class="block text-sm/6 font-bold text-dark">
+    <label :for="computedId" class="block text-sm/6 font-bold " :class="labelClass">
       {{ label }}
     </label>
     <div class="mt-2">
@@ -25,6 +25,10 @@ export default {
     modelValue: {
       type: String,
       default: '',
+    },
+    labelClass: {
+      type: String,
+      default: "text-dark"
     },
     label: {
       type: String,

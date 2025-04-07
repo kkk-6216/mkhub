@@ -35,7 +35,7 @@
         <div class="col-span-full">
           <label for="about" class="block text-sm/6 font-medium text-dark">О себе</label>
           <div class="mt-2" v-if="about.length !== 0">
-            <p class="block w-full rounded-md bg-white py-1.5 text-base text-dark sm:text-sm/6">{{ displayAbout }}</p>
+            <p class="block w-full rounded-md bg-white py-1.5 text-base text-dark sm:text-sm/6">{{ about }}</p>
           </div>
           <div class="mt-2" v-if="about.length === 0">
             <p class="block w-full rounded-md bg-white py-1.5 text-base text-gray-500 sm:text-sm/6">Пусто...</p>
@@ -57,6 +57,7 @@
 <script>
 import { useAuthStore } from "@/store/auth.js";
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
+import { getUserAbout } from "@/modules/profile/service/user-details.js";
 
 export default {
   name: "Profile",
@@ -65,8 +66,11 @@ export default {
   },
   data() {
     return {
-
+      about: ''
     };
+  },
+  mounted() {
+    this.fetchUserDetails();
   },
   beforeCreate() {
     this.authStore = useAuthStore();
@@ -78,24 +82,30 @@ export default {
     userName() {
       return this.user?.sub || 'Имя пользователя';
     },
-    about() {
-      return this.user?.about || '';
-    },
     userAvatar() {
-      console.log(this.authStore.userAvatar)
+
       return this.authStore.userAvatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg';
     },
     displayUserName() {
       return this.userName;
     },
-    displayAbout() {
-      return this.about;
-    },
+
   },
+  inject: ['showAlert'],
   methods: {
     goTo(path) {
       this.$router.push(path);
     },
+    async fetchUserDetails() {
+      try {
+        const userData = await getUserAbout();
+
+        this.about = userData.about || 'Не указано';
+
+      } catch (error) {
+        this.showAlert('error', `Ошибка при получении данных: ${error}`);
+      }
+    }
   },
 };
 </script>

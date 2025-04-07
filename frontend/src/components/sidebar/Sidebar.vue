@@ -68,7 +68,7 @@
             <div class="flex items-center justify-between cursor-pointer">
               <div class="flex items-center space-x-3" @click="goTo('/profile')">
                 <img
-                    :src="user.avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
+                    :src="avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
                     alt="Avatar"
                     class="w-10 h-10 rounded-xl"
                 />
@@ -174,6 +174,9 @@ export default {
     },
     user() {
       return this.authStore.user;
+    },
+    avatar() {
+      return this.authStore.userAvatar;
     },
     filteredMenuItems() {
       if (!this.isAuthenticated) {

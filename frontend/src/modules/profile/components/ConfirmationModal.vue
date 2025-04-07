@@ -1,6 +1,6 @@
 <template>
-  <div v-if="show" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-    <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div v-if="show" class="fixed inset-0 flex items-center justify-center backdrop-blur-sm">
+    <div class="relative p-5 w-96  bg-white  bg-opacity-90 rounded-lg shadow-lg border border-gray-200">
       <div class="mt-3 text-center">
         <h3 class="text-lg leading-6 font-medium text-gray-900">{{ title }}</h3>
         <div class="mt-2 pb-2 px-4">
