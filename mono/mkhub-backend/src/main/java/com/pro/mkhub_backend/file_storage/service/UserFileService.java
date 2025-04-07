@@ -45,12 +45,13 @@ public class UserFileService {
         String userFolderPath = "/users/" + userId;
         String avatarFolderPath = userFolderPath + "/avatar";
 
-        googleDriveService.getOrCreateFolder(userFolderPath);
+        String userFolderPathCreated = googleDriveService.getOrCreateFolder(userFolderPath);
         String avatarFolderId = googleDriveService.getOrCreateFolder(avatarFolderPath);
 
         GoogleDriveService.FileUploadResult result = googleDriveService.uploadFile(file, avatarFolderId);
 
         UserFileMetadata metadata = new UserFileMetadata();
+        metadata.setUserFolderPath(userFolderPathCreated);
         metadata.setGoogleDriveFileId(result.getFileId());
         metadata.setFileName(file.getOriginalFilename());
         metadata.setStoredFileName(result.getStoredFileName());
