@@ -26,6 +26,7 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('refreshToken', this.refreshToken);
 
         this.user = jwtDecode(this.accessToken);
+        await this.getAvatar();
 
       } catch (error) {
         throw error;
@@ -42,6 +43,9 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('accessToken', this.accessToken);
         localStorage.setItem('refreshToken', this.refreshToken);
         this.user = jwtDecode(this.accessToken);
+
+        await this.getAvatar();
+
       } catch (error) {
         throw error;
       }
@@ -84,6 +88,12 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
+        const decoded = jwtDecode(this.refreshToken);
+        const now = Math.floor(Date.now() / 1000);
+        if (!decoded.exp || decoded.exp < now) {
+          return;
+        }
+
         if (this.accessToken) {
           await apiClient.post('/auth/sign-out', {
             refreshToken: this.refreshToken,
@@ -91,18 +101,18 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.error("Ошибка при выходе:", error.message);
-      }
+      } finally {
+        this.user = null;
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.userAvatar = null;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userAvatar');
 
-      this.user = null;
-      this.accessToken = null;
-      this.refreshToken = null;
-      this.userAvatar = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('userAvatar');
-
-      if (router.currentRoute.value.path !== "/login") {
-        await router.push("/login");
+        if (router.currentRoute.value.path !== "/login") {
+          await router.push("/login");
+        }
       }
     },
 
@@ -147,7 +157,29 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.error("Ошибка загрузки файла:", error);
       }
-    }
+    },
+
+    async changePassword(passwordData) {
+      try {
+        const response = await apiClient.put("/auth/change-password", passwordData);
+
+        return { success: true, message: response.data };
+
+      } catch (error) {
+        if (error.response && error.response.data) {
+          return {
+            success: false,
+            errors: error.response.data,
+          };
+        } else {
+          return {
+            success: false,
+            errors: { error: "Неизвестная ошибка при смене пароля" },
+          };
+        }
+      }
+    },
+
 
 
   },
