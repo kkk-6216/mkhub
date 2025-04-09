@@ -143,7 +143,7 @@
 
     </Modal>
 
-    <Modal v-if="isEditPanelOpen" @close="closeEditPanel" position="fixed p-4 pt-16 z-50 flex justify-center items-start" width="w-[900px]">
+    <Modal v-if="isEditPanelOpen" @close="closeEditPanel" position="fixed p-4 pt-5 z-50 flex justify-center items-start" width="w-[900px]">
       <div class="p-3 space-y-6">
 
         <!-- Заголовок -->
@@ -303,7 +303,7 @@
       </div>
     </Modal>
 
-    <Modal position="fixed p-4 pt-16 z-50 flex justify-center items-start" v-if="isUserDetailsOpen" @close="closeUserDetails" width="w-[900px]">
+    <Modal position="fixed p-4 pt-5 z-50 flex justify-center items-start" v-if="isUserDetailsOpen" @close="closeUserDetails" width="w-[900px]">
       <div class="p-3 space-y-3">
 
         <!-- Заголовок -->
