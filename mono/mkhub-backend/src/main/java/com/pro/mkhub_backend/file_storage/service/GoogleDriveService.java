@@ -1,11 +1,13 @@
 package com.pro.mkhub_backend.file_storage.service;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleDriveService {
 
     private final Drive googleDrive;
@@ -103,6 +106,8 @@ public class GoogleDriveService {
     public void deleteFile(String fileId) {
         try {
             googleDrive.files().delete(fileId).execute();
+        } catch (NullPointerException | GoogleJsonResponseException e) {
+            log.warn(e.getMessage());
         } catch (IOException e) {
             throw new RuntimeException("Ошибка удаления файла из Google Drive. FileId: " + fileId, e);
         }
