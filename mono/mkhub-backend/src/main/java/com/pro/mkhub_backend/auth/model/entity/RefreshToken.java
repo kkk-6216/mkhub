@@ -26,7 +26,7 @@ public class RefreshToken {
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiryDate;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
