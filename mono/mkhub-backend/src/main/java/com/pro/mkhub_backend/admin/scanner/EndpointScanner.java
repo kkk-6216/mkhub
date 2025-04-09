@@ -1,70 +1,130 @@
 package com.pro.mkhub_backend.admin.scanner;
 
 import com.pro.mkhub_backend.admin.dto.EndpointInfo;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import com.pro.mkhub_backend.security.config.StaticEndpointRoles;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
-public class EndpointScanner implements ApplicationListener<ContextRefreshedEvent> {
+@RequiredArgsConstructor
+public class EndpointScanner {
 
+    private final ApplicationContext context;
+
+    @Getter
     private final List<EndpointInfo> endpoints = new ArrayList<>();
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        Map<String, HandlerMapping> mappings = event.getApplicationContext().getBeansOfType(HandlerMapping.class);
+    @PostConstruct
+    public void scanEndpoints() {
+        Map<String, RequestMappingHandlerMapping> mappings = context.getBeansOfType(RequestMappingHandlerMapping.class);
+        Set<String> added = new HashSet<>();
 
-        for (HandlerMapping mapping : mappings.values()) {
-            if (mapping instanceof RequestMappingHandlerMapping rmhm) {
-                rmhm.getHandlerMethods().forEach((info, method) -> {
-                    Set<String> urls = new HashSet<>();
+        for (var mapping : mappings.values()) {
+            Map<RequestMappingInfo, HandlerMethod> handlerMethods = mapping.getHandlerMethods();
 
-                    // Поддержка PathPattern (Spring Boot 3+)
-                    if (info.getPathPatternsCondition() != null) {
-                        info.getPathPatternsCondition().getPatterns()
-                                .forEach(pathPattern -> urls.add(pathPattern.getPatternString()));
-                    }
+            for (var entry : handlerMethods.entrySet()) {
+                RequestMappingInfo info = entry.getKey();
+                HandlerMethod handler = entry.getValue();
 
-                    // Поддержка старой модели (на всякий случай)
-                    if (info.getPatternsCondition() != null) {
-                        urls.addAll(info.getPatternsCondition().getPatterns());
-                    }
+                Set<String> urls = Optional.ofNullable(info.getPathPatternsCondition())
+                        .map(c -> c.getPatterns().stream()
+                                .map(PathPattern::getPatternString)
+                                .collect(Collectors.toSet()))
+                        .orElseGet(() -> Optional.ofNullable(info.getPatternsCondition())
+                                .map(p -> Set.copyOf(p.getPatterns()))
+                                .orElse(Set.of()));
 
-                    for (String url : urls) {
-                        Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-                        if (methods.isEmpty()) {
-                            // Если не указано явно — считается, что поддерживаются все методы
-                            endpoints.add(new EndpointInfo(url, "ALL", resolveRole(method)));
-                        } else {
-                            for (RequestMethod requestMethod : methods) {
-                                endpoints.add(new EndpointInfo(url, requestMethod.name(), resolveRole(method)));
+                Set<RequestMethod> httpMethods = info.getMethodsCondition().getMethods();
+
+                for (String url : urls) {
+                    if (httpMethods.isEmpty()) {
+                        String key = url + "::ALL";
+                        if (added.add(key)) {
+                            Set<String> roles = collectRoles(url, null, handler);
+                            endpoints.add(new EndpointInfo(url, "ALL", new ArrayList<>(roles)));
+                        }
+                    } else {
+                        for (RequestMethod method : httpMethods) {
+                            String key = url + "::" + method.name();
+                            if (added.add(key)) {
+                                Set<String> roles = collectRoles(url, method, handler);
+                                endpoints.add(new EndpointInfo(url, method.name(), new ArrayList<>(roles)));
                             }
                         }
                     }
-                });
+                }
             }
         }
     }
 
+    private Set<String> collectRoles(String url, RequestMethod method, HandlerMethod handler) {
+        Set<String> staticRoles = new HashSet<>(StaticEndpointRoles.getRoles(url, method).orElse(Collections.emptyList()));
 
-    private String resolveRole(HandlerMethod method) {
-        if (method.hasMethodAnnotation(PreAuthorize.class)) {
-            String value = method.getMethodAnnotation(PreAuthorize.class).value();
-            if (value.contains("ADMIN")) return "ADMIN";
-            if (value.contains("MODERATOR")) return "MODERATOR";
-            if (value.contains("STUDENT")) return "STUDENT";
+        PreAuthorize annotation = handler.getMethodAnnotation(PreAuthorize.class);
+        if (annotation == null) {
+            annotation = handler.getBeanType().getAnnotation(PreAuthorize.class);
         }
-        return "PUBLIC";
+
+        Set<String> annotationRoles = new HashSet<>();
+        if (annotation != null) {
+            annotationRoles = extractRolesFromExpression(annotation.value());
+        }
+
+        Set<String> combinedRoles = new HashSet<>();
+        combinedRoles.addAll(staticRoles);
+        combinedRoles.addAll(annotationRoles);
+
+        // Определим, как интерпретировать роли
+        if (!combinedRoles.isEmpty()) {
+            // Есть конкретные роли (ROLE_ADMIN, ...), убираем AUTHENTICATED если нужно
+            Set<String> actualRoles = combinedRoles.stream()
+                    .filter(role -> role.startsWith("ROLE_"))
+                    .collect(Collectors.toSet());
+
+            if (!actualRoles.isEmpty()) {
+                return actualRoles;
+            }
+
+            if (combinedRoles.contains("AUTHENTICATED")) {
+                return Set.of("AUTHENTICATED");
+            }
+        }
+
+        // Не защищён
+        return Set.of("PUBLIC");
     }
 
-    public List<EndpointInfo> getEndpoints() {
-        return endpoints;
+
+    private Set<String> extractRolesFromExpression(String expression) {
+        Set<String> result = new HashSet<>();
+        Pattern rolePattern = Pattern.compile("hasRole\\('(.*?)'\\)|hasAnyRole\\((.*?)\\)");
+
+        Matcher matcher = rolePattern.matcher(expression);
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                result.add("ROLE_" + matcher.group(1));
+            } else if (matcher.group(2) != null) {
+                String[] parts = matcher.group(2).split(",");
+                for (String part : parts) {
+                    String role = part.replaceAll("[\"'\\s]", "");
+                    if (!role.isBlank()) result.add("ROLE_" + role);
+                }
+            }
+        }
+        return result;
     }
 }
