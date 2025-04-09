@@ -480,7 +480,7 @@ import {
   deleteUser,
   getUser, getUsers,
   updateAbout, updateData, updateRole, updateSecurityStatus, updateUsername
-} from "@/modules/moderator/service/user-service.js";
+} from "@/modules/admin/service/user-service.js";
 
 import InputComponent from "@/modules/admin/components/InputComponent.vue";
 

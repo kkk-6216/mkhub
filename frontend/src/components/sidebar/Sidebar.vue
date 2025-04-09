@@ -121,7 +121,7 @@ export default {
         { to: '/resources', label: 'Ресурсы', icon: markRaw(ResourcesIcon), iconClass: 'mdi-folder-open', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'], public: true },
         { to: '/messages', label: 'Сообщения', icon: markRaw(MessagesIcon), iconClass: 'mdi-message', roles: ['ROLE_STUDENT', 'ROLE_ADMIN','ROLE_MODERATOR'] },
         { to: '/settings', label: 'Настройки', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_STUDENT'] },
-        { to: '/admin/monitoring', label: 'Панель управления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_ADMIN'] },
+        { to: '/admin/users', label: 'Панель управления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_ADMIN'] },
         { to: '/moderator/dashboard', label: 'Панель управления', icon: markRaw(SettingsIcon), iconClass: 'mdi-cog', roles: ['ROLE_MODERATOR'] },
       ]
     };

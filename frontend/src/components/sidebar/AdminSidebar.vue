@@ -92,7 +92,6 @@
 
 import { useAuthStore } from '@/store/auth.js';
 import DefaultButton from "@/components/buttons/DefaultButton.vue";
-import MonitoringIcon from "@/components/icons/AdminSidebarIcons/MonitoringIcon.vue";
 import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
 import ApiGatewayIcon from "@/components/icons/AdminSidebarIcons/ApiGatewayIcon.vue";
 import LogoutIcon from "@/components/icons/AdminSidebarIcons/LogoutIcon.vue";
@@ -113,7 +112,6 @@ export default {
       initialWidth: window.innerWidth,
       isOpen: false,
       menuItems: [
-        { to: '/admin/monitoring', label: 'Мониторинг', icon: markRaw(MonitoringIcon), iconClass: 'mdi-monitor' },
         { to: '/admin/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
         { to: '/admin/api-gateway', label: 'API Gateway', icon: markRaw(ApiGatewayIcon), iconClass: 'mdi-api' },
         { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
