@@ -66,7 +66,7 @@
             <div class="flex items-center justify-between cursor-pointer">
               <div class="flex items-center space-x-3" @click="goTo('/profile')">
                 <img
-                    :src="user.avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
+                    :src="avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
                     alt="Avatar"
                     class="w-10 h-10 rounded-xl"
                 />
@@ -158,6 +158,9 @@ export default {
   },
 
   computed: {
+    avatar() {
+      return this.authStore.userAvatar;
+    },
     currentPath() {
       return this.$route.path;
     },
