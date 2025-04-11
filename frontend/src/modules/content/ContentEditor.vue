@@ -20,7 +20,7 @@
     </div>
 
     <!-- Область ввода текста и команд -->
-    <EditorInput
+    <EditorInput 
       ref="editorInputRef"
       @command-typed="handleCommandTyped"
       @direct-input="handleDirectInput"
@@ -31,18 +31,20 @@
 </template>
 
 <script>
-import TextBlock from '@/modules/content/components/blocks/TextBlock.vue';
+import MarkdownEditor from '@/modules/content/components/blocks/MarkdownEditor.vue';
 import ImageBlock from '@/modules/content/components/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/components/blocks/FileBlock.vue';
+import LinkBlock from '@/modules/content/components/blocks/LinkBlock.vue'; // Импортируем компонент
 import EditorInput from '@/modules/content/components/com/EditorInput.vue';
 import { useCommands } from '@/modules/content/components/com/useCommands';
 
 export default {
   name: "ContentEditor",
   components: {
-    TextBlock,
+    MarkdownEditor,
     ImageBlock,
     FileBlock,
+    LinkBlock, // Добавляем компонент
     EditorInput
   },
   props: {
@@ -58,9 +60,10 @@ export default {
       contentBlocks: [],
       blockRefs: {},
       blockComponents: {
-        'text-block': TextBlock,
+        'text-block': MarkdownEditor,
         'image-block': ImageBlock,
-        'file-block': FileBlock
+        'file-block': FileBlock,
+        'link-block': LinkBlock // Регистрируем компонент
       }
     };
   },
@@ -69,14 +72,18 @@ export default {
       return {
         text: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length),
         image: () => this.$refs.imageInputRef?.click(),
-        file: () => this.$refs.fileInputRef?.click()
+        file: () => this.$refs.fileInputRef?.click(),
+        link: () => this.addLinkBlock(this.contentBlocks.length) // Добавляем команду для ссылки
       };
     }
   },
   watch: {
     initialContent: {
       handler(newContent) {
-        if (JSON.stringify(newContent ?? []) !== JSON.stringify(this.contentBlocks)) {
+        const currentContentString = JSON.stringify(this.contentBlocks);
+        const newContentString = JSON.stringify(newContent || []);
+        if (newContentString !== currentContentString) {
+          console.log("ContentEditor: Updating contentBlocks from initialContent prop");
           this.contentBlocks = this.prepareBlocks(newContent || []);
         }
       },
@@ -107,7 +114,7 @@ export default {
         this.$refs.editorInputRef.clearInput();
       }
     },
-    
+
     handleDirectInput(content) {
       if (content.trim()) {
         this.addTextBlock(content, this.contentBlocks.length);
@@ -115,50 +122,82 @@ export default {
         this.scrollToInput();
       }
     },
-    
-    handleTextEntered(htmlContent) {
-      this.addTextBlock(htmlContent, this.contentBlocks.length);
+
+    handleTextEntered(markdownContent) {
+      this.addTextBlock(markdownContent, this.contentBlocks.length);
       this.$refs.editorInputRef.clearInput();
       this.scrollToInput();
     },
 
-    addTextBlock(htmlContent, index) {
+    addTextBlock(markdownContent, index) {
+      console.log(`ContentEditor: Adding text block at index ${index}`);
       const newBlock = {
         component: 'text-block',
         id: Math.random().toString(36).substring(2, 9),
-        data: { text: htmlContent }
+        data: { text: markdownContent }
       };
       this.contentBlocks.splice(index, 0, newBlock);
+      this.$nextTick(() => {
+        if(index === this.contentBlocks.length - 1) {
+          this.focusBlock(index);
+        }
+      });
+    },
+
+    // Новый метод для добавления блока ссылки
+    addLinkBlock(index) {
+      console.log(`ContentEditor: Adding link block at index ${index}`);
+      const newBlock = {
+        component: 'link-block',
+        id: Math.random().toString(36).substring(2, 9),
+        data: { title: 'Untitled Link', url: '', description: '' }
+      };
+      this.contentBlocks.splice(index, 0, newBlock);
+      this.$nextTick(() => {
+        this.focusBlock(index);
+        this.scrollToInput();
+      });
     },
 
     addEmptyTextBlockAndFocus(index) {
+      console.log(`ContentEditor: Adding empty text block at index ${index}`);
       this.addTextBlock('', index);
-      this.scrollToInput();
+      this.$nextTick(() => {
+        this.focusBlock(index);
+        this.scrollToInput();
+      });
     },
 
     insertNewBlockAfter(currentIndex) {
+      console.log(`ContentEditor: Inserting new block after index ${currentIndex}`);
       this.addEmptyTextBlockAndFocus(currentIndex + 1);
     },
 
     handleBlockUpdate({ index, newData }) {
       const block = this.contentBlocks[index];
-      if (block) {
-        const updatedBlock = {
-          ...block,
-          data: { ...block.data, ...newData }
-        };
-        this.contentBlocks.splice(index, 1, updatedBlock);
-      }
+      if (!block) return;
+
+      const updatedBlock = {
+        ...block,
+        data: { ...block.data, ...newData }
+      };
+
+      const newBlocks = [...this.contentBlocks];
+      newBlocks[index] = updatedBlock;
+      this.contentBlocks = newBlocks;
     },
 
     deleteBlock(index) {
       if (index >= 0 && index < this.contentBlocks.length) {
-        this.contentBlocks.splice(index, 1);
-        const focusIndex = Math.max(0, index - 1);
-        if (this.contentBlocks.length > 0) {
-             this.$nextTick(() => this.focusBlock(focusIndex));
+        console.log(`ContentEditor: Deleting block at index ${index}`);
+        const newBlocks = this.contentBlocks.filter((_, i) => i !== index);
+        this.contentBlocks = newBlocks;
+
+        if (this.contentBlocks.length === 0) {
+          this.$nextTick(() => this.$refs.editorInputRef.focus());
         } else {
-            this.$nextTick(() => this.$refs.editorInputRef.focus());
+          const focusIndex = Math.max(0, index - 1);
+          this.$nextTick(() => this.focusBlock(focusIndex));
         }
         this.scrollToInput();
       }
@@ -167,13 +206,14 @@ export default {
     handleImageUpload(event) {
       const file = event.target.files?.[0];
       if (!file || !file.type.startsWith('image/')) return;
+      console.log("ContentEditor: Handling image upload");
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.contentBlocks.push({
+        this.contentBlocks = [...this.contentBlocks, {
           component: 'image-block',
           id: Math.random().toString(36).substring(2, 9),
           data: { src: e.target.result, caption: file.name, alt: file.name }
-        });
+        }];
         this.scrollToInput();
       };
       reader.readAsDataURL(file);
@@ -183,15 +223,16 @@ export default {
     handleFileUpload(event) {
       const file = event.target.files?.[0];
       if (!file) return;
-      this.contentBlocks.push({
+      console.log("ContentEditor: Handling file upload");
+      this.contentBlocks = [...this.contentBlocks, {
         component: 'file-block',
         id: Math.random().toString(36).substring(2, 9),
         data: {
-            name: file.name,
-            size: file.size,
-            fileUrl: URL.createObjectURL(file)
+          name: file.name,
+          size: file.size,
+          fileUrl: URL.createObjectURL(file)
         }
-      });
+      }];
       this.scrollToInput();
       event.target.value = '';
     },
@@ -204,10 +245,13 @@ export default {
       this.$nextTick(() => {
         const componentRef = this.blockRefs[index];
         if (componentRef && typeof componentRef.focusEditor === 'function') {
+          console.log(`ContentEditor: Calling focusEditor on componentRef for index ${index}`);
           componentRef.focusEditor();
-        } else if (componentRef && componentRef.$el && typeof componentRef.$el.focus === 'function') {
+        } else if (componentRef?.$el?.focus) {
+          console.log(`ContentEditor: Calling focus on componentRef.$el for index ${index}`);
           componentRef.$el.focus();
         } else {
+          console.log(`ContentEditor: No focus method found for block ${index}, focusing EditorInput.`);
           this.$refs.editorInputRef?.focus();
         }
       });
@@ -215,7 +259,7 @@ export default {
 
     scrollToInput() {
       this.$nextTick(() => {
-        this.$refs.editorInputRef.scrollToView();
+        this.$refs.editorInputRef?.scrollToView();
       });
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative command-input-area">
+  <div class="relative command-input-area mb-4">
     <div
       ref="editorRef"
       class="w-full p-2 focus:outline-none pt-2 text-gray-700"
@@ -43,7 +43,7 @@ export default {
       isDirectlyTyping: false,
       commandMenuPosition: { top: '100%', left: '0px' },
       activeCommandIndex: 0,
-      inputPlaceholder: "Введите '/' для команд..."
+      inputPlaceholder: "Введите '/' для отображения команд..."
     }
   },
   computed: {
