@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 relative group">
+  <div class="flex items-center p-2 mb-4 rounded-md hover:bg-gray-100 transition-colors duration-200 relative group">
     <!-- File Icon -->
     <svg class="w-6 h-6 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Options Menu -->
-    <div class="relative ml-auto">
+    <div class="absolute top-2 right-2">
       <OptionsMenu
         @copy="copyFileUrl"
         @download="downloadFile"

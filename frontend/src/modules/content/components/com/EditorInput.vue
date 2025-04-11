@@ -1,5 +1,5 @@
 <template>
-  <div class="relative command-input-area">
+  <div class="relative command-input-area mb-4">
     <div
       ref="editorRef"
       class="w-full p-2 focus:outline-none pt-2 text-gray-700"
