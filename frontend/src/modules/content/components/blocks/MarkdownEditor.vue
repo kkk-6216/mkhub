@@ -66,7 +66,7 @@
     <!-- Final Preview View section -->
     <div v-if="isFinalView" class="final-preview-container relative group hover:bg-gray-100 rounded-md">
       <div
-        class="preview-final p-6 w-full prose max-w-none mx-auto ..." 
+        class="preview-final p-6 w-full prose max-w-none mx-auto ..."
         v-html="renderedMarkdown">
       </div>
 
@@ -75,6 +75,8 @@
           @copy="copyContent"
           @download="downloadContent"
           @delete="deleteContent"
+          @edit="returnToEditing"  
+          :showEdit="true"        
           :showDelete="true"
         />
       </div>
@@ -191,10 +193,8 @@ export default {
   },
   mounted() {
     this.updatePreview();
-    document.addEventListener('click', this.handleClickOutside);
   },
   beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     handleFormat(type) {
@@ -657,10 +657,15 @@ export default {
     },
     finishEditing() {
       this.isFinalView = true;
-      this.updatePreview();
     },
     returnToEditing() {
-      this.isFinalView = false;
+      this.isFinalView = false; // Возвращаем в режим редактирования
+      // Добавляем фокусировку на редактор для удобства
+      this.$nextTick(() => { // Дожидаемся обновления DOM
+        if (this.$refs.editor) { // Проверяем, что ссылка на редактор существует
+           this.$refs.editor.focus();
+        }
+      });
     },
     copyContent() {
       navigator.clipboard.writeText(this.markdownText)

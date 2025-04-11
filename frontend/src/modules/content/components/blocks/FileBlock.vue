@@ -1,5 +1,13 @@
 <template>
   <div class="flex items-center p-2 mb-4 rounded-md hover:bg-gray-100 transition-colors duration-200 relative group">
+    <!-- Скрытый input для замены файла -->
+    <input
+      type="file"
+      ref="fileInput"
+      class="hidden"
+      @change="onFileSelected"
+    />
+
     <!-- File Icon -->
     <svg class="w-6 h-6 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
@@ -23,6 +31,7 @@
       <OptionsMenu
         @copy="copyFileUrl"
         @download="downloadFile"
+        @edit="triggerFileEdit"
         @delete="$emit('delete', index)"
       />
     </div>
@@ -30,7 +39,7 @@
 </template>
 
 <script>
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue'; // Путь к компоненту нужно правильно указать
+import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue';
 
 export default {
   name: "FileBlock",
@@ -117,6 +126,29 @@ export default {
         console.error('Ошибка скачивания:', err);
         this.$toast?.error('Ошибка скачивания') || alert('Ошибка скачивания');
       }
+    },
+
+    // 🆕 Открыть выбор нового файла
+    triggerFileEdit() {
+      this.$refs.fileInput?.click();
+    },
+
+    // 🆕 Обработка нового выбранного файла
+    onFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      this.$emit('update', {
+        index: this.index,
+        newData: {
+          name: file.name,
+          size: file.size,
+          file,
+          fileUrl: null
+        }
+      });
+
+      event.target.value = ''; // сброс input'а
     }
   }
 };
