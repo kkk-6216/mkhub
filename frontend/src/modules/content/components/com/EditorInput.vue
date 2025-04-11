@@ -43,7 +43,7 @@ export default {
       isDirectlyTyping: false,
       commandMenuPosition: { top: '100%', left: '0px' },
       activeCommandIndex: 0,
-      inputPlaceholder: "Введите '/' для команд..."
+      inputPlaceholder: "Введите '/' для отображения команд..."
     }
   },
   computed: {

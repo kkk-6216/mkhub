@@ -34,6 +34,7 @@
 import MarkdownEditor from '@/modules/content/components/blocks/MarkdownEditor.vue';
 import ImageBlock from '@/modules/content/components/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/components/blocks/FileBlock.vue';
+import LinkBlock from '@/modules/content/components/blocks/LinkBlock.vue'; // Импортируем компонент
 import EditorInput from '@/modules/content/components/com/EditorInput.vue';
 import { useCommands } from '@/modules/content/components/com/useCommands';
 
@@ -43,6 +44,7 @@ export default {
     MarkdownEditor,
     ImageBlock,
     FileBlock,
+    LinkBlock, // Добавляем компонент
     EditorInput
   },
   props: {
@@ -60,7 +62,8 @@ export default {
       blockComponents: {
         'text-block': MarkdownEditor,
         'image-block': ImageBlock,
-        'file-block': FileBlock
+        'file-block': FileBlock,
+        'link-block': LinkBlock // Регистрируем компонент
       }
     };
   },
@@ -69,7 +72,8 @@ export default {
       return {
         text: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length),
         image: () => this.$refs.imageInputRef?.click(),
-        file: () => this.$refs.fileInputRef?.click()
+        file: () => this.$refs.fileInputRef?.click(),
+        link: () => this.addLinkBlock(this.contentBlocks.length) // Добавляем команду для ссылки
       };
     }
   },
@@ -137,6 +141,21 @@ export default {
         if(index === this.contentBlocks.length - 1) {
           this.focusBlock(index);
         }
+      });
+    },
+
+    // Новый метод для добавления блока ссылки
+    addLinkBlock(index) {
+      console.log(`ContentEditor: Adding link block at index ${index}`);
+      const newBlock = {
+        component: 'link-block',
+        id: Math.random().toString(36).substring(2, 9),
+        data: { title: 'Untitled Link', url: '', description: '' }
+      };
+      this.contentBlocks.splice(index, 0, newBlock);
+      this.$nextTick(() => {
+        this.focusBlock(index);
+        this.scrollToInput();
       });
     },
 
