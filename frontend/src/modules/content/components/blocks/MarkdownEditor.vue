@@ -312,53 +312,104 @@ export default {
       // Horizontal Rule
       html = html.replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '<hr class="my-4 border-t border-gray-300">\n');
 
+      // ИСПРАВЛЕНА ФУНКЦИЯ ОБРАБОТКИ СПИСКОВ
       // Lists - Unordered and Ordered
-      const processLists = (type) => {
-        const listRegex = type === 'ol'
-          ? /^(\s*)(\d+)\.\s+(.*)/gm
-          : /^(\s*)([-*+])\s+(.*)/gm;
-
-        let lastIndent = -1;
-        let listStack = [];
-        let listOpen = false;
-        let processedHtml = '';
+      const processList = (html, isOrdered) => {
+        const marker = isOrdered ? '\\d+\\.' : '[-*+]';
+        const regex = new RegExp(`^(\\s*)(${marker})\\s+(.*?)$`, 'gm');
+        let result = '';
         let lastIndex = 0;
-
-        html.replace(listRegex, (match, indent, bullet, content, offset) => {
-          const precedingText = html.substring(lastIndex, offset);
-          processedHtml += precedingText;
-
-          const indentLevel = indent.length;
-          let itemHtml = '';
-          while (listStack.length > 0 && lastIndent >= indentLevel) {
-            if (listOpen) itemHtml += `</${listStack.pop()}>\n`; else listStack.pop();
-            lastIndent = listStack.length > 0 ? lastIndent - 2 : -1;
-            listOpen = listStack.length > 0;
-          }
-          if (listStack.length === 0 || lastIndent < indentLevel) {
-            itemHtml += `<${type} class="${type === 'ol' ? 'list-decimal' : 'list-disc'} pl-5 my-2">\n`;
-            listStack.push(type); lastIndent = indentLevel; listOpen = true;
-          } else if (!listOpen) {
-            itemHtml += `<${type} class="${type === 'ol' ? 'list-decimal' : 'list-disc'} pl-5 my-2">\n`; listOpen = true;
-          }
-
-          itemHtml += `<li class="my-1">${this.processInlineElements(content)}</li>\n`;
-          processedHtml += itemHtml;
-          lastIndex = offset + match.length;
-          return '';
-        });
-        processedHtml += html.substring(lastIndex);
-        while (listStack.length > 0) {
-          if (listOpen) processedHtml += `</${listStack.pop()}>\n`; else listStack.pop();
-          listOpen = listStack.length > 0;
+        let inList = false;
+        let listType = isOrdered ? 'ol' : 'ul';
+        let currentIndent = 0;
+        let listStack = [];
+        let startNumber = 1;
+        
+        // Находим все элементы списка в тексте
+        const matches = [];
+        let match;
+        while ((match = regex.exec(html)) !== null) {
+          matches.push({
+            fullMatch: match[0],
+            indent: match[1].length,
+            marker: match[2],
+            content: match[3],
+            index: match.index,
+            length: match[0].length
+          });
         }
-        html = processedHtml;
+
+        if (matches.length === 0) {
+          return html;
+        }
+
+        // Группируем элементы по спискам
+        const lists = [];
+        let currentList = null;
+
+        matches.forEach((item, index) => {
+          // Начало нового списка или первый элемент
+          if (!currentList || 
+              (index > 0 && matches[index-1].index + matches[index-1].length + 1 < item.index)) {
+            if (currentList) {
+              lists.push(currentList);
+            }
+            currentList = {
+              items: [item],
+              isOrdered: isOrdered,
+              startIndex: item.index,
+              endIndex: item.index + item.length
+            };
+            
+            // Извлекаем номер начала списка для упорядоченных списков
+            if (isOrdered) {
+              currentList.startNumber = parseInt(item.marker, 10);
+            }
+          } else {
+            // Продолжение текущего списка
+            currentList.items.push(item);
+            currentList.endIndex = item.index + item.length;
+          }
+        });
+        
+        // Добавляем последний список
+        if (currentList) {
+          lists.push(currentList);
+        }
+
+        // Обрабатываем каждый список
+        let resultHtml = '';
+        let currentPosition = 0;
+
+        lists.forEach(list => {
+          // Добавляем текст перед списком
+          resultHtml += html.substring(currentPosition, list.startIndex);
+          
+          // Начинаем список
+          const listClass = isOrdered ? 'list-decimal' : 'list-disc';
+          const startAttr = isOrdered ? ` start="${list.startNumber}"` : '';
+          resultHtml += `<${listType}${startAttr} class="${listClass} pl-5 my-2">\n`;
+          
+          // Добавляем все элементы списка
+          list.items.forEach(item => {
+            resultHtml += `<li class="my-1">${this.processInlineElements(item.content)}</li>\n`;
+          });
+          
+          // Закрываем список
+          resultHtml += `</${listType}>\n`;
+          
+          currentPosition = list.endIndex;
+        });
+        
+        // Добавляем оставшийся текст
+        resultHtml += html.substring(currentPosition);
+        
+        return resultHtml;
       };
-      processLists('ol');
-      processLists('ul');
-      html = html.replace(/<\/ul>\s*<ul class="[^"]*">/g, '');
-      html = html.replace(/<\/ol>\s*<ol class="[^"]*">/g, '');
-      html = html.replace(/<\/li>\s*<(?=ul|ol)/g, '</li>');
+
+      // Обрабатываем каждый тип списка отдельно
+      html = processList(html, false); // Ненумерованные списки
+      html = processList(html, true);  // Нумерованные списки
 
       // Headers
       html = html.replace(/^###### (.*$)/gm, '<h6 class="text-sm font-semibold mt-4 mb-2">$1</h6>\n');
@@ -393,8 +444,9 @@ export default {
       if (!text) return '';
       let processedText = text;
       
-      if (/<[a-z][a-z0-9]*\b[^>]*>/i.test(text)) {
-        return text;
+      // Защита от некорректного HTML
+      if (/<ol|<ul|<li|<\/ol|<\/ul|<\/li/i.test(text)) {
+        return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
       
       // Links
@@ -632,6 +684,90 @@ export default {
       }
     },
     handleKeyDown(e) {
+      if (e.key === 'Enter') {
+        const target = e.target;
+        const cursorPos = target.selectionStart;
+        const textBeforeCursor = target.value.substring(0, cursorPos);
+        const textAfterCursor = target.value.substring(cursorPos);
+        const currentLine = textBeforeCursor.split('\n').pop();
+        
+        // Проверяем, находимся ли мы в строке списка
+        const unorderedListMatch = currentLine.match(/^(\s*[-*+]\s+)(.*)$/);
+        const orderedListMatch = currentLine.match(/^(\s*\d+\.\s+)(.*)$/);
+        
+        if (unorderedListMatch) {
+          // Неупорядоченный список
+          const [, prefix, content] = unorderedListMatch;
+          
+          // Если строка списка пуста, прекращаем список
+          if (!content.trim()) {
+            e.preventDefault();
+            const newText = textBeforeCursor.substring(0, textBeforeCursor.length - prefix.length) + '\n' + textAfterCursor;
+            this.markdownText = newText;
+            this.$nextTick(() => {
+              target.selectionStart = target.selectionEnd = cursorPos - prefix.length + 1;
+            });
+            return;
+          }
+          
+          // продолжаем список с новым элементом
+          e.preventDefault();
+          const newText = textBeforeCursor + '\n' + prefix + textAfterCursor;
+          this.markdownText = newText;
+          this.$nextTick(() => {
+            target.selectionStart = target.selectionEnd = cursorPos + prefix.length + 1;
+          });
+          return;
+        } 
+        else if (orderedListMatch) {
+          // Упорядоченный список
+          const [, prefix, content] = orderedListMatch;
+          
+          // Если строка списка пуста, прекращаем список
+          if (!content.trim()) {
+            e.preventDefault();
+            const newText = textBeforeCursor.substring(0, textBeforeCursor.length - prefix.length) + '\n' + textAfterCursor;
+            this.markdownText = newText;
+            this.$nextTick(() => {
+              target.selectionStart = target.selectionEnd = cursorPos - prefix.length + 1;
+            });
+            return;
+          }
+          
+          // Получаем номер текущего элемента и инкрементируем для следующего
+          const currentNumber = parseInt(prefix.match(/\d+/)[0]);
+          const nextNumber = currentNumber + 1;
+          const newPrefix = prefix.replace(/\d+/, nextNumber);
+          
+          // продолжаем список с инкрементированным номером
+          e.preventDefault();
+          const newText = textBeforeCursor + '\n' + newPrefix + textAfterCursor;
+          this.markdownText = newText;
+          this.$nextTick(() => {
+            target.selectionStart = target.selectionEnd = cursorPos + newPrefix.length + 1;
+          });
+          return;
+        }
+        
+        // Если мы находимся в конце текста, проверяем, нужно ли создать новый блок
+        const isAtEnd = cursorPos === target.value.length;
+        if (isAtEnd && (
+            (target.value[target.value.length - 1] === '\n') || 
+            (target.value.trim() && target.value[target.value.length - 1] !== '\n')
+          )) {
+          // Trim trailing newlines for better UX
+          if (target.value[target.value.length - 1] === '\n') {
+            this.markdownText = this.markdownText.replace(/\n+$/, '');
+            this.$emit('update', { index: this.index, newData: { text: this.markdownText } });
+          }
+          
+          // Request a new block after this one
+          e.preventDefault();
+          this.$emit('request-new-block-after', this.index);
+          return;
+        }
+      }
+      
       if (e.ctrlKey || e.metaKey) {
         switch (e.key.toLowerCase()) {
           case 'b':
@@ -644,9 +780,6 @@ export default {
             break;
         }
       }
-    },
-    handleClickOutside(event) {
-      // Handled by individual components now
     },
     clearEditor() {
       if (confirm('Are you sure you want to clear the editor? All content will be lost.')) {
