@@ -1,6 +1,6 @@
 <template>
   <!-- Main container: Full width, flex layout, padding, NO BORDER, relative group -->
-  <div class="w-full flex items-center p-3 mb-2 rounded-md bg-white relative group transition-colors duration-150 hover:bg-gray-50">
+  <div class="w-full flex items-center p-2 mb-2 rounded-md bg-white relative group transition-colors duration-150 hover:bg-gray-50">
     <!-- A: Favicon/Icon Area (Always Visible) -->
     <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center mr-3 mt-0.5">
        <!-- Loading Spinner -->

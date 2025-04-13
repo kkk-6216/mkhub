@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center p-2 mb-4 rounded-md hover:bg-gray-100 transition-colors duration-200 relative group">
+  <div class="flex items-center p-3 mb-2 rounded-md hover:bg-gray-50 transition-colors duration-200 relative group">
     <!-- Скрытый input для замены файла -->
     <input
       type="file"

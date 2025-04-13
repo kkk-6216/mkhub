@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-4 p-4 rounded-md hover:bg-gray-100 transition-colors duration-200 relative group">
+  <div class="mb-2 p-4 rounded-md hover:bg-gray-50 transition-colors duration-200 relative group">
     <!-- Скрытый input для замены изображения -->
     <input
       type="file"

@@ -1,8 +1,8 @@
 <template>
   <div 
     :class="{
-      'bg-gray-100 min-h-100 mb-4 p-4 rounded-md': !isFinalView, // Фон и высота только при редактировании
-      'final-view-active mb-4': isFinalView      // Новый класс для CSS hover-эффекта
+      'bg-gray-100 min-h-100 mb-2 p-4 rounded-md': !isFinalView, // Фон и высота только при редактировании
+      'final-view-active mb-2': isFinalView      // Новый класс для CSS hover-эффекта
     }"
   >
     <!-- Header -->
@@ -64,9 +64,9 @@
     </div>
 
     <!-- Final Preview View section -->
-    <div v-if="isFinalView" class="final-preview-container relative group hover:bg-gray-100 rounded-md">
+    <div v-if="isFinalView" class="final-preview-container relative group hover:bg-gray-50 rounded-md">
       <div
-        class="preview-final p-6 w-full prose max-w-none mx-auto ..."
+        class="preview-final p-2 w-full prose max-w-none mx-auto ..."
         v-html="renderedMarkdown">
       </div>
 
