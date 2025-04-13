@@ -1,197 +1,335 @@
 <template>
-  <div class="link-block rounded-md border border-gray-200 p-3 my-2 flex items-start hover:bg-gray-50 transition-colors">
-    <!-- Icon section -->
-    <div class="flex-shrink-0 mr-3">
-      <div class="w-8 h-8 rounded-md bg-blue-100 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
-        </svg>
+  <!-- Root container: White background, subtle padding, rounded corners, group for hover -->
+  <div class="link-block w-full relative group bg-white rounded mb-2">
+    <!-- Link Element: Contains icon and text, provides internal padding -->
+    <a :href="localUrl || '#'" target="_blank" rel="noopener noreferrer" class="flex items-start space-x-3 no-underline text-gray-900 p-2">
+      <!-- Favicon Area: Fixed size, centered content -->
+      <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+        <!-- Actual Favicon -->
+        <img v-if="faviconUrl" :src="faviconUrl" alt="favicon" class="w-full h-full object-contain rounded">
+        <!-- Placeholder: Light gray background, gray icon -->
+        <div v-else class="w-full h-full bg-gray-100 rounded flex items-center justify-center text-gray-400">
+           <!-- Loading Spinner -->
+           <svg v-if="isLoading" class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <!-- Default Link Icon -->
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+        </div>
       </div>
-    </div>
-    
-    <!-- Content section -->
-    <div class="flex-grow min-w-0">
-      <!-- Title and edit/delete buttons row -->
-      <div class="flex items-center justify-between mb-1">
-        <div class="flex items-center min-w-0">
-          <input 
-            v-if="isEditing" 
-            ref="titleInput" 
-            v-model="editedTitle" 
-            class="font-medium text-gray-900 focus:outline-none border-b border-blue-500 w-full" 
-            @blur="finishTitleEdit"
-            @keydown.enter="finishTitleEdit"
+
+      <!-- Content Area: Takes remaining space -->
+      <div class="flex-grow min-w-0">
+        <!-- Display Mode: Clickable to edit -->
+        <div v-if="!isEditing" @click="enterEditMode" class="cursor-text">
+          <!-- Title: Semibold, slightly larger, dark text. Lighter/italic when placeholder/error -->
+          <h4 class="font-semibold text-sm truncate" :class="{ 'text-gray-500 italic': !localTitle && !isLoading && !error }">
+            {{ isLoading ? 'Загрузка данных...' : (localTitle || (error ? 'Ошибка' : 'Без заголовка')) }}
+          </h4>
+          <!-- Description: Smaller, slightly lighter text -->
+          <p v-if="localDescription && !isLoading && !error" class="text-xs text-gray-600 mt-0.5 break-words line-clamp-2">
+            {{ localDescription }}
+          </p>
+          <!-- URL: Smallest, gray text -->
+          <p class="text-xs text-gray-500 truncate mt-0.5">
+            {{ localUrl || 'Нет URL' }}
+          </p>
+          <!-- Error Message: Red text -->
+           <p v-if="error && !isLoading" class="text-xs text-red-500 mt-1">{{ error }}</p>
+        </div>
+
+        <!-- Edit Mode -->
+        <div v-else>
+          <!-- Input: Standard input styling for white background -->
+          <input
+            ref="urlInputRef"
+            type="text"
+            v-model="editUrl"
+            placeholder="Введите URL и нажмите Enter"
+            class="w-full text-sm p-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white placeholder-gray-400"
+            @keydown.enter.prevent="saveUrl"
+            @blur="handleBlur"
+            @keydown.esc="cancelEdit"
           />
-          <h3 
-            v-else 
-            class="font-medium text-gray-900 truncate cursor-pointer" 
-            @click="startTitleEdit"
-          >
-            {{ data.title || 'Untitled Link' }}
-          </h3>
-        </div>
-        
-        <div class="flex-shrink-0 flex space-x-1">
-          <button 
-            @click="toggleEdit" 
-            class="text-gray-400 hover:text-gray-700 p-1 rounded"
-            title="Edit link"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M13.586 3.586a2 2 0 112.828 2.828l-7.586 7.586a2 2 0 01-1.414.586H5V12.586a2 2 0 01.586-1.414l7.586-7.586z" />
-              <path d="M11 18h3.586a2 2 0 001.414-.586l3.707-3.707a1 1 0 00-1.414-1.414L15 15.586V18h-4v-2.585l3.293-3.293a1 1 0 00-1.414-1.414L11 12.586V18z" />
-            </svg>
-          </button>
-          <button 
-            @click="$emit('delete')" 
-            class="text-gray-400 hover:text-red-500 p-1 rounded"
-            title="Delete link"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-          </button>
+           <p v-if="error" class="text-xs text-red-500 mt-1">{{ error }}</p>
         </div>
       </div>
-      
-      <!-- URL input/display -->
-      <div class="mb-1">
-        <input 
-          v-if="isEditing" 
-          ref="urlInput"
-          v-model="editedUrl" 
-          placeholder="https://example.com" 
-          class="text-sm text-blue-600 w-full focus:outline-none border-b border-blue-500" 
-          @blur="updateUrl"
-          @keydown.enter="updateUrl"
-        />
-        <a 
-          v-else 
-          :href="data.url" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          class="text-sm text-blue-600 hover:underline truncate block"
-        >
-          {{ displayUrl }}
-        </a>
-      </div>
-      
-      <!-- Description -->
-      <div v-if="isEditing || data.description">
-        <textarea 
-          v-if="isEditing" 
-          v-model="editedDescription" 
-          rows="2"
-          placeholder="Add a description..."
-          class="text-sm text-gray-600 w-full focus:outline-none border-b border-blue-500 resize-none"
-          @blur="updateDescription"
-          @keydown.enter.prevent="updateDescription"
-        ></textarea>
-        <p 
-          v-else 
-          class="text-sm text-gray-600 line-clamp-2"
-        >
-          {{ data.description }}
-        </p>
-      </div>
-    </div>
+    </a>
+
+    <!-- Delete Button: Appears on hover, adjusted for white background -->
+    <button
+      v-if="!isEditing"
+      @click.stop="$emit('delete')"
+      class="absolute top-1 right-1 p-1 rounded text-gray-500 hover:bg-gray-100 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+      aria-label="Удалить блок ссылки"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
   </div>
 </template>
 
 <script>
+// Script content remains the same as your Options API version
+// --- КОНФИГУРАЦИЯ API ---
+const MICROLINK_API_KEY = ''; // <-- ВАШ API КЛЮЧ (ЕСЛИ ЕСТЬ)
+const USE_PRO_ENDPOINT = false; // Установите true, если используете платный ключ
+
+// Утилита для проверки URL
+const isValidHttpUrl = (string) => {
+  try {
+    const url = new URL(string);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+};
+
 export default {
-  name: "LinkBlock",
+  name: 'LinkBlock',
   props: {
     data: {
       type: Object,
-      default: () => ({
-        title: '',
-        url: '',
-        description: ''
-      })
+      required: true,
+      default: () => ({ url: '', title: '', description: '', favicon: '' })
     },
-    index: {
-      type: Number,
-      required: true
-    }
+    index: { type: Number, required: true }
   },
-  emits: ['delete', 'update', 'request-new-block-after'],
+  emits: ['update', 'delete'],
   data() {
+    // Инициализация состояния из props
+    const initialUrl = this.data?.url || '';
     return {
-      isEditing: false,
-      editedTitle: '',
-      editedUrl: '',
-      editedDescription: ''
+      isEditing: !initialUrl, // Начать редактирование, если URL пуст при инициализации
+      isLoading: false,
+      error: '',
+      // Локальное состояние для отображения, инициализируется из props
+      localUrl: initialUrl,
+      localTitle: this.data?.title || '',
+      localDescription: this.data?.description || '',
+      faviconUrl: this.data?.favicon || '',
+      // Для поля ввода в режиме редактирования
+      editUrl: initialUrl,
+      initialUrlBeforeEdit: initialUrl // Для отмены редактирования
     };
   },
-  computed: {
-    displayUrl() {
-      if (!this.data.url) return 'No URL';
-      
-      try {
-        const url = new URL(this.data.url);
-        // Truncate the URL for display if needed
-        return url.hostname + (url.pathname !== '/' ? url.pathname : '');
-      } catch (e) {
-        return this.data.url;
-      }
+  watch: {
+    // --- Слежение за изменениями props.data извне ---
+    data: {
+        handler(newData, oldData) {
+            if (JSON.stringify(newData) === JSON.stringify(oldData)) {
+                 return;
+            }
+            console.log("LinkBlock: Prop data changed externally", newData);
+            const newUrl = newData?.url || '';
+            this.localUrl = newUrl;
+            this.localTitle = newData?.title || '';
+            this.localDescription = newData?.description || '';
+            this.faviconUrl = newData?.favicon || '';
+            this.editUrl = newUrl;
+            this.initialUrlBeforeEdit = newUrl;
+            if (newUrl && !newData?.title && !this.isLoading && !this.isEditing && isValidHttpUrl(newUrl)) {
+                 console.log("LinkBlock: Fetching metadata due to external prop change with missing title.");
+                 this.fetchMetadata(newUrl).then(meta => {
+                     if (meta) {
+                        if (this.localUrl === newUrl) {
+                             this.updateBlockData({ url: newUrl, ...meta });
+                        }
+                     }
+                 });
+            } else if (!newUrl && !this.isEditing) {
+                 // this.enterEditMode();
+                 this.error = '';
+            } else if (!isValidHttpUrl(newUrl) && newUrl !== '') {
+                this.error = 'Некорректный URL получен извне';
+            } else {
+                 this.error = '';
+            }
+        },
+        deep: true
+    }
+  },
+  mounted() {
+    if (this.localUrl && !this.localTitle && !this.isLoading && isValidHttpUrl(this.localUrl)) {
+      console.log("LinkBlock: Fetching metadata on mount because title is missing.");
+      this.fetchMetadata(this.localUrl).then(meta => {
+         if (meta) {
+             if (this.localUrl === this.data.url) {
+               this.updateBlockData({ url: this.localUrl, ...meta });
+             }
+         }
+      });
+    } else if (!this.localUrl) {
+      this.enterEditMode();
     }
   },
   methods: {
-    toggleEdit() {
-      this.isEditing = !this.isEditing;
-      if (this.isEditing) {
-        this.editedTitle = this.data.title || '';
-        this.editedUrl = this.data.url || '';
-        this.editedDescription = this.data.description || '';
+    async fetchMetadata(urlToFetch) {
+        if (!urlToFetch || !isValidHttpUrl(urlToFetch)) {
+            this.error = 'Введите корректный URL (http:// или https://)';
+            this.isLoading = false;
+            this.localTitle = '';
+            this.localDescription = '';
+            this.faviconUrl = '';
+            return null;
+        }
+        this.isLoading = true;
+        this.error = '';
+        console.log(`LinkBlock: Fetching real metadata for ${urlToFetch} using Microlink`);
+        const encodedUrl = encodeURIComponent(urlToFetch);
+        let apiUrl = `https://api.microlink.io/?url=${encodedUrl}&palette=true`;
+        const headers = {};
+        if (MICROLINK_API_KEY && USE_PRO_ENDPOINT) {
+             apiUrl = `https://pro.microlink.io/?url=${encodedUrl}&palette=true`;
+             headers['x-api-key'] = MICROLINK_API_KEY;
+             console.log("Using Microlink PRO endpoint with API Key");
+        } else if (MICROLINK_API_KEY && !USE_PRO_ENDPOINT){
+             console.warn("Microlink API Key provided but USE_PRO_ENDPOINT is false. Using free endpoint.");
+        }
+        try {
+            const response = await fetch(apiUrl, { headers });
+            if (!response.ok) {
+                let errorMessage = `Ошибка API: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData?.data?.message || errorData?.message || errorMessage;
+                    console.error("Microlink API Error Response:", errorData);
+                } catch (e) { /* Ignore */ }
+                throw new Error(errorMessage);
+            }
+            const result = await response.json();
+            console.log("Microlink API Success Response:", result);
+            if (result.status === 'success' && result.data) {
+                const meta = result.data;
+                this.error = '';
+                const title = meta.title || urlToFetch;
+                const description = meta.description || '';
+                let finalFavicon = meta.logo?.url || '';
+                if (!finalFavicon) {
+                    try {
+                        const parsedUrl = new URL(urlToFetch);
+                        finalFavicon = `https://www.google.com/s2/favicons?sz=64&domain=${parsedUrl.hostname}`;
+                         console.log("Using Google Favicon as fallback:", finalFavicon);
+                    } catch(e) {
+                         console.warn("Could not parse URL for Google Favicon fallback", e);
+                    }
+                }
+                return { title, description, favicon: finalFavicon };
+            } else {
+                throw new Error(result.message || 'API вернуло некорректный ответ');
+            }
+        } catch (err) {
+            console.error("LinkBlock: Error fetching metadata via API:", err);
+            this.error = `Не удалось загрузить данные: ${err.message || 'Неизвестная ошибка'}`;
+            this.localTitle = urlToFetch;
+            this.localDescription = '';
+            this.faviconUrl = '';
+            return null;
+        } finally {
+            this.isLoading = false;
+        }
+    },
+    updateBlockData(newData) {
+        if (newData.url !== undefined) this.localUrl = newData.url;
+        if (newData.title !== undefined) this.localTitle = newData.title;
+        if (newData.description !== undefined) this.localDescription = newData.description;
+        if (newData.favicon !== undefined) this.faviconUrl = newData.favicon;
+        this.isLoading = false;
+        const updatePayload = {};
+        if (newData.url !== undefined) updatePayload.url = newData.url;
+        if (newData.title !== undefined) updatePayload.title = newData.title;
+        if (newData.description !== undefined) updatePayload.description = newData.description;
+        if (newData.favicon !== undefined) updatePayload.favicon = newData.favicon;
+        if (Object.keys(updatePayload).length > 0) {
+            console.log("LinkBlock: Emitting update event", { index: this.index, newData: updatePayload });
+            this.$emit('update', {
+                index: this.index,
+                newData: updatePayload
+            });
+        }
+    },
+    async saveUrl() {
+        const newUrl = this.editUrl.trim();
+        if (newUrl === this.initialUrlBeforeEdit || !isValidHttpUrl(newUrl)) {
+            if (!isValidHttpUrl(newUrl) && newUrl !== '') {
+                 this.error = 'Введите корректный URL (http:// или https://)';
+            } else if (newUrl === '') {
+                 this.error = 'URL не может быть пустым';
+            } else {
+                this.error = '';
+            }
+            this.isEditing = false;
+            if (!isValidHttpUrl(newUrl)) {
+                this.editUrl = this.initialUrlBeforeEdit;
+            }
+            return;
+        }
+        this.error = '';
+        this.localUrl = newUrl;
+        this.initialUrlBeforeEdit = newUrl;
+        this.localTitle = newUrl;
+        this.localDescription = '';
+        this.faviconUrl = '';
+        this.isLoading = true;
+        this.isEditing = false;
+        const meta = await this.fetchMetadata(newUrl);
+        if (meta) {
+            this.updateBlockData({ url: newUrl, ...meta });
+        } else {
+            this.updateBlockData({ url: newUrl, title: newUrl, description: '', favicon: '' });
+        }
+    },
+    enterEditMode() {
+        if (this.isLoading) return;
+        this.initialUrlBeforeEdit = this.localUrl;
+        this.editUrl = this.localUrl;
+        this.isEditing = true;
+        this.error = '';
         this.$nextTick(() => {
-          this.$refs.titleInput?.focus();
+            this.$refs.urlInputRef?.focus();
+            this.$refs.urlInputRef?.select();
         });
-      }
     },
-    
-    startTitleEdit() {
-      this.isEditing = true;
-      this.editedTitle = this.data.title || '';
-      this.$nextTick(() => {
-        this.$refs.titleInput?.focus();
-      });
+    cancelEdit() {
+        this.editUrl = this.initialUrlBeforeEdit;
+        this.isEditing = false;
+        this.error = '';
+        if (!this.initialUrlBeforeEdit) {
+            // this.$emit('delete');
+        }
     },
-    
-    finishTitleEdit() {
-      if (this.editedTitle !== this.data.title) {
-        this.$emit('update', {
-          index: this.index,
-          newData: { title: this.editedTitle }
-        });
-      }
+    handleBlur(event) {
+        if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) {
+            return;
+        }
+        setTimeout(() => {
+            if (this.isEditing) {
+                 this.saveUrl();
+            }
+        }, 100);
     },
-    
-    updateUrl() {
-      if (this.editedUrl !== this.data.url) {
-        this.$emit('update', {
-          index: this.index,
-          newData: { url: this.editedUrl }
-        });
-      }
-    },
-    
-    updateDescription() {
-      if (this.editedDescription !== this.data.description) {
-        this.$emit('update', {
-          index: this.index, 
-          newData: { description: this.editedDescription }
-        });
-      }
-    },
-    
     focusEditor() {
-      if (this.isEditing) {
-        this.$refs.titleInput?.focus();
-      } else {
-        this.startTitleEdit();
-      }
+        this.enterEditMode();
     }
   }
-};
+}
 </script>
+
+<style scoped>
+/* line-clamp might require the @tailwindcss/line-clamp plugin */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.link-block {
+ /* Ensure minimum height even when empty or loading */
+  min-height: 56px; /* Adjusted based on p-2 padding */
+}
+</style>
