@@ -35,7 +35,8 @@
 import MarkdownEditor from '@/modules/content/components/blocks/MarkdownEditor.vue';
 import ImageBlock from '@/modules/content/components/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/components/blocks/FileBlock.vue';
-import LinkBlock from '@/modules/content/components/blocks/LinkBlock.vue'; // Импортировали
+import LinkBlock from '@/modules/content/components/blocks/LinkBlock.vue';
+import CodeBlock from '@/modules/content/components/blocks/CodeBlock.vue';  // Импортировали
 import EditorInput from '@/modules/content/components/com/EditorInput.vue';
 import { useCommands } from '@/modules/content/components/com/useCommands';
 import { nextTick } from 'vue'; // Import nextTick
@@ -59,7 +60,8 @@ export default {
     MarkdownEditor,
     ImageBlock,
     FileBlock,
-    LinkBlock, // Добавили
+    LinkBlock, 
+    CodeBlock,// Добавили
     EditorInput
   },
   props: {
@@ -76,7 +78,8 @@ export default {
         'text-block': MarkdownEditor,
         'image-block': ImageBlock,
         'file-block': FileBlock,
-        'link-block': LinkBlock
+        'link-block': LinkBlock,
+        'code-block': CodeBlock
       }
     };
   },
@@ -310,10 +313,16 @@ export default {
 
     addLinkBlockWithUrl(url, index) {
       console.log(`ContentEditor: Adding link block with URL at index ${index}`);
-      this.addBlock({ component: 'link-block', data: { url: url, title: url, description: '', favicon: '' } }, index);
+      // ***** CHANGE THIS LINE *****
+      // OLD: this.addBlock({ component: 'link-block', data: { url: url, title: url, description: '', favicon: '' } }, index);
+      // NEW: Set title to empty string initially to trigger fetch in LinkBlock
+      this.addBlock({ component: 'link-block', data: { url: url, title: '', description: '', favicon: '' } }, index);
+      // ***** END CHANGE *****
+
       this.$refs.editorInputRef?.clearInput();
       nextTick(() => {
-        this.scrollToInput(); // Не фокусируемся, LinkBlock сам начнет загрузку
+        // Don't focus the block, let LinkBlock handle its loading state
+        this.scrollToInput();
       });
     },
 

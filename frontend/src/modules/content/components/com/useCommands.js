@@ -25,6 +25,12 @@ export function useCommands() {
       type: 'link',
       label: 'Ссылка', 
       icon: 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244'
+    },
+    { 
+      text: '/code', 
+      type: 'code',
+      label: 'Код', 
+      icon: 'M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5'
     }
   ];
 
@@ -41,5 +47,6 @@ export function useCommands() {
     getFilteredCommands
   };
 }
+
 
 
