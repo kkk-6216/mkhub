@@ -16,6 +16,7 @@
         @update="handleBlockUpdate"
         @delete="deleteBlock(index)"
         @request-new-block-after="insertNewBlockAfter"
+        @convert-to-image="handleConvertToImage"
       />
     </div>
 
@@ -127,6 +128,31 @@ export default {
   methods: {
     // --- Методы ---
 
+    handleConvertToImage({ index, imageUrl, caption, alt }) {
+      if (index >= 0 && index < this.contentBlocks.length) {
+        console.log(`ContentEditor: Converting link to image at index ${index}, imageUrl: ${imageUrl}`);
+        
+        // Создаем новый блок изображения на основе данных
+        const imageBlock = {
+          component: 'image-block',
+          id: generateId(),
+          data: {
+            src: imageUrl,
+            caption: caption || 'Image from URL',
+            alt: alt || 'Image from URL'
+          }
+        };
+        
+        // Заменяем текущий блок на новый блок изображения
+        const newBlocks = [...this.contentBlocks];
+        newBlocks[index] = imageBlock;
+        this.contentBlocks = newBlocks;
+        
+        // Прокручиваем к инпуту
+        this.scrollToInput();
+      }
+    },
+
     prepareBlocks(blocks) {
       return Array.isArray(blocks)
         ? blocks.map(block => ({ ...block, id: block.id || generateId() }))
@@ -140,32 +166,111 @@ export default {
       }
     },
 
-    handleDirectInput(htmlContent) {
-       const tempDiv = document.createElement('div');
-       tempDiv.innerHTML = htmlContent;
-       const textContent = tempDiv.textContent || tempDiv.innerText || "";
-       const trimmedText = textContent.trim();
-
-       if (isValidHttpUrl(trimmedText)) {
-           this.addLinkBlockWithUrl(trimmedText, this.contentBlocks.length);
-       } else if (trimmedText) {
-         this.addTextBlock(htmlContent, this.contentBlocks.length); // Используем оригинальный HTML
-       }
-       this.$refs.editorInputRef?.clearInput(); // Доступ через this.$refs
-       this.scrollToInput();
+    // Enhanced image URL detection
+    isImageUrl(url) {
+      // Check if it's a valid URL first
+      if (!isValidHttpUrl(url)) return false;
+      
+      // 1. Check common image extensions
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico', '.tiff'];
+      const lowercaseUrl = url.toLowerCase();
+      
+      // Check for image extensions at the end of URL or before query parameters
+      const hasImageExtension = imageExtensions.some(ext => 
+        lowercaseUrl.endsWith(ext) || lowercaseUrl.includes(ext + '?'));
+      
+      // 2. Check for common image-serving patterns in the URL
+      const imagePatterns = [
+        /images?/i,                // "image" or "images" in the URL
+        /\.(static|cdn|media)\./i, // Common CDN patterns
+        /\/img\//i,                // Common image path segment
+        /\/photos?\//i             // Common photo path segment
+      ];
+      
+      const matchesImagePattern = imagePatterns.some(pattern => pattern.test(url));
+      
+      // 3. Check for "image" related terms in the query string
+      const hasImageQuery = url.includes('image') || url.includes('photo') || url.includes('pic');
+      
+      // Consider it an image URL if it meets the extension test OR 
+      // (matches an image pattern AND has image-related query terms)
+      return hasImageExtension || (matchesImagePattern && hasImageQuery);
     },
 
-    handleTextEntered(htmlContent) {
+    // Add image block from a URL
+    addImageBlockFromUrl(imageUrl, index) {
+      console.log(`ContentEditor: Adding image block from URL at index ${index}, imageUrl: ${imageUrl}`);
+      
+      // Add the image block with the URL as src
+      this.addBlock({
+        component: 'image-block',
+        data: {
+          src: imageUrl,
+          caption: 'Image from URL',
+          alt: 'Image from URL'
+        }
+      }, index);
+      
+      this.$refs.editorInputRef?.clearInput();
+      this.scrollToInput();
+    },
+
+    handleDirectInput(htmlContent) {
+      console.log("ContentEditor: handleDirectInput called with:", htmlContent);
+      
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlContent;
       const textContent = tempDiv.textContent || tempDiv.innerText || "";
       const trimmedText = textContent.trim();
 
+      console.log("ContentEditor: Extracted text:", trimmedText);
+
       if (isValidHttpUrl(trimmedText)) {
-        this.addLinkBlockWithUrl(trimmedText, this.contentBlocks.length);
+        console.log("ContentEditor: Valid URL detected");
+        
+        // Check if it's an image URL
+        if (this.isImageUrl(trimmedText)) {
+          console.log("ContentEditor: Image URL detected, adding image block");
+          this.addImageBlockFromUrl(trimmedText, this.contentBlocks.length);
+        } else {
+          console.log("ContentEditor: Link URL detected, adding link block");
+          this.addLinkBlockWithUrl(trimmedText, this.contentBlocks.length);
+        }
       } else if (trimmedText) {
+        console.log("ContentEditor: Text content detected, adding text block");
         this.addTextBlock(htmlContent, this.contentBlocks.length);
       }
+      
+      this.$refs.editorInputRef?.clearInput();
+      this.scrollToInput();
+    },
+
+    handleTextEntered(htmlContent) {
+      console.log("ContentEditor: handleTextEntered called with:", htmlContent);
+      
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      const textContent = tempDiv.textContent || tempDiv.innerText || "";
+      const trimmedText = textContent.trim();
+
+      console.log("ContentEditor: Extracted text:", trimmedText);
+
+      if (isValidHttpUrl(trimmedText)) {
+        console.log("ContentEditor: Valid URL detected");
+        
+        // Check if it's an image URL
+        if (this.isImageUrl(trimmedText)) {
+          console.log("ContentEditor: Image URL detected, adding image block");
+          this.addImageBlockFromUrl(trimmedText, this.contentBlocks.length);
+        } else {
+          console.log("ContentEditor: Link URL detected, adding link block");
+          this.addLinkBlockWithUrl(trimmedText, this.contentBlocks.length);
+        }
+      } else if (trimmedText) {
+        console.log("ContentEditor: Text content detected, adding text block");
+        this.addTextBlock(htmlContent, this.contentBlocks.length);
+      }
+      
       this.$refs.editorInputRef?.clearInput();
       this.scrollToInput();
     },

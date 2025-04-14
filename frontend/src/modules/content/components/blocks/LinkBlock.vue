@@ -72,15 +72,15 @@
               <p v-if="localDescription" class="text-xs text-gray-600 mt-1 break-words line-clamp-3">
                   {{ localDescription }}
               </p>
-              <!-- URL Section (still present in hover card) -->
-              <div class="flex items-center space-x-1 mt-2">
+              
+               <div class="flex items-center space-x-1 mt-2">
                   <img v-if="faviconUrl" :src="faviconUrl" alt="" class="w-3.5 h-3.5 object-contain flex-shrink-0">
                   <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                  <a :href="localUrl" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline truncate min-w-0" @click.stop="handleLinkClick">
                    {{ localUrl.replace(/^https?:\/\//, '') }}
                  </a>
               </div>
-           </div>
+           </div> 
         </div>
       </div>
       <!-- End Hover Card Content -->
@@ -94,8 +94,10 @@
         @download="triggerDownload"
         @edit="triggerEdit"
         @delete="triggerDelete"
+        @convert-to-image="convertToImageBlock"
         :disable-copy="!localUrl || !isValidHttpUrl(localUrl)"
         :disable-download="!localUrl || !isValidHttpUrl(localUrl)"
+        :disable-convert-to-image="!localUrl || !isValidHttpUrl(localUrl) || !isImageUrl(localUrl)"
         />
     </div>
 
@@ -123,7 +125,7 @@ export default {
      data: { type: Object, required: true, default: () => ({ url: '', title: '', description: '', favicon: '' }) },
      index: { type: Number, required: true }
   },
-  emits: ['update', 'delete'],
+  emits: ['update', 'delete', 'convert-to-image'],
   data() { /* ... no change ... */
      const initialUrl = this.data?.url || '';
      return {
@@ -197,6 +199,12 @@ export default {
        if (this.$refs.contentRef) {
          this.resizeObserver.observe(this.$refs.contentRef);
        }
+     }
+
+     // Если это ссылка на изображение, предложим сразу преобразовать
+     if (this.localUrl && isValidHttpUrl(this.localUrl) && this.isImageUrl(this.localUrl)) {
+       console.log("LinkBlock: URL is an image, suggesting conversion");
+       this.convertToImageBlock();
      }
   },
   beforeUnmount() { 
@@ -289,6 +297,14 @@ export default {
         this.isLoading = false; if (this.localUrl !== newUrl) { this.updateInProgress = false; return; }
         if (meta) { this.updateBlockData({ url: newUrl, ...meta }); } else { this.updateBlockData({ url: newUrl, title: newUrl, description: '', favicon: '' }); }
         this.updateInProgress = false;
+
+        // Если оказалось что это ссылка на изображение, предложим конвертировать
+        if (this.isImageUrl(newUrl)) {
+          console.log("LinkBlock: Detected image URL after save:", newUrl);
+          this.convertToImageBlock();
+          // Можно добавить автоматическое преобразование, если необходимо
+          // this.convertToImageBlock();
+        }
     },
     enterEditMode() { /* ... no change ... */
         if (this.isLoading) return; this.initialUrlBeforeEdit = this.localUrl; this.editUrl = this.localUrl;
@@ -376,6 +392,57 @@ export default {
         // Fallback: Open in new tab if direct download fails (might just display the content)
         window.open(this.localUrl, '_blank', 'noopener,noreferrer');
       }
+    },
+
+    // NEW METHODS FOR IMAGE URL DETECTION AND CONVERSION
+
+    // Method to detect if URL is an image
+    isImageUrl(url) {
+      // Проверяем, что это действительный URL
+      if (!url || !isValidHttpUrl(url)) return false;
+      
+      // 1. Проверяем расширения файлов изображений
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico', '.tiff'];
+      const lowercaseUrl = url.toLowerCase();
+      
+      // Проверка расширений в конце URL или перед параметрами запроса
+      const hasImageExtension = imageExtensions.some(ext => 
+        lowercaseUrl.endsWith(ext) || lowercaseUrl.includes(ext + '?'));
+      
+      // 2. Проверяем типичные паттерны URL изображений
+      const imagePatterns = [
+        /images?/i,                // "image" или "images" в URL
+        /\.(static|cdn|media)\./i, // Типичные паттерны CDN
+        /\/img\//i,                // Типичный сегмент пути для изображений
+        /\/photos?\//i             // Типичный сегмент пути для фото
+      ];
+      
+      const matchesImagePattern = imagePatterns.some(pattern => pattern.test(url));
+      
+      // 3. Проверяем термины, связанные с изображениями, в строке запроса
+      const hasImageQuery = url.includes('image') || url.includes('photo') || url.includes('pic');
+      
+      // Считаем URL изображением, если он соответствует тесту на расширение ИЛИ
+      // (соответствует паттерну изображения И содержит термины, связанные с изображениями, в запросе)
+      return hasImageExtension || (matchesImagePattern && hasImageQuery);
+    },
+
+    // Method to convert link to image block
+    convertToImageBlock() {
+      if (!this.localUrl || !isValidHttpUrl(this.localUrl)) {
+        console.error("LinkBlock: Cannot convert to image - invalid URL");
+        return;
+      }
+
+      console.log("LinkBlock: Converting link to image block:", this.localUrl);
+      
+      // Emit event to parent component to handle the conversion
+      this.$emit('convert-to-image', {
+        index: this.index,
+        imageUrl: this.localUrl,
+        caption: this.localTitle || 'Image from URL',
+        alt: this.localTitle || 'Image from URL'
+      });
     }
   }
 }
