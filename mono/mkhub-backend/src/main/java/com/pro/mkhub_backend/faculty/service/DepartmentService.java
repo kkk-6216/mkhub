@@ -2,6 +2,7 @@ package com.pro.mkhub_backend.faculty.service;
 
 import com.pro.mkhub_backend.faculty.dto.department.CreationDepartmentDto;
 import com.pro.mkhub_backend.faculty.dto.department.DepartmentDto;
+import com.pro.mkhub_backend.faculty.dto.department.DepartmentItemDto;
 import com.pro.mkhub_backend.faculty.dto.department.UpdateDepartmentDto;
 import com.pro.mkhub_backend.faculty.mapper.DepartmentMapper;
 import com.pro.mkhub_backend.faculty.model.entity.Department;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +93,13 @@ public class DepartmentService {
     private Faculty findFacultyById(Long id) {
         return facultyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with id " + id));
+    }
+
+    public List<DepartmentItemDto> getDepartmentsItem() {
+        return departmentRepository.findAll()
+                .stream()
+                .map(departmentMapper::departmentToDepartmentItemDto)
+                .collect(Collectors.toList());
     }
 
 }
