@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,5 +37,8 @@ public class Department {
     @JoinColumn(name = "faculty_id", nullable = false)
     @ToString.Exclude
     private Faculty faculty;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "department")
+    private List<Course> courseList;
 
 }
