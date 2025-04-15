@@ -2,6 +2,7 @@ package com.pro.mkhub_backend.faculty.controller;
 
 import com.pro.mkhub_backend.faculty.dto.department.CreationDepartmentDto;
 import com.pro.mkhub_backend.faculty.dto.department.DepartmentDto;
+import com.pro.mkhub_backend.faculty.dto.department.DepartmentItemDto;
 import com.pro.mkhub_backend.faculty.dto.department.UpdateDepartmentDto;
 import com.pro.mkhub_backend.faculty.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
@@ -43,14 +44,20 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DepartmentDto>> getDepartments(
-            @RequestParam(value = "facultyId", required = false) Long facultyId) {
+    public ResponseEntity<?> getDepartments(
+            @RequestParam(value = "facultyId", required = false) Long facultyId,
+            @RequestParam(value = "verbose", defaultValue = "true") boolean verbose
 
-        List<DepartmentDto> departments = (facultyId == null)
-                ? departmentService.getDepartments()
-                : departmentService.getDepartmentsByFacultyId(facultyId);
+    ) {
 
-        return ResponseEntity.ok(departments);
+        if (verbose) {
+            List<DepartmentDto> departments = (facultyId == null)
+                    ? departmentService.getDepartments()
+                    : departmentService.getDepartmentsByFacultyId(facultyId);
+            return ResponseEntity.ok(departments);
+        } else {
+            return ResponseEntity.ok(departmentService.getDepartmentsItem());
+        }
     }
 
 }
