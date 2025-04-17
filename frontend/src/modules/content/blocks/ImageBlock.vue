@@ -34,7 +34,7 @@
 
 <script>
 import { defineComponent } from 'vue';
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue';
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 
 export default defineComponent({
   name: "ImageBlock",

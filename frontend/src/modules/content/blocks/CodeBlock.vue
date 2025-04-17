@@ -42,7 +42,7 @@ import { EditorView, keymap } from '@codemirror/view'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import hljs from 'highlight.js'
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue'
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 
 // Языковые расширения
 import { javascript } from '@codemirror/lang-javascript'

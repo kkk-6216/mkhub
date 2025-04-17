@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue'; // Adjust path
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 
 // --- API CONFIG & UTILS --- (Keep from LinkBlockHover)
 const MICROLINK_API_KEY = '';

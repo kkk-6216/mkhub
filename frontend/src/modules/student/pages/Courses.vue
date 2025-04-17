@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import ContentEditor from '@/modules/content/ContentEditor.vue';
+import ContentEditor from '@/modules/content/ContentEditor/ContentEditor.vue';
 
 export default {
   components: {

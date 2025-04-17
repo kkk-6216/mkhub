@@ -35,13 +35,13 @@
 
 <script>
 // Импорты компонентов блоков
-import MarkdownEditor from '@/modules/content/components/blocks/MarkdownEditor.vue';
-import ImageBlock from '@/modules/content/components/blocks/ImageBlock.vue';
-import FileBlock from '@/modules/content/components/blocks/FileBlock.vue';
-import LinkBlock from '@/modules/content/components/blocks/LinkBlock.vue';
-import CodeBlock from '@/modules/content/components/blocks/CodeBlock.vue'; // Убедитесь, что путь верный
-import EditorInput from '@/modules/content/components/com/EditorInput.vue';
-import { useCommands } from '@/modules/content/components/com/useCommands';
+import MarkdownEditor from '@/modules/content/blocks/MarkdownEditor/MarkdownEditor.vue';
+import ImageBlock from '@/modules/content/blocks/ImageBlock.vue';
+import FileBlock from '@/modules/content/blocks/FileBlock.vue';
+import LinkBlock from '@/modules/content/blocks/LinkBlock.vue';
+import CodeBlock from '@/modules/content/blocks/CodeBlock.vue';
+import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.vue';
+import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 
 // Утилиты
