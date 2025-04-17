@@ -89,7 +89,8 @@ export default {
         text: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length),
         image: () => this.$refs.imageInputRef?.click(),
         file: () => this.$refs.fileInputRef?.click(),
-        link: () => this.addLinkBlock(this.contentBlocks.length) // Добавили команду
+        link: () => this.addLinkBlock(this.contentBlocks.length),
+        code: () => this.addCodeBlock(this.contentBlocks.length)  // Добавили команду
       };
     }
   },
@@ -130,6 +131,22 @@ export default {
   },
   methods: {
     // --- Методы ---
+    // В ContentEditor.vue -> methods -> addCodeBlock
+    addCodeBlock(index) {
+      console.log(`ContentEditor: Adding code block at index ${index}`);
+      this.addBlock({
+        component: 'code-block',
+        data: {
+          code: '', // Начнем с пустого кода
+          language: 'javascript', // Язык по умолчанию
+          caption: ''
+        }
+      }, index);
+      this.$refs.editorInputRef?.clearInput();
+      nextTick(() => {
+          this.focusBlock(index); // Теперь можно фокусироваться на блоке кода
+      });
+    },
 
     handleConvertToImage({ index, imageUrl, caption, alt }) {
       if (index >= 0 && index < this.contentBlocks.length) {
@@ -392,7 +409,7 @@ export default {
           this.scrollToInput();
       };
       reader.readAsDataURL(file);
-      event.target.value = ''; // Сбросить инпут
+      this.$refs.editorInputRef?.clearInput(); // Сбросить инпут
     },
 
     handleFileUpload(event) {
@@ -405,7 +422,7 @@ export default {
             data: { name: file.name, size: file.size, fileUrl: URL.createObjectURL(file) }
         }, this.contentBlocks.length);
       this.scrollToInput();
-      event.target.value = ''; // Сбросить инпут
+      this.$refs.editorInputRef?.clearInput(); // Сбросить инпут
     },
 
     clearEditorInput() {
