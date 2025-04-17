@@ -4,7 +4,7 @@
   >
     <!-- Языковая метка -->
     <div class="absolute top-1 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
-      {{ language }}
+      {{ detectedLanguage }}
     </div>
 
     <!-- Контейнер для редактора -->
@@ -37,11 +37,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
+import hljs from 'highlight.js'
 import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue'
 
 // Языковые расширения
@@ -59,7 +60,7 @@ import { xml } from '@codemirror/lang-xml'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
-  language: { type: String, default: 'javascript' },
+  language: { type: String, default: '' }, // Пустая строка для автоопределения
   placeholder: { type: String, default: 'Введите ваш код здесь...' }
 })
 
@@ -68,7 +69,24 @@ const emit = defineEmits(['update:modelValue', 'delete'])
 const code = ref(props.modelValue)
 const editorRef = ref(null)
 const isEditing = ref(true)
+const detectedLanguage = ref('text')
 let editorView = null
+
+// Белый список поддерживаемых языков
+const languageWhitelist = [
+  'javascript',
+  'typescript',
+  'python',
+  'html',
+  'css',
+  'json',
+  'cpp',
+  'java',
+  'php',
+  'sql',
+  'markdown',
+  'xml'
+]
 
 const languageMap = {
   javascript: javascript(),
@@ -79,18 +97,25 @@ const languageMap = {
   css: css(),
   json: json(),
   cpp: cpp(),
-  csharp: cpp(),
   java: java(),
   php: php(),
-  xml: xml(),
-  go: null,
-  swift: null,
-  kotlin: null,
-  bash: null,
-  yaml: null,
   sql: sql(),
-  markdown: markdown()
+  markdown: markdown(),
+  xml: xml(),
+  text: null
 }
+
+// Функция автоопределения языка
+function detectLanguage(code) {
+  if (!code.trim()) return 'text'
+  const result = hljs.highlightAuto(code, languageWhitelist)
+  return result.language || 'text'
+}
+
+// Обновляем detectedLanguage при изменении кода
+watch(code, (newCode) => {
+  detectedLanguage.value = props.language || detectLanguage(newCode)
+}, { immediate: true })
 
 watch(() => props.modelValue, (val) => {
   if (val !== code.value && editorView) {
@@ -102,7 +127,7 @@ watch(() => props.modelValue, (val) => {
   }
 })
 
-watch(() => props.language, createEditor)
+watch(detectedLanguage, createEditor)
 watch(isEditing, createEditor)
 
 function createEditor() {
@@ -112,7 +137,7 @@ function createEditor() {
 
   if (!editorRef.value) return
 
-  const languageExtension = languageMap[props.language.toLowerCase()] || null
+  const languageExtension = languageMap[detectedLanguage.value.toLowerCase()] || null
 
   const extensions = [
     keymap.of([...defaultKeymap, indentWithTab]),
@@ -218,7 +243,7 @@ function downloadCode() {
   const blob = new Blob([code.value], { type: 'text/plain;charset=utf-8' })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
-  link.download = `code.${props.language.toLowerCase()}`
+  link.download = `code.${detectedLanguage.value.toLowerCase()}`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -232,7 +257,6 @@ function downloadCode() {
   min-height: 150px;
   z-index: 0;
   padding-top: 0.5rem;
-  /* overflow удалён, чтобы не скрывало кнопку */
 }
 
 :deep(.cm-editor) {
