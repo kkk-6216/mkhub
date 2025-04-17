@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative group mb-4 rounded-md border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-200 resize-y min-h-[200px]"
+    class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4   duration-200 resize-y min-h-[200px]"
   >
     <!-- Языковая метка -->
     <div class="absolute top-1 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
@@ -16,7 +16,7 @@
     <button
       v-if="isEditing"
       @click="finishEditing"
-      class="absolute top-2 right-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors z-10"
+      class="absolute top-2 right-2 px-3 py-1 text-sm bg-main text-white rounded hover:bg-main-hover transition-colors z-10"
     >
       Готово
     </button>
@@ -36,8 +36,7 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+<script>
 import { EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { defaultKeymap, indentWithTab } from '@codemirror/commands'
@@ -58,195 +57,192 @@ import { sql } from '@codemirror/lang-sql'
 import { markdown } from '@codemirror/lang-markdown'
 import { xml } from '@codemirror/lang-xml'
 
-const props = defineProps({
-  modelValue: { type: String, default: '' },
-  language: { type: String, default: '' }, // Пустая строка для автоопределения
-  placeholder: { type: String, default: 'Введите ваш код здесь...' }
-})
-
-const emit = defineEmits(['update:modelValue', 'delete'])
-
-const code = ref(props.modelValue)
-const editorRef = ref(null)
-const isEditing = ref(true)
-const detectedLanguage = ref('text')
-let editorView = null
-
-// Белый список поддерживаемых языков
-const languageWhitelist = [
-  'javascript',
-  'typescript',
-  'python',
-  'html',
-  'css',
-  'json',
-  'cpp',
-  'java',
-  'php',
-  'sql',
-  'markdown',
-  'xml'
-]
-
-const languageMap = {
-  javascript: javascript(),
-  typescript: javascript({ typescript: true }),
-  jsx: javascript({ jsx: true }),
-  python: python(),
-  html: html(),
-  css: css(),
-  json: json(),
-  cpp: cpp(),
-  java: java(),
-  php: php(),
-  sql: sql(),
-  markdown: markdown(),
-  xml: xml(),
-  text: null
-}
-
-// Функция автоопределения языка
-function detectLanguage(code) {
-  if (!code.trim()) return 'text'
-  const result = hljs.highlightAuto(code, languageWhitelist)
-  return result.language || 'text'
-}
-
-// Обновляем detectedLanguage при изменении кода
-watch(code, (newCode) => {
-  detectedLanguage.value = props.language || detectLanguage(newCode)
-}, { immediate: true })
-
-watch(() => props.modelValue, (val) => {
-  if (val !== code.value && editorView) {
-    code.value = val
-    editorView.dispatch({
-      changes: { from: 0, to: editorView.state.doc.length, insert: val }
-    })
-    editorView.requestMeasure()
-  }
-})
-
-watch(detectedLanguage, createEditor)
-watch(isEditing, createEditor)
-
-function createEditor() {
-  if (editorView) {
-    editorView.destroy()
-  }
-
-  if (!editorRef.value) return
-
-  const languageExtension = languageMap[detectedLanguage.value.toLowerCase()] || null
-
-  const extensions = [
-    keymap.of([...defaultKeymap, indentWithTab]),
-    EditorState.tabSize.of(2),
-    EditorView.lineWrapping,
-    syntaxHighlighting(defaultHighlightStyle),
-    EditorView.editable.of(isEditing.value),
-    EditorView.theme({
-      "&": {
-        backgroundColor: "#ffffff",
-        color: "#333333",
-      },
-      "&.cm-focused": {
-        outline: "none !important"
-      },
-      ".cm-gutters": {
-        backgroundColor: "#f8f8f8",
-        color: "#999",
-        borderRight: "1px solid #eee",
-      },
-      ".cm-activeLineGutter": {
-        backgroundColor: "#f0f0f0",
-      },
-      ".cm-activeLine": {
-        backgroundColor: "#f5f5f5",
-      },
-      ".cm-placeholder": {
-        color: "#999",
-        fontStyle: "italic",
-        paddingLeft: "2px"
+export default {
+  name: 'CodeEditor',
+  components: { OptionsMenu },
+  props: {
+    modelValue: { type: String, default: '' },
+    language: { type: String, default: '' },
+    placeholder: { type: String, default: 'Введите ваш код здесь...' }
+  },
+  emits: ['update:modelValue', 'delete'],
+  data() {
+    return {
+      code: this.modelValue,
+      editorView: null,
+      isEditing: true,
+      detectedLanguage: 'text',
+      languageWhitelist: [
+        'javascript',
+        'typescript',
+        'python',
+        'html',
+        'css',
+        'json',
+        'cpp',
+        'java',
+        'php',
+        'sql',
+        'markdown',
+        'xml'
+      ],
+      languageMap: {
+        javascript: javascript(),
+        typescript: javascript({ typescript: true }),
+        jsx: javascript({ jsx: true }),
+        python: python(),
+        html: html(),
+        css: css(),
+        json: json(),
+        cpp: cpp(),
+        java: java(),
+        php: php(),
+        sql: sql(),
+        markdown: markdown(),
+        xml: xml(),
+        text: null
       }
-    }),
-    EditorView.updateListener.of(update => {
-      if (update.docChanged) {
-        code.value = update.state.doc.toString()
-        emit('update:modelValue', code.value)
-      }
-    })
-  ]
-
-  if (languageExtension) {
-    extensions.push(languageExtension)
-  }
-
-  if (!code.value) {
-    extensions.push(EditorView.contentAttributes.of({ 'aria-placeholder': props.placeholder }))
-    extensions.push(EditorView.theme({
-      ".cm-line": {
-        paddingLeft: "2px"
-      }
-    }))
-  }
-
-  const startState = EditorState.create({
-    doc: code.value,
-    extensions
-  })
-
-  editorView = new EditorView({
-    state: startState,
-    parent: editorRef.value
-  })
-
-  requestAnimationFrame(() => {
-    if (isEditing.value) {
-      editorView.focus()
     }
-    editorView.requestMeasure()
-  })
-}
+  },
+  watch: {
+    modelValue(val) {
+      if (val !== this.code && this.editorView) {
+        this.code = val
+        this.editorView.dispatch({
+          changes: { from: 0, to: this.editorView.state.doc.length, insert: val }
+        })
+        this.editorView.requestMeasure()
+      }
+    },
+    code(newCode) {
+      this.detectedLanguage = this.language || this.detectLanguage(newCode)
+      this.$emit('update:modelValue', newCode)
+    },
+    detectedLanguage() {
+      this.createEditor()
+    },
+    isEditing() {
+      this.createEditor()
+    }
+  },
+  mounted() {
+    this.createEditor()
+    this.detectedLanguage = this.language || this.detectLanguage(this.code)
+  },
+  beforeUnmount() {
+    if (this.editorView) {
+      this.editorView.destroy()
+    }
+  },
+  methods: {
+    detectLanguage(code) {
+      if (!code.trim()) return 'text'
+      const result = hljs.highlightAuto(code, this.languageWhitelist)
+      return result.language || 'text'
+    },
+    createEditor() {
+      if (this.editorView) {
+        this.editorView.destroy()
+      }
 
-function startEditing() {
-  isEditing.value = true
-}
+      if (!this.$refs.editorRef) return
 
-function finishEditing() {
-  isEditing.value = false
-}
+      const languageExtension = this.languageMap[this.detectedLanguage.toLowerCase()] || null
 
-onMounted(() => {
-  createEditor()
-})
+      const extensions = [
+        keymap.of([...defaultKeymap, indentWithTab]),
+        EditorState.tabSize.of(2),
+        EditorView.lineWrapping,
+        syntaxHighlighting(defaultHighlightStyle),
+        EditorView.editable.of(this.isEditing),
+        EditorView.theme({
+          "&": {
+            backgroundColor: "#ffffff",
+            color: "#333333",
+          },
+          "&.cm-focused": {
+            outline: "none !important"
+          },
+          ".cm-gutters": {
+            backgroundColor: "#f8f8f8",
+            color: "#999",
+            borderRight: "1px solid #eee",
+          },
+          ".cm-activeLineGutter": {
+            backgroundColor: "#f0f0f0",
+          },
+          ".cm-activeLine": {
+            backgroundColor: "#f5f5f5",
+          },
+          ".cm-placeholder": {
+            color: "#999",
+            fontStyle: "italic",
+            paddingLeft: "2px"
+          }
+        }),
+        EditorView.updateListener.of(update => {
+          if (update.docChanged) {
+            this.code = update.state.doc.toString()
+          }
+        })
+      ]
 
-onUnmounted(() => {
-  if (editorView) {
-    editorView.destroy()
+      if (languageExtension) {
+        extensions.push(languageExtension)
+      }
+
+      if (!this.code) {
+        extensions.push(EditorView.contentAttributes.of({ 'aria-placeholder': this.placeholder }))
+        extensions.push(EditorView.theme({
+          ".cm-line": {
+            paddingLeft: "2px"
+          }
+        }))
+      }
+
+      const startState = EditorState.create({
+        doc: this.code,
+        extensions
+      })
+
+      this.editorView = new EditorView({
+        state: startState,
+        parent: this.$refs.editorRef
+      })
+
+      this.$nextTick(() => {
+        if (this.isEditing) {
+          this.editorView.focus()
+        }
+        this.editorView.requestMeasure()
+      })
+    },
+    startEditing() {
+      this.isEditing = true
+    },
+    finishEditing() {
+      this.isEditing = false
+    },
+    copyCode() {
+      navigator.clipboard.writeText(this.code)
+        .then(() => {
+            this.$toast?.success('Код скопирован') || alert('Код скопирован');
+          })
+          .catch(err => {
+            console.error('Ошибка копирования:', err);
+            this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
+          });
+    },
+    downloadCode() {
+      const blob = new Blob([this.code], { type: 'text/plain;charset=utf-8' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `code.${this.detectedLanguage.toLowerCase()}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
   }
-})
-
-function copyCode() {
-  navigator.clipboard.writeText(code.value)
-    .then(() => {
-      const notification = document.createElement('div')
-      notification.textContent = 'Код скопирован'
-      notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:10px;border-radius:4px;z-index:1000;'
-      document.body.appendChild(notification)
-      setTimeout(() => document.body.removeChild(notification), 2000)
-    })
-    .catch(() => alert('Ошибка копирования'))
-}
-
-function downloadCode() {
-  const blob = new Blob([code.value], { type: 'text/plain;charset=utf-8' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `code.${detectedLanguage.value.toLowerCase()}`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
 }
 </script>
 
@@ -274,5 +270,10 @@ function downloadCode() {
 :deep(.cm-content) {
   padding-top: 12px;
   padding-bottom: 12px;
+}
+
+.group:hover :deep(.cm-editor) {
+  background-color: rgb(249 250 251); /* gray-50 */
+  transition: background-color 0.2s ease;
 }
 </style>

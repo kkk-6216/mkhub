@@ -852,11 +852,11 @@ export default {
     copyContent() {
       navigator.clipboard.writeText(this.markdownText)
         .then(() => {
-          this.$toast?.success('Content copied to clipboard') || alert('Content copied to clipboard');
+          this.$toast?.success('Текст скопирован') || alert('Текст скопирован');
         })
         .catch(err => {
-          console.error('Failed to copy:', err);
-          this.$toast?.error('Failed to copy content') || alert('Failed to copy content');
+          console.error('Ошибка копирования:', err);
+          this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
         });
     },
     // --- MODIFIED: Emit delete event ---
