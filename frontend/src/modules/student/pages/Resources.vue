@@ -1,99 +1,110 @@
 <template>
-  <div class="flex min-h-screen bg-[#e7f4fd] text-gray-800 p-6 space-x-6">
-    <!-- Sidebar already exists -->
-
-    <!-- Main content -->
-    <div class="flex-1 space-y-6">
-      <!-- My Courses Section -->
+  <div class="flex h-screen bg-blue-50 transition-all duration-300" :class="{ 'pr-[400px]': selectedCourse }">
+    <!-- Asosiy Kontent -->
+    <div class="w-full p-6 space-y-6">
       <div>
-        <h1 class="text-2xl font-semibold">My courses</h1>
-        <div class="flex space-x-6 mt-4">
-          <button class="font-medium border-b-2 border-black pb-1">Active</button>
-          <button class="text-gray-500">Completed</button>
-        </div>
-
-        <!-- Top course cards -->
-        <div class="flex space-x-4 mt-6">
-          <div class="bg-[#041c4d] rounded-xl p-4 text-white w-48">
-            <p class="text-sm">UX design</p>
-            <h3 class="text-lg font-semibold mt-2">User flow</h3>
-            <p class="text-xs mt-6 text-gray-300">4/8</p>
-          </div>
-          <div class="bg-[#0a1d3d] rounded-xl p-4 text-white w-48">
-            <p class="text-sm">Marketing</p>
-            <h3 class="text-lg font-semibold mt-2">Strategy</h3>
-            <p class="text-xs mt-6 text-gray-300">9/10</p>
-          </div>
-          <div class="bg-[#021936] rounded-xl p-4 text-white w-48">
-            <p class="text-sm">Magic</p>
-            <h3 class="text-lg font-semibold mt-2">Potion making</h3>
-            <p class="text-xs mt-6 text-gray-300">5/7</p>
-          </div>
+        <h1 class="text-2xl font-bold">My courses</h1>
+        <div class="flex space-x-4 mt-2">
+          <button class="font-semibold border-b-2 border-black">Active</button>
+          <button class="text-gray-400">Completed</button>
         </div>
       </div>
 
-      <!-- Trending Section -->
+      <!-- Kurs Kartalari -->
+      <div class="flex space-x-4 overflow-x-auto">
+        <div
+            v-for="(course, index) in courses"
+            :key="index"
+            @click="openPanel(course)"
+            class="min-w-[200px] cursor-pointer p-4 rounded-xl text-white"
+            :class="course.bg"
+        >
+          <h3 class="text-sm opacity-80">{{ course.category }}</h3>
+          <h2 class="text-lg font-semibold">{{ course.title }}</h2>
+          <p class="text-sm mt-2 opacity-90">{{ course.progress }}</p>
+        </div>
+      </div>
+
+      <!-- Trending -->
       <div>
         <h2 class="text-xl font-semibold">Trending</h2>
-        <div class="flex space-x-4 mt-2 text-sm text-gray-600">
-          <button class="font-medium text-black">Design</button>
-          <button>Marketing</button>
-          <button>Sales</button>
-          <button>Branding</button>
-          <button>Advertising</button>
-        </div>
-
-        <div class="space-y-4 mt-4">
-          <!-- Course Card 1 -->
-          <div class="bg-white rounded-xl p-4 flex items-center shadow-sm">
-            <div class="w-16 h-16 bg-green-100 rounded-lg mr-4"></div>
-            <div class="flex-1">
-              <h3 class="font-medium">How to create patterns</h3>
-              <p class="text-xs text-gray-500">Start 18.02 • Rate 4.8 • Level - hard</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div
+              v-for="(trend, index) in trending"
+              :key="index"
+              @click="openPanel(trend)"
+              class="bg-white p-4 rounded-xl shadow cursor-pointer hover:bg-gray-50"
+          >
+            <div class="text-sm text-gray-500">{{ trend.category }}</div>
+            <div class="font-semibold">{{ trend.title }}</div>
+            <div class="text-xs text-gray-400 mt-2">
+              Start {{ trend.start }} | Rate {{ trend.rate }} | Level: {{ trend.level }}
             </div>
-            <button class="text-gray-400 hover:text-black">⋮</button>
-          </div>
-
-          <!-- Course Card 2 -->
-          <div class="bg-white rounded-xl p-4 flex items-center shadow-sm">
-            <div class="w-16 h-16 bg-blue-100 rounded-lg mr-4"></div>
-            <div class="flex-1">
-              <h3 class="font-medium">UX Research</h3>
-              <p class="text-xs text-gray-500">Start 25.02 • Rate 4.5 • Level - medium</p>
-            </div>
-            <button class="text-gray-400 hover:text-black">⋮</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right panel (Course details) -->
-    <div class="w-64 bg-white rounded-xl p-4 shadow-md relative">
-      <div class="w-full h-24 bg-blue-100 rounded-md mb-4"></div>
-      <div class="absolute top-2 right-2 bg-blue-700 text-white px-2 py-1 rounded-full text-sm">$176</div>
-      <h3 class="font-semibold text-lg mb-2">UX Research</h3>
-      <p class="text-sm text-gray-600 mb-2">
-        Want to learn more about CJM creation and informational sketches?
-      </p>
-      <ul class="list-disc pl-4 text-xs text-gray-500 mb-4">
-        <li>UX process methodologies</li>
-        <li>Customer Journey Map creation</li>
-        <li>User flow & App flow</li>
-      </ul>
-      <div class="text-sm mb-4">
-        <div><strong>32h</strong> Theory</div>
-        <div><strong>58h</strong> Practice</div>
+    <!-- O‘ng Panel (faqat kurs tanlansa chiqadi) -->
+    <div
+        v-if="selectedCourse"
+        class="fixed top-0 right-0 h-full w-[400px] bg-white shadow-xl p-6 transition-transform duration-300 z-50"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold">{{ selectedCourse.title }}</h2>
+        <button @click="selectedCourse = null" class="text-gray-400 hover:text-black text-xl">&times;</button>
       </div>
-      <button class="bg-blue-700 text-white w-full py-2 rounded-md font-medium">View schedule</button>
+      <p class="text-sm text-gray-600 mb-4">{{ selectedCourse.description || 'Detailed course info...' }}</p>
+      <div class="flex justify-between text-sm mt-4">
+        <div>
+          <p class="font-semibold">32h</p>
+          <p class="text-gray-500">Theory</p>
+        </div>
+        <div>
+          <p class="font-semibold">58h</p>
+          <p class="text-gray-500">Practice</p>
+        </div>
+      </div>
+      <button class="mt-6 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">View schedule</button>
     </div>
   </div>
 </template>
 
 <script setup>
-// Hozircha hech qanday JS logika kiritilmadi.
-// Interaktivlik (tabs, ochiluvchi panel) kerak bo‘lsa alohida qo‘shamiz.
+import { ref } from 'vue'
+
+// Kurslar
+const courses = ref([
+  { title: 'User flow', category: 'UX design', progress: '4/8', bg: 'bg-blue-900' },
+  { title: 'Strategy', category: 'Marketing', progress: '9/10', bg: 'bg-indigo-700' },
+  { title: 'Potion making', category: 'Magic', progress: '5/7', bg: 'bg-blue-800' },
+])
+
+// Trending
+const trending = ref([
+  {
+    title: 'How to create patterns',
+    category: 'UI design',
+    start: '18.02',
+    rate: '4.8',
+    level: 'hard',
+  },
+  {
+    title: 'UX Research',
+    category: 'UX design',
+    start: '25.02',
+    rate: '4.5',
+    level: 'medium',
+  },
+])
+
+const selectedCourse = ref(null)
+
+function openPanel(course) {
+  selectedCourse.value = course
+}
 </script>
 
 <style scoped>
-/* Qo‘shimcha custom uslublar kerak bo‘lsa shu yerga yoziladi */
+/* Panel chiqganda background shrink effekt */
 </style>
