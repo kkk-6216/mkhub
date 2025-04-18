@@ -4,6 +4,8 @@ import DepartmentPage from '@/modules/moderator/pages/DepartmentPage.vue';
 import FacultiesPage from '@/modules/moderator/pages/FacultiesPage.vue';
 import ModerationPage from '@/modules/moderator/pages/ModerationPage.vue';
 import RequestsPage from '@/modules/moderator/pages/RequestsPage.vue';
+import CoursesPage from "@/modules/moderator/pages/CoursesPage.vue";
+import LessonsPage from "@/modules/moderator/pages/LessonsPage.vue";
 
 export default {
     path: '/moderator',
@@ -29,6 +31,16 @@ export default {
             path: 'departments',
             name: 'DepartmentPage',
             component: DepartmentPage,
+        },
+        {
+            path: 'courses',
+            name: 'CoursesPage',
+            component: CoursesPage,
+        },
+        {
+            path: 'lessons',
+            name: 'LessonsPage',
+            component: LessonsPage,
         },
         {
             path: 'moderation',
