@@ -2,7 +2,7 @@ import apiClient from '@/api/axiosInstance.js'
 
 export const getDepartmentsByFacultyId = (id) => apiClient.get(`/departments?facultyId=${id}`);
 
-export const getDepartments = () => apiClient.get('/departments');
+export const getDepartments = (verbose) => apiClient.get('/departments?verbose=' + verbose);
 
 export const getDepartmentById = (id) => apiClient.get(`/departments/${id}`);
 
