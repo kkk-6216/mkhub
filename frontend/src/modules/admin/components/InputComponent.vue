@@ -1,6 +1,6 @@
 <template>
   <div class="relative">
-    <label :for="computedId" class="block text-sm/6 font-medium text-gray-500">
+    <label :for="computedId" class="block text-sm/6 font-medium " :class="labelClass">
       {{ label }}
     </label>
 
@@ -22,7 +22,7 @@
             @focus="isFocused = true"
             @blur="isFocused = false"
             :class="[
-            'block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6',
+            'block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6'
           ]"
         />
       </div>
@@ -48,6 +48,10 @@ export default {
     type: {
       type: String,
       default: 'text',
+    },
+    labelClass: {
+      type: String,
+      default: 'text-gray-500',
     },
     id: {
       type: String,
