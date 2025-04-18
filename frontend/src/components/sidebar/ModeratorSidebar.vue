@@ -120,6 +120,8 @@ export default {
         { to: '/moderator/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
         { to: '/moderator/faculties', label: 'Факультеты', icon: markRaw(FacultiesIcon), iconClass: 'mdi-school' },
         { to: '/moderator/departments', label: 'Кафедры', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
+        { to: '/moderator/courses', label: 'Курсы', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
+        { to: '/moderator/lessons', label: 'Темы', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
         { to: '/moderator/moderation', label: 'Модерации', icon: markRaw(ModerationIcon), iconClass: 'mdi-shield-check' },
         { to: '/moderator/requests', label: 'Запросы', icon: markRaw(RequestsIcon), iconClass: 'mdi-message-question' },
         { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }
