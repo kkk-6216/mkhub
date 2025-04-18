@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue';
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 
 export default {
   name: "FileBlock",

@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import CommandMenu from '@/modules/content/components/com/CommandMenu.vue';
-import { useCommands } from '@/modules/content/components/com/useCommands';
+import CommandMenu from '@/modules/content/ContentEditor/components/CommandMenu.vue';
+import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 
 export default {
   name: 'EditorInput',
@@ -134,7 +134,10 @@ export default {
         event.preventDefault();
         const editor = this.$refs.editorRef;
         if (editor?.innerText.trim()) {
+          // Отправляем текст для создания нового блока
           this.$emit('text-entered', editor.innerHTML);
+          // Очищаем поле ввода
+          this.clearInput();
           this.isDirectlyTyping = false;
         } else {
           this.clearInput();
@@ -145,6 +148,8 @@ export default {
           const editor = this.$refs.editorRef;
           if (editor?.innerText.trim()) {
             this.$emit('text-entered', editor.innerHTML);
+            // Очищаем поле ввода после создания блока с текстом
+            this.clearInput();
             this.isDirectlyTyping = false;
           }
         }, 0);

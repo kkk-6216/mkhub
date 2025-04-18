@@ -1,8 +1,8 @@
 <template>
   <div 
     :class="{
-      'bg-gray-100 min-h-100 mb-2 p-4 rounded-md': !isFinalView, // Фон и высота только при редактировании
-      'final-view-active mb-2': isFinalView      // Новый класс для CSS hover-эффекта
+      'bg-gray-100 min-h-100 mb-2 p-4 rounded-md': !isFinalView, 
+      'final-view-active mb-2': isFinalView      
     }"
   >
     <!-- Header -->
@@ -29,22 +29,26 @@
 
     <!-- Editor and Preview Area -->
     <div v-if="!isFinalView" class="flex flex-col md:flex-row gap-4">
+
       <!-- Editor -->
       <div class="editor-wrapper w-full md:w-1/2">
+
         <textarea
           ref="editor"
           v-model="markdownText"
-          @input="updatePreview"
+          @input="handleInput" 
           @keydown="handleKeyDown"
           class="editor w-full h-[60vh] p-4 border border-gray-300 rounded-lg bg-white shadow-sm resize-none font-mono text-sm text-gray-800 leading-relaxed transition-all"
           placeholder="Write your markdown here..."
           spellcheck="false"
         ></textarea>
+
         <div class="text-xs text-gray-500 mt-2 flex gap-4">
           <span>Lines: {{ lineCount }}</span>
           <span>Words: {{ wordCount }}</span>
           <span>Chars: {{ charCount }}</span>
         </div>
+
       </div>
 
       <!-- Preview -->
@@ -74,108 +78,59 @@
         <OptionsMenu
           @copy="copyContent"
           @download="downloadContent"
-          @delete="deleteContent"
+          @delete="$emit('delete', index)"
           @edit="returnToEditing"  
           :showEdit="true"        
           :showDelete="true"
         />
       </div>
-    </div>
+  </div>
 
-    <!-- Help Modal -->
-    <div v-if="showHelpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-auto">
-        <div class="p-6">
-          <div class="flex justify-between items-center mb-4 border-b pb-2">
-            <h2 class="text-xl font-bold text-gray-800">Markdown Quick Reference</h2>
-            <button @click="showHelpModal = false" class="text-gray-500 hover:text-gray-800 text-2xl transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div class="prose prose-sm max-w-none">
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-              <p class="text-red-600 font-semibold">Note: Text alignment, color, and underline use HTML tags and are not standard Markdown.</p>
-            </div>
-            
-            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-3">Basic Formatting</h3>
-            <ul class="space-y-2">
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600"># Heading 1</code> (<code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">## H2</code>, <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">### H3</code> ... <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">###### H6</code>)</li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">**Bold Text**</code> or <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">__Bold Text__</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">*Italic Text*</code> or <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">_Italic Text_</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&lt;u&gt;Underlined Text&lt;/u&gt;</code> (Uses HTML)</li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">~~Strikethrough~~</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">`Inline code`</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">[Link Text](https://example.com)</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&gt; Blockquote</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">---</code> or <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">***</code> for Horizontal Rule</li>
-              <li>Font Size: Select text and use size dropdown (Inserts <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&lt;span style="font-size: size;"&gt;...&lt;/span&gt;</code>).</li>  
-            </ul>
-
-            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-3 mt-6">Lists</h3>
-            <p class="font-medium">Unordered:</p>
-            <ul class="space-y-1">
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">- Item 1</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">* Item 2</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">+ Item 3</code> (Indent for sub-items: <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">  - Sub-item</code>)</li>
-            </ul>
-            <p class="font-medium mt-3">Ordered:</p>
-            <ol class="space-y-1">
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">1. First item</code></li>
-              <li><code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">2. Second item</code> (Numbering is automatic)</li>
-            </ol>
-
-            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-3 mt-6">Alignment, Color & Underline (Using HTML)</h3>
-            <ul class="space-y-2">
-              <li>Alignment: Select text/line and use toolbar buttons (Inserts <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&lt;div style="text-align: center;"&gt;...&lt;/div&gt;</code>).</li>
-              <li>Color: Select text and use color picker (Inserts <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&lt;span style="color: #color;"&gt;...&lt;/span&gt;</code>).</li>
-              <li>Underline: Select text and use U button (Inserts <code class="bg-gray-100 px-1.5 py-0.5 rounded text-red-600">&lt;u&gt;...&lt;/u&gt;</code>).</li>
-            </ul>
-
-            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-3 mt-6">Tables</h3>
-            <pre class="bg-gray-100 p-3 rounded text-sm overflow-x-auto"><code>| Header 1 | Header 2 |
-| -------- | -------- |
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |</code></pre>
-            <p class="text-sm mt-2">(The hyphens <code class="bg-gray-100 px-1 py-0.5 rounded text-red-600">---</code> define the header separator. Colons can be used for alignment: <code class="bg-gray-100 px-1 py-0.5 rounded text-red-600">:---:</code> centered, <code class="bg-gray-100 px-1 py-0.5 rounded text-red-600">---:</code> right-aligned)</p>
-
-            <h3 class="text-lg font-semibold text-gray-800 border-b pb-1 mb-3 mt-6">Keyboard Shortcuts</h3>
-            <ul class="space-y-2">
-              <li><strong>Bold:</strong> Ctrl+B</li>
-              <li><strong>Italic:</strong> Ctrl+I</li>
-              <li><strong>Tab/Indent:</strong> Tab (Shift+Tab to unindent in lists)</li>
-              <li><strong>Continue List:</strong> Enter (when cursor is at end of list item)</li>
-            </ul>
-          </div>
-          <div class="mt-6 text-right">
-            <button @click="showHelpModal = false" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Help Modal -->
+  <HelpModal 
+        :show="showHelpModal"
+        @close="showHelpModal = false"
+      />
   </div>
 </template>
 
 <script>
-import EditorMenu from '@/modules/content/components/com/EditorMenu.vue';
-import FormattingToolbar from '@/modules/content/components/com/FormattingToolbar.vue';
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue';
+import EditorMenu from '@/modules/content/blocks/MarkdownEditor/components/EditorMenu.vue';
+import FormattingToolbar from '@/modules/content/blocks/MarkdownEditor/components/FormattingToolbar.vue';
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import HelpModal from '@/modules/content/blocks/MarkdownEditor/components/HelpModal.vue';
 
 export default {
   components: {
     EditorMenu,
     FormattingToolbar,
-    OptionsMenu
+    OptionsMenu,
+    HelpModal 
   },
+  // --- NEW: Define props ---
+  props: {
+    data: {
+      type: Object,
+      required: true,
+      // Provide a default structure, especially for text
+      default: () => ({ text: '' })
+    },
+    index: {
+      type: Number,
+      required: true
+    }
+  },
+  // --- NEW: Define emits ---
+  emits: ['update', 'delete', 'request-new-block-after'],
   data() {
     return {
-      markdownText: `# Welcome to Markdown Editor`,
+      // --- MODIFIED: Initialize from prop ---
+      markdownText: this.data?.text || '', // Use optional chaining and fallback
       renderedMarkdown: '',
       showHelpModal: false,
-      isFinalView: false
+      isFinalView: false,
+      showHelpModal: false,
+      isInternalChange: false
     };
   },
   computed: {
@@ -189,6 +144,31 @@ export default {
       const lines = this.markdownText.split('\n');
       if (lines.length === 1 && lines[0] === '') return 0;
       return lines.length;
+    }
+  },
+  // --- NEW: Add watchers ---
+  watch: {
+    // Watch for external changes to the data prop
+    'data.text'(newText) {
+      // Only update if the prop changed externally and differs from internal state
+      if (!this.isInternalChange && newText !== this.markdownText) {
+        console.log(`MarkdownEditor ${this.index}: Prop data.text changed, updating markdownText.`);
+        this.markdownText = newText || '';
+        // No need to emit update here, it came from outside
+        this.updatePreview(); // Re-render markdown when prop changes
+      }
+      // Reset flag after handling potential external change
+      this.isInternalChange = false;
+    },
+    // Watch for internal changes to markdownText to emit updates
+    markdownText(newValue) {
+      this.isInternalChange = true; // Mark change as internal
+      console.log(`MarkdownEditor ${this.index}: Internal markdownText changed, emitting update.`);
+      // Debounce or throttle this emit in real applications if needed
+      this.$emit('update', { index: this.index, newData: { text: newValue } });
+      // updatePreview is implicitly called by v-model binding on textarea,
+      // but calling explicitly ensures consistency if v-model logic changes.
+      this.updatePreview();
     }
   },
   mounted() {
@@ -218,6 +198,13 @@ export default {
         case 'hr': this.addHorizontalRule(); break;
       }
     },
+    // --- NEW: Handle textarea input ---
+    handleInput() {
+        // v-model already updates markdownText.
+        // The watcher for markdownText will handle emitting the update.
+        // We still need updatePreview if not relying solely on the watcher triggering it.
+        // this.updatePreview(); // updatePreview is called via watcher now
+    },
     setFontSize(size) {
       const selection = this.getSelectedText();
       if (selection.text) {
@@ -241,14 +228,14 @@ export default {
       let html = markdown;
 
       const htmlPlaceholders = [];
-      
+
       const protectHtml = (html) => {
         return html.replace(/<([a-z][a-z0-9]*)\b[^>]*>([\s\S]*?)<\/\1>/gi, (match) => {
           htmlPlaceholders.push(match);
           return `__HTMLPLACEHOLDER_${htmlPlaceholders.length - 1}__`;
         });
       };
-      
+
       const restoreHtml = (processedHtml) => {
         let result = processedHtml;
         for (let i = 0; i < htmlPlaceholders.length; i++) {
@@ -261,71 +248,82 @@ export default {
       html = protectHtml(html);
 
       // Tables
-      html = html.replace(/^\|(.+)\|\s*\n\|([\-:\s\|]+)\|\s*\n((?:\|.*\|\s*\n?)*)/gm, (match, headerRow, alignmentRow, bodyRows) => {
-        const headers = headerRow.split('|').map(cell => cell.trim()).slice(1, -1);
-        const alignments = alignmentRow.split('|').map(cell => {
-          cell = cell.trim();
-          if (!cell) return 'left';
-          if (cell.startsWith(':') && cell.endsWith(':')) return 'center';
-          if (cell.endsWith(':')) return 'right';
-          return 'left';
-        }).slice(1, -1);
+      html = html.replace(/^\|(.*\|)+\s*\n\|([\s:\-\|]+)\|\s*\n(\|.*\|\n?)*$/gm, (match) => {
+        // Split the match into rows
+        const rows = match.split('\n').filter(row => row.trim());
+        
+        if (rows.length < 2) return match; 
+        
+        const headerRow = rows[0];
+        const delimiterRow = rows[1];
+        const bodyRows = rows.slice(2);
+        
 
-        let tableHtml = '<table class="markdown-table w-full border-collapse my-4">\n<thead>\n<tr>\n';
+        const extractCells = (row) => {
+          return row.split('|')
+            .slice(1, -1) 
+            .map(cell => cell.trim());
+        };
+        
+        
+        const headers = extractCells(headerRow);
+        
+      
+        const alignments = extractCells(delimiterRow).map(delim => {
+          delim = delim.trim();
+          const hasLeft = delim.startsWith(':');
+          const hasRight = delim.endsWith(':');
+          if (hasLeft && hasRight) return 'center';
+          if (hasRight) return 'right';
+          return 'left';
+        });
+        
+      
+        let tableHtml = '<table class="markdown-table w-full border-collapse my-4">\n';
+        
+      
+        tableHtml += '<thead>\n<tr>\n';
         headers.forEach((header, i) => {
           const align = alignments[i] || 'left';
-          tableHtml += `<th style="text-align:${align}" class="border px-4 py-2 bg-gray-100 font-semibold">${this.processInlineElements(header)}</th>\n`;
+          tableHtml += `  <th class="border px-4 py-2 text-${align} bg-gray-100">${this.processInlineElements(header)}</th>\n`;
         });
-        tableHtml += '</tr>\n</thead>\n<tbody>\n';
+        tableHtml += '</tr>\n</thead>\n';
+        
 
-        if (bodyRows && bodyRows.trim()) {
-          const rows = bodyRows.trim().split('\n');
-          rows.forEach(row => {
-            if (!row.trim()) return;
-            const cells = row.split('|').map(cell => cell.trim()).slice(1, -1);
-            const validCells = cells.slice(0, headers.length);
-
-            tableHtml += '<tr>\n';
-            validCells.forEach((cell, i) => {
-              const align = alignments[i] || 'left';
-              const cellContent = cell === '' ? ' ' : this.processInlineElements(cell);
-              tableHtml += `<td style="text-align:${align}" class="border px-4 py-2">${cellContent}</td>\n`;
-            });
-            for (let i = validCells.length; i < headers.length; i++) {
-              const align = alignments[i] || 'left';
-              tableHtml += `<td style="text-align:${align}" class="border px-4 py-2"> </td>\n`;
-            }
-            tableHtml += '</tr>\n';
+        tableHtml += '<tbody>\n';
+        bodyRows.forEach(row => {
+          if (!row.trim()) return; 
+          
+          const cells = extractCells(row);
+          tableHtml += '<tr>\n';
+          
+          headers.forEach((_, i) => {
+            const align = alignments[i] || 'left';
+            const cellContent = cells[i] || '';
+            tableHtml += `  <td class="border px-4 py-2 text-${align}">${this.processInlineElements(cellContent)}</td>\n`;
           });
-        }
-        tableHtml += '</tbody>\n</table>\n';
+          
+          tableHtml += '</tr>\n';
+        });
+        
+        tableHtml += '</tbody>\n</table>';
         return tableHtml;
       });
 
       // Blockquotes
       html = html.replace(/^> (.*(?:\n> .*)*)/gm, (match, content) => {
         const lines = content.replace(/^> /gm, '');
-        return `<blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-700 my-2">${this.processInlineElements(lines.trim())}</blockquote>\n`;
+        return `\n<blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-700 my-2">${this.processInlineElements(lines.trim())}</blockquote>\n`;
       });
       html = html.replace(/<\/blockquote>\n?<blockquote class="[^"]*">/g, '<br>');
 
       // Horizontal Rule
-      html = html.replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '<hr class="my-4 border-t border-gray-300">\n');
+      html = html.replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '\n<hr class="my-4 border-t border-gray-300">\n');
 
-      // ИСПРАВЛЕНА ФУНКЦИЯ ОБРАБОТКИ СПИСКОВ
-      // Lists - Unordered and Ordered
+      // Lists
       const processList = (html, isOrdered) => {
         const marker = isOrdered ? '\\d+\\.' : '[-*+]';
         const regex = new RegExp(`^(\\s*)(${marker})\\s+(.*?)$`, 'gm');
-        let result = '';
-        let lastIndex = 0;
-        let inList = false;
-        let listType = isOrdered ? 'ol' : 'ul';
-        let currentIndent = 0;
-        let listStack = [];
-        let startNumber = 1;
-        
-        // Находим все элементы списка в тексте
         const matches = [];
         let match;
         while ((match = regex.exec(html)) !== null) {
@@ -339,106 +337,80 @@ export default {
           });
         }
 
-        if (matches.length === 0) {
-          return html;
-        }
+        if (matches.length === 0) return html;
 
-        // Группируем элементы по спискам
         const lists = [];
         let currentList = null;
-
         matches.forEach((item, index) => {
-          // Начало нового списка или первый элемент
-          if (!currentList || 
-              (index > 0 && matches[index-1].index + matches[index-1].length + 1 < item.index)) {
-            if (currentList) {
-              lists.push(currentList);
-            }
+          if (!currentList || (index > 0 && matches[index - 1].index + matches[index - 1].length + 1 < item.index)) {
+            if (currentList) lists.push(currentList);
             currentList = {
               items: [item],
-              isOrdered: isOrdered,
+              isOrdered,
               startIndex: item.index,
               endIndex: item.index + item.length
             };
-            
-            // Извлекаем номер начала списка для упорядоченных списков
             if (isOrdered) {
               currentList.startNumber = parseInt(item.marker, 10);
             }
           } else {
-            // Продолжение текущего списка
             currentList.items.push(item);
             currentList.endIndex = item.index + item.length;
           }
         });
-        
-        // Добавляем последний список
-        if (currentList) {
-          lists.push(currentList);
-        }
+        if (currentList) lists.push(currentList);
 
-        // Обрабатываем каждый список
         let resultHtml = '';
         let currentPosition = 0;
 
         lists.forEach(list => {
-          // Добавляем текст перед списком
           resultHtml += html.substring(currentPosition, list.startIndex);
-          
-          // Начинаем список
-          const listClass = isOrdered ? 'list-decimal' : 'list-disc';
-          const startAttr = isOrdered ? ` start="${list.startNumber}"` : '';
-          resultHtml += `<${listType}${startAttr} class="${listClass} pl-5 my-2">\n`;
-          
-          // Добавляем все элементы списка
+          const tag = list.isOrdered ? 'ol' : 'ul';
+          const listClass = list.isOrdered ? 'list-decimal' : 'list-disc';
+          const startAttr = list.isOrdered ? ` start="${list.startNumber}"` : '';
+          resultHtml += `\n<${tag}${startAttr} class="${listClass} pl-5 my-2">\n`;
           list.items.forEach(item => {
             resultHtml += `<li class="my-1">${this.processInlineElements(item.content)}</li>\n`;
           });
-          
-          // Закрываем список
-          resultHtml += `</${listType}>\n`;
-          
+          resultHtml += `</${tag}>\n`;
           currentPosition = list.endIndex;
         });
-        
-        // Добавляем оставшийся текст
+
         resultHtml += html.substring(currentPosition);
-        
         return resultHtml;
       };
 
-      // Обрабатываем каждый тип списка отдельно
-      html = processList(html, false); // Ненумерованные списки
-      html = processList(html, true);  // Нумерованные списки
+      html = processList(html, false); // Unordered
+      html = processList(html, true);  // Ordered
 
       // Headers
-      html = html.replace(/^###### (.*$)/gm, '<h6 class="text-sm font-semibold mt-4 mb-2">$1</h6>\n');
-      html = html.replace(/^##### (.*$)/gm, '<h5 class="text-base font-semibold mt-4 mb-2">$1</h5>\n');
-      html = html.replace(/^#### (.*$)/gm, '<h4 class="text-lg font-semibold mt-4 mb-2">$1</h4>\n');
-      html = html.replace(/^### (.*$)/gm, '<h3 class="text-xl font-semibold mt-5 mb-3">$1</h3>\n');
-      html = html.replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>\n');
-      html = html.replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mt-6 mb-4">$1</h1>\n');
+      html = html.replace(/^###### (.*$)/gm, '\n<h6 class="text-sm font-semibold mt-4 mb-2">$1</h6>\n');
+      html = html.replace(/^##### (.*$)/gm, '\n<h5 class="text-base font-semibold mt-4 mb-2">$1</h5>\n');
+      html = html.replace(/^#### (.*$)/gm, '\n<h4 class="text-lg font-semibold mt-4 mb-2">$1</h4>\n');
+      html = html.replace(/^### (.*$)/gm, '\n<h3 class="text-xl font-semibold mt-5 mb-3">$1</h3>\n');
+      html = html.replace(/^## (.*$)/gm, '\n<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>\n');
+      html = html.replace(/^# (.*$)/gm, '\n<h1 class="text-3xl font-bold mt-6 mb-4">$1</h1>\n');
 
-      // Restore all HTML placeholders before paragraph processing
       html = restoreHtml(html);
 
       // Paragraphs
-      html = html.split('\n\n').map(paragraph => {
+      html = html.split(/\n{2,}/).map(paragraph => {
         const trimmed = paragraph.trim();
-        if (!trimmed || trimmed.match(/^<(h[1-6]|ul|ol|li|blockquote|pre|hr|table|p|div|span|u)[^>]*>/i)) {
-          return paragraph;
+        if (!trimmed) return '';
+        if (/^<(h[1-6]|ul|ol|li|blockquote|pre|hr|table|p|div|span|u|code)[\s>]/i.test(trimmed)) {
+          return trimmed;
         }
-        const processedLines = this.processInlineElements(trimmed);
-        const linesWithBreaks = processedLines.split('\n').join('<br>\n');
-        return `<p class="my-3">${linesWithBreaks}</p>`;
+        const processed = this.processInlineElements(trimmed);
+        return `<p class="my-3">${processed.replace(/\n/g, '<br>\n')}</p>`;
       }).join('\n\n');
 
-      // Final Cleanup
+      html = html.replace(/(<\/(?:ul|ol|table|blockquote|pre)>)\s*(?=<)/g, '$1\n');
       html = html.replace(/<\/li><br>\n<li/g, '</li><li');
       html = html.replace(/<p class="[^"]*">\s*<\/p>/g, '');
       html = html.replace(/<p>(\s*<(?:ul|ol|blockquote|pre|hr|table)[^>]*>[\s\S]*?<\/(?:ul|ol|blockquote|pre|hr|table)>)\s*<\/p>/g, '$1');
 
       return html.trim();
+
     },
     processInlineElements(text) {
       if (!text) return '';
@@ -448,27 +420,19 @@ export default {
       if (/<ol|<ul|<li|<\/ol|<\/ul|<\/li/i.test(text)) {
         return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
-      
-      // Links
-      processedText = processedText.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, 
+
+      processedText = processedText.replace(/\[([^\]]+)]\(([^)\s]+)\)/g,
         '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>');
-      
-      // Bold
       processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
       processedText = processedText.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-      
-      // Italic
       processedText = processedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       processedText = processedText.replace(/_([^_]+)_/g, '<em>$1</em>');
-      
-      // Strikethrough
       processedText = processedText.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-      
-      // Inline Code
-      processedText = processedText.replace(/`([^`]+)`/g, 
+      processedText = processedText.replace(/`([^`]+)`/g,
         '<code class="bg-gray-100 px-1 py-0.5 rounded text-red-600 font-mono text-sm">$1</code>');
 
       return processedText;
+
     },
     getSelectedText() {
       const textarea = this.$refs.editor;
@@ -749,12 +713,10 @@ export default {
           return;
         }
         
-        // Если мы находимся в конце текста, проверяем, нужно ли создать новый блок
-        const isAtEnd = cursorPos === target.value.length;
-        if (isAtEnd && (
-            (target.value[target.value.length - 1] === '\n') || 
-            (target.value.trim() && target.value[target.value.length - 1] !== '\n')
-          )) {
+        // ИЗМЕНЕНО: Проверка наличия специальной комбинации клавиш для создания нового блока
+        if (e.ctrlKey || e.shiftKey) {
+          // Если нажат Ctrl+Enter или Shift+Enter, создаем новый блок после текущего
+          e.preventDefault();
           // Trim trailing newlines for better UX
           if (target.value[target.value.length - 1] === '\n') {
             this.markdownText = this.markdownText.replace(/\n+$/, '');
@@ -762,10 +724,13 @@ export default {
           }
           
           // Request a new block after this one
-          e.preventDefault();
           this.$emit('request-new-block-after', this.index);
           return;
         }
+        
+        // ИЗМЕНЕНО: По умолчанию, просто вставляем перенос строки
+        // Не предотвращаем стандартное поведение Enter, что позволяет перейти на новую строку
+        return;
       }
       
       if (e.ctrlKey || e.metaKey) {
@@ -803,18 +768,26 @@ export default {
     copyContent() {
       navigator.clipboard.writeText(this.markdownText)
         .then(() => {
-          this.$toast?.success('Content copied to clipboard') || alert('Content copied to clipboard');
+          this.$toast?.success('Текст скопирован') || alert('Текст скопирован');
         })
         .catch(err => {
-          console.error('Failed to copy:', err);
-          this.$toast?.error('Failed to copy content') || alert('Failed to copy content');
+          console.error('Ошибка копирования:', err);
+          this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
         });
     },
+    // --- MODIFIED: Emit delete event ---
     deleteContent() {
-      this.markdownText = '';
-      this.updatePreview();
-      this.isFinalView = false;
-      this.$emit('delete');
+        if (confirm('Are you sure you want to delete this block?')) {
+            this.$emit('delete', this.index);
+        }
+    },
+    // --- NEW: Method to be called by parent ---
+    focusEditor() {
+      this.$nextTick(() => {
+        this.$refs.editor?.focus();
+        // Optionally scroll into view if needed
+        // this.$refs.editor?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
     },
     downloadContent() {
       try {
@@ -835,7 +808,6 @@ export default {
   }
 };
 </script>
-
 <style>
 .final-preview {
   animation: fadeIn 0.3s ease-in-out;

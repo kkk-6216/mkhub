@@ -14,7 +14,7 @@
       <img
         :src="data.src"
         :alt="data.caption || 'Image'"
-        class="max-w-full h-auto rounded"
+        class="max-w-full max-h-[500px] rounded"
         @click="openImage"
       />
       <p v-if="data.caption" class="text-sm text-gray-500 mt-2">{{ data.caption }}</p>
@@ -34,7 +34,7 @@
 
 <script>
 import { defineComponent } from 'vue';
-import OptionsMenu from '@/modules/content/components/com/OptionsMenu.vue';
+import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 
 export default defineComponent({
   name: "ImageBlock",
