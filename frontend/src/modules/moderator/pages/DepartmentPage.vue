@@ -428,7 +428,7 @@ export default {
       this.loading = true;
       let error = null;
       try {
-        const response = await getDepartments();
+        const response = await getDepartments(true);
         this.departments = response.data;
       } catch (err) {
         error = err.response?.data?.message || err.message || 'Произошла ошибка при загрузке';
