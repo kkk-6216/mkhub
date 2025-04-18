@@ -4,34 +4,60 @@
     <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
     <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
 
-<!-- Блоки контента -->
-<div class="content-blocks mb-4">
-  <component
-    v-for="(block, index) in contentBlocks"
-    :key="block.id"
-    :is="blockComponents[block.component]"
-    :ref="(el) => { if (el) blockRefs[index] = el; }"
-    :data="block.data"
-    :index="index"
-    @update="handleBlockUpdate"
-    @delete="deleteBlock(index)"
-    @request-new-block-after="insertNewBlockAfter"
-    @convert-to-image="handleConvertToImage"
-    @focus="handleBlockFocus(index)" 
-  />
-</div>
+    <!-- Блоки контента с возможностью перетаскивания -->
+    <draggable
+      v-model="contentBlocks"
+      item-key="id"
+      tag="div"
+      class="content-blocks mb-4"
+      handle=".drag-handle"
+      :animation="200"
+      @start="dragStart"
+      @end="dragEnd"
+    >
+      <template #item="{ element: block, index }">
+        <div
+          class="relative group"
+          :class="{ 'drag-active': isDragging }"
+          @mouseenter="hoveredBlockIndex = index"
+          @mouseleave="hoveredBlockIndex = -1"
+        >
+          <!-- Кнопка для перетаскивания -->
+          <button
+            class="drag-handle absolute left-[-30px] top-[5px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move"
+            :class="{ 'opacity-100': isDragging || hoveredBlockIndex === index }"
+          >
+          <ChevronUpDown class="h-5 w-5" />
 
-<!-- Область ввода текста и команд -->
-<EditorInput
-  ref="editorInputRef"
-  @command-typed="handleCommandTyped"
-  @direct-input="handleDirectInput"
-  @text-entered="handleTextEntered"
-  @clear-requested="clearEditorInput"
-/>
+          </button>
 
+          <!-- Сам блок контента -->
+          <component
+            :is="blockComponents[block.component]"
+            :ref="(el) => { if (el) blockRefs[index] = el; }"
+            :data="block.data"
+            :index="index"
+            @update="handleBlockUpdate"
+            @delete="deleteBlock(index)"
+            @request-new-block-after="insertNewBlockAfter"
+            @convert-to-image="handleConvertToImage"
+            @focus="handleBlockFocus(index)"
+          />
+        </div>
+      </template>
+    </draggable>
+
+    <!-- Область ввода текста и команд -->
+    <EditorInput
+      ref="editorInputRef"
+      @command-typed="handleCommandTyped"
+      @direct-input="handleDirectInput"
+      @text-entered="handleTextEntered"
+      @clear-requested="clearEditorInput"
+    />
   </div>
 </template>
+
 
 <script>
 // Импорты компонентов блоков
@@ -43,6 +69,8 @@ import CodeBlock from '@/modules/content/blocks/CodeBlock.vue';
 import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.vue';
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
+import draggable from 'vuedraggable';
+import ChevronUpDown from '@heroicons/vue/24/outline';
 
 // Утилиты
 const isValidHttpUrl = (string) => {
@@ -66,7 +94,9 @@ export default {
     FileBlock,
     LinkBlock,
     CodeBlock, // CodeBlock зарегистрирован
-    EditorInput
+    EditorInput,
+    draggable,
+    ChevronUpDown
   },
   props: {
     initialContent: { type: Array, default: () => [] }
@@ -87,6 +117,8 @@ export default {
       },
       lastFocusedBlockIndex: -1, // Опционально: для отслеживания фокуса
       isMounted: false, // Флаг для предотвращения действий до монтирования
+      isDragging: false, // Флаг для отслеживания состояния перетаскивания
+      hoveredBlockIndex: -1
     };
   },
   computed: {
@@ -158,6 +190,17 @@ export default {
   },
   methods: {
     // --- Управление блоками ---
+    dragStart() {
+      this.isDragging = true;
+      console.log("ContentEditor: Начало перетаскивания блока");
+    },
+    
+    dragEnd() {
+      this.isDragging = false;
+      console.log("ContentEditor: Завершение перетаскивания блока");
+      // После перетаскивания обновляем порядок блоков
+      this.$emit('update:content', JSON.parse(JSON.stringify(this.contentBlocks)));
+    },
 
     /**
      * Подготавливает блоки из входных данных, добавляя ID и проверяя структуру.
@@ -488,8 +531,39 @@ export default {
 
 <style scoped>
 .content-blocks {
-  /* Можно добавить отступы */
   padding-bottom: 1rem;
 }
-</style> 
+
+.drag-handle {
+  color: #888;
+  transition: opacity 0.2s ease;
+}
+
+.drag-handle:hover {
+  color: #333;
+}
+
+.drag-active {
+  opacity: 0.8;
+}
+
+/* Анимация для перетаскиваемых элементов */
+.flip-list-move {
+  transition: transform 0.2s;
+}
+
+/* Стиль для состояния перетаскивания */
+.sortable-chosen {
+  opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+}
+
+/* Стиль для места, куда можно перетащить элемент */
+.sortable-ghost {
+  opacity: 0.5;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+</style>
 

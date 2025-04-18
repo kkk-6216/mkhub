@@ -71,6 +71,7 @@ export default {
       code: this.modelValue,
       editorView: null,
       isEditing: true,
+      shouldDelete: false, 
       detectedLanguage: 'text',
       languageWhitelist: [
         'javascript',
@@ -222,6 +223,11 @@ export default {
     },
     finishEditing() {
       this.isEditing = false
+
+      if (!this.code.trim()) {
+        this.shouldDelete = true
+        this.$emit('delete')
+      }
     },
     copyCode() {
       navigator.clipboard.writeText(this.code)

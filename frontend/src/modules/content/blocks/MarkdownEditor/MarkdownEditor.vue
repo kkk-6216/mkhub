@@ -248,41 +248,66 @@ export default {
       html = protectHtml(html);
 
       // Tables
-      html = html.replace(/^\|(.+?)\|\s*\n\|([:\-\| ]+)\|\s*\n((?:\|.*?\|\s*\n?)*)/gm, (match, headerRow, alignmentRow, bodyRows) => {
-        const splitRow = row => row.split('|').map(cell => cell.trim()).filter(cell => cell.length > 0);
+      html = html.replace(/^\|(.*\|)+\s*\n\|([\s:\-\|]+)\|\s*\n(\|.*\|\n?)*$/gm, (match) => {
+        // Split the match into rows
+        const rows = match.split('\n').filter(row => row.trim());
+        
+        if (rows.length < 2) return match; 
+        
+        const headerRow = rows[0];
+        const delimiterRow = rows[1];
+        const bodyRows = rows.slice(2);
+        
 
-        const headers = splitRow(headerRow);
-        const alignments = splitRow(alignmentRow).map(cell => {
-          const hasLeft = cell.startsWith(':');
-          const hasRight = cell.endsWith(':');
+        const extractCells = (row) => {
+          return row.split('|')
+            .slice(1, -1) 
+            .map(cell => cell.trim());
+        };
+        
+        
+        const headers = extractCells(headerRow);
+        
+      
+        const alignments = extractCells(delimiterRow).map(delim => {
+          delim = delim.trim();
+          const hasLeft = delim.startsWith(':');
+          const hasRight = delim.endsWith(':');
           if (hasLeft && hasRight) return 'center';
           if (hasRight) return 'right';
           return 'left';
         });
-
-        let table = '<table class="markdown-table w-full border-collapse my-4">\n<thead>\n<tr>';
+        
+      
+        let tableHtml = '<table class="markdown-table w-full border-collapse my-4">\n';
+        
+      
+        tableHtml += '<thead>\n<tr>\n';
         headers.forEach((header, i) => {
           const align = alignments[i] || 'left';
-          table += `<th class="border px-4 py-2 text-${align} bg-gray-100">${this.processInlineElements(header)}</th>`;
+          tableHtml += `  <th class="border px-4 py-2 text-${align} bg-gray-100">${this.processInlineElements(header)}</th>\n`;
         });
-        table += '</tr>\n</thead>\n<tbody>';
+        tableHtml += '</tr>\n</thead>\n';
+        
 
-        if (bodyRows && bodyRows.trim()) {
-          const rows = bodyRows.trim().split(/\r?\n/); // Универсальный сплит
-          console.log(bodyRows)
-          rows.forEach(row => {
-            const cells = splitRow(row);
-            table += '<tr>';
-            headers.forEach((_, i) => {
-              const align = alignments[i] || 'left';
-              table += `<td class="border px-4 py-2 text-${align}">${this.processInlineElements(cells[i] || '')}</td>`;
-            });
-            table += '</tr>';
+        tableHtml += '<tbody>\n';
+        bodyRows.forEach(row => {
+          if (!row.trim()) return; 
+          
+          const cells = extractCells(row);
+          tableHtml += '<tr>\n';
+          
+          headers.forEach((_, i) => {
+            const align = alignments[i] || 'left';
+            const cellContent = cells[i] || '';
+            tableHtml += `  <td class="border px-4 py-2 text-${align}">${this.processInlineElements(cellContent)}</td>\n`;
           });
-        }
-
-        table += '</tbody>\n</table>';
-        return table;
+          
+          tableHtml += '</tr>\n';
+        });
+        
+        tableHtml += '</tbody>\n</table>';
+        return tableHtml;
       });
 
       // Blockquotes
