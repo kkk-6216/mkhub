@@ -1,15 +1,15 @@
 <template>
   <div class="relative w-full p-5 mt-10">
-    <!-- Скрытые input для загрузки файлов -->
+    <!-- Hidden file inputs -->
     <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
     <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
 
-    <!-- Блоки контента с возможностью перетаскивания -->
+    <!-- Draggable content blocks -->
     <draggable
       v-model="contentBlocks"
       item-key="id"
       tag="div"
-      class="content-blocks mb-4"
+      class="mb-4"
       handle=".drag-handle"
       :animation="200"
       @start="dragStart"
@@ -19,29 +19,29 @@
       <template #item="{ element: block, index }">
         <div
           class="relative group"
-          :class="{ 'drag-active': isDragging }"
+          :class="{ 'opacity-80 bg-gray-50 rounded': isDragging }"
           @mouseenter="hoveredBlockIndex = index"
           @mouseleave="hoveredBlockIndex = -1"
         >
-          <!-- Кнопка для перетаскивания -->
+          <!-- Drag handle button -->
           <button
-            class="drag-handle absolute left-[5px] top-[5px] z-10  opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move p-1 bg-white bg-opacity-50 rounded /* Optional styling */"
+            class="drag-handle absolute left-1 top-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move p-1 rounded"
             :class="{ 'opacity-100': isDragging || hoveredBlockIndex === index }"
-            title="Перетащить блок"
+            title="Drag block"
           >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="black" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-          </svg>
-
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-gray-700">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+            </svg>
           </button>
 
-          <!-- Сам блок контента -->
-          <div class="pl-[35px] pt-[5px]">
+          <!-- Content block -->
+          <div class="pl-9 pt-1">
             <component
               :is="blockComponents[block.component]"
               :ref="(el) => { if (el) blockRefs[index] = el; }"
               :data="block.data"
               :index="index"
+              :isActive="activeBlockIndex === index"
               @update="handleBlockUpdate"
               @delete="deleteBlock(index)"
               @request-new-block-after="insertNewBlockAfter"
@@ -53,7 +53,7 @@
       </template>
     </draggable>
 
-    <!-- Область ввода текста и команд -->
+    <!-- Input area for text and commands -->
     <EditorInput
       ref="editorInputRef"
       @command-typed="handleCommandTyped"
@@ -64,28 +64,29 @@
   </div>
 </template>
 
-
 <script>
-// Импорты компонентов блоков
+// Component imports 
 import MarkdownEditor from '@/modules/content/blocks/MarkdownEditor/MarkdownEditor.vue';
 import ImageBlock from '@/modules/content/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/blocks/FileBlock.vue';
 import LinkBlock from '@/modules/content/blocks/LinkBlock.vue';
 import CodeBlock from '@/modules/content/blocks/CodeBlock.vue';
-import FormulaBlock from '@/modules/content/blocks/FormulaBlock.vue';
+import FormulaBlock from '@/modules/content/blocks/FormulaBlock/FormulaBlock.vue';
 import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.vue';
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
 
-// Утилиты
+// Utilities
 const isValidHttpUrl = (string) => {
   try {
     const url = new URL(string);
     return url.protocol === "http:" || url.protocol === "https:";
   } catch (_) { return false; }
 };
+
 const generateId = () => Math.random().toString(36).substring(2, 9);
+
 const isImageUrl = (url) => {
   if (!isValidHttpUrl(url)) return false;
   const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|tiff)(\?.*)?$/i;
@@ -111,25 +112,24 @@ export default {
   data() {
     return {
       contentBlocks: [],
-      blockRefs: {}, // Используем объект для рефов по индексу
+      blockRefs: {}, 
       commands: {},
-      // Маппинг строк компонентов на импортированные компоненты
       blockComponents: {
         'text-block': MarkdownEditor,
         'image-block': ImageBlock,
         'file-block': FileBlock,
         'link-block': LinkBlock,
         'code-block': CodeBlock,
-        'formula-block': FormulaBlock// Маппинг для CodeBlock
+        'formula-block': FormulaBlock
       },
-      lastFocusedBlockIndex: -1, // Опционально: для отслеживания фокуса
-      isMounted: false, // Флаг для предотвращения действий до монтирования
-      isDragging: false, // Флаг для отслеживания состояния перетаскивания
+      activeBlockIndex: -1,
+      isMounted: false,
+      isDragging: false,
       hoveredBlockIndex: -1
     };
   },
   computed: {
-    // Действия для команд, вводимых через "/"
+    // Command actions
     commandActions() {
       return {
         text: () => this.addEmptyTextBlockAndFocus(this.contentBlocks.length),
@@ -137,115 +137,122 @@ export default {
         file: () => this.$refs.fileInputRef?.click(),
         link: () => this.addLinkBlock(this.contentBlocks.length),
         code: () => this.addCodeBlock(this.contentBlocks.length),
-        formula: () => this.addFormulaBlock(this.contentBlocks.length) // Команда для CodeBlock
+        formula: () => this.addFormulaBlock(this.contentBlocks.length)
       };
     }
   },
   watch: {
-    // Следим за изменениями входных данных
+    // Watch initialContent changes
     initialContent: {
       handler(newContent) {
-        // Сравниваем только значащие данные, без ID, чтобы избежать лишних обновлений
         const currentSignificantData = JSON.stringify(this.contentBlocks.map(b => ({ component: b.component, data: b.data })));
         const newSignificantData = JSON.stringify(this.prepareBlocks(newContent || []).map(b => ({ component: b.component, data: b.data })));
 
         if (newSignificantData !== currentSignificantData) {
-          console.log("ContentEditor: Обновление contentBlocks из initialContent prop");
+          console.log("ContentEditor: Updating contentBlocks from initialContent prop");
           this.contentBlocks = this.prepareBlocks(newContent || []);
-          // Сбрасываем рефы после изменения контента
           nextTick(() => {
             this.blockRefs = {};
           });
-        } else {
-          // console.log("ContentEditor: initialContent не изменился значительно, пропуск обновления.");
         }
       },
       immediate: true,
-      // deep: true // Глубокое отслеживание может быть тяжелым. Сравнение выше должно быть достаточно.
     },
-    // Следим за изменениями массива блоков (добавление, удаление, ИЗМЕНЕНИЕ ДАННЫХ ВНУТРИ)
+    // Watch contentBlocks changes
     contentBlocks: {
       handler(newBlocks, oldBlocks) {
-        if (!this.isMounted) return; // Не отправляем события до монтирования
-        // Сравниваем, чтобы убедиться, что изменение было (deep watch иногда срабатывает лишний раз)
+        if (!this.isMounted) return;
         if (JSON.stringify(newBlocks) !== JSON.stringify(oldBlocks)) {
-            console.log("ContentEditor: contentBlocks изменены, отправка события update:content");
-            // Отправляем глубокую копию, чтобы внешние изменения не влияли на внутреннее состояние
-            this.$emit('update:content', JSON.parse(JSON.stringify(newBlocks)));
+          console.log("ContentEditor: contentBlocks changed, emitting update:content");
+          this.$emit('update:content', JSON.parse(JSON.stringify(newBlocks)));
         }
       },
-      deep: true // Глубокое отслеживание здесь НЕОБХОДИМО для отслеживания ИЗМЕНЕНИЙ ВНУТРИ данных блока
+      deep: true
     }
   },
   created() {
     const { commands } = useCommands();
     this.commands = commands;
-    // Начальный контент устанавливается через watcher с immediate: true
-    console.log("ContentEditor: Компонент создан");
+    console.log("ContentEditor: Component created");
   },
   mounted() {
-      this.isMounted = true;
-      console.log("ContentEditor: Компонент смонтирован");
-      // Если при инициализации нет блоков, фокусируемся на инпуте
-      if (this.contentBlocks.length === 0) {
-          this.$refs.editorInputRef?.focus();
-      }
+    this.isMounted = true;
+    console.log("ContentEditor: Component mounted");
+    if (this.contentBlocks.length === 0) {
+      this.$refs.editorInputRef?.focus();
+    }
   },
   beforeUpdate() {
-    // Очищаем рефы перед каждым циклом обновления DOM
-    // Важно, чтобы :ref функция корректно перезаписывала ссылки
     this.blockRefs = {};
   },
   methods: {
-    // --- Управление блоками ---
+    // --- Block management ---
     dragStart() {
       this.isDragging = true;
-      console.log("ContentEditor: Начало перетаскивания блока");
+      console.log("ContentEditor: Started block dragging");
     },
     
     dragEnd() {
       this.isDragging = false;
-      console.log("ContentEditor: Завершение перетаскивания блока");
-      // После перетаскивания обновляем порядок блоков
+      console.log("ContentEditor: Finished block dragging");
       this.$emit('update:content', JSON.parse(JSON.stringify(this.contentBlocks)));
     },
 
     /**
-     * Подготавливает блоки из входных данных, добавляя ID и проверяя структуру.
+     * Prepare blocks from input data
      */
     prepareBlocks(blocks) {
-      console.log("ContentEditor: prepareBlocks запущено");
+      console.log("ContentEditor: prepareBlocks called");
       return Array.isArray(blocks)
         ? blocks
-            // Фильтруем некорректные блоки
             .filter(block => block && block.component && this.blockComponents[block.component] && typeof block.data === 'object')
             .map(block => ({
               component: block.component,
-              // Глубокое клонирование данных, чтобы избежать общих ссылок
               data: JSON.parse(JSON.stringify(block.data)),
-              id: block.id || generateId() // Добавляем ID, если его нет
+              id: block.id || generateId()
             }))
         : [];
     },
 
     /**
-     * Добавляет новый блок в указанную позицию.
+     * Add a new block at the specified position
      */
     addBlock(blockData, index) {
+      // Deactivate all blocks before adding a new one
+      this.deactivateAllBlocks();
+      
       const newBlock = {
         ...blockData,
         id: blockData.id || generateId()
       };
-      console.log(`ContentEditor: Добавление блока ${newBlock.component} по индексу ${index} с ID ${newBlock.id}`);
-      // Создаем НОВЫЙ массив для обеспечения реактивности
+      console.log(`ContentEditor: Adding ${newBlock.component} block at index ${index} with ID ${newBlock.id}`);
+      
       const currentBlocks = [...this.contentBlocks];
       currentBlocks.splice(index, 0, newBlock);
-      this.contentBlocks = currentBlocks; // Присваиваем новый массив
+      this.contentBlocks = currentBlocks;
+      
+      // Set the new block as active
+      nextTick(() => {
+        this.activeBlockIndex = index;
+      });
     },
 
-    // Добавьте метод
+    /**
+     * Deactivate all blocks (switch to view mode)
+     */
+    deactivateAllBlocks() {
+      if (this.activeBlockIndex >= 0) {
+        // Call exitEditMode on the active block if available
+        const activeComponent = this.blockRefs[this.activeBlockIndex];
+        if (activeComponent && typeof activeComponent.exitEditMode === 'function') {
+          activeComponent.exitEditMode();
+        }
+        this.activeBlockIndex = -1;
+      }
+    },
+
     addFormulaBlock(index) {
-      console.log(`ContentEditor: Добавление блока формулы по индексу ${index}`);
+      console.log(`ContentEditor: Adding formula block at index ${index}`);
       this.addBlock({
         component: 'formula-block',
         data: { latex: '', displayMode: true }
@@ -256,16 +263,13 @@ export default {
       });
     },
 
-    /**
-     * Добавляет блок кода.
-     */
-     addCodeBlock(index) {
-      console.log(`ContentEditor: Добавление блока кода по индексу ${index}`);
+    addCodeBlock(index) {
+      console.log(`ContentEditor: Adding code block at index ${index}`);
       this.addBlock({
         component: 'code-block',
         data: {
-          code: '', // Начинаем с пустого кода
-          language: 'javascript', // Язык по умолчанию
+          code: '',
+          language: 'javascript',
         }
       }, index);
       this.$refs.editorInputRef?.clearInput();
@@ -275,52 +279,52 @@ export default {
     },
 
     addTextBlock(htmlContent, index) {
-      console.log(`ContentEditor: Добавление текстового блока по индексу ${index}`);
+      console.log(`ContentEditor: Adding text block at index ${index}`);
       this.addBlock({ component: 'text-block', data: { text: htmlContent } }, index);
       nextTick(() => { this.focusBlock(index); });
     },
 
     addLinkBlock(index) {
-      console.log(`ContentEditor: Добавление пустого блока ссылки по индексу ${index}`);
+      console.log(`ContentEditor: Adding empty link block at index ${index}`);
       this.addBlock({ component: 'link-block', data: { url: '', title: '', description: '', favicon: '' } }, index);
       this.$refs.editorInputRef?.clearInput();
       nextTick(() => { this.focusBlock(index); });
     },
 
     addLinkBlockWithUrl(url, index) {
-      console.log(`ContentEditor: Добавление блока ссылки с URL ${url} по индексу ${index}`);
+      console.log(`ContentEditor: Adding link block with URL ${url} at index ${index}`);
       this.addBlock({ component: 'link-block', data: { url: url, title: '', description: '', favicon: '' } }, index);
       this.$refs.editorInputRef?.clearInput();
-      nextTick(() => { this.scrollToInput(); }); // Не фокусируемся, даем загрузить превью
+      nextTick(() => { this.scrollToInput(); });
     },
 
     addImageBlockFromUrl(imageUrl, index) {
-      console.log(`ContentEditor: Добавление блока изображения по URL ${imageUrl} по индексу ${index}`);
+      console.log(`ContentEditor: Adding image block from URL ${imageUrl} at index ${index}`);
       this.addBlock({
         component: 'image-block',
-        data: { src: imageUrl, caption: 'Изображение по URL', alt: 'Изображение по URL' }
+        data: { src: imageUrl, caption: 'Image from URL', alt: 'Image from URL' }
       }, index);
       this.$refs.editorInputRef?.clearInput();
       this.scrollToInput();
     },
 
     addEmptyTextBlockAndFocus(index) {
-      console.log(`ContentEditor: Добавление пустого текстового блока по индексу ${index} и фокусировка`);
+      console.log(`ContentEditor: Adding empty text block at index ${index} and focusing`);
       this.addBlock({ component: 'text-block', data: { text: '' } }, index);
       this.$refs.editorInputRef?.clearInput();
       nextTick(() => { this.focusBlock(index); });
     },
 
     /**
-     * Вставляет новый пустой текстовый блок после указанного индекса.
+     * Insert new empty text block after specified index
      */
     insertNewBlockAfter(currentIndex) {
-      console.log(`ContentEditor: Вставка нового блока после индекса ${currentIndex}`);
+      console.log(`ContentEditor: Inserting new block after index ${currentIndex}`);
       this.addEmptyTextBlockAndFocus(currentIndex + 1);
     },
 
     /**
-     * Обрабатывает событие обновления данных от дочернего блока.
+     * Handle block data update from child component
      */
     handleBlockUpdate({ index, newData }) {
       if (index >= 0 && index < this.contentBlocks.length) {
@@ -329,60 +333,62 @@ export default {
         const potentialNewData = { ...block.data, ...newData };
         const potentialNewDataString = JSON.stringify(potentialNewData);
 
-        // Обновляем только если данные действительно изменились
         if (currentDataString !== potentialNewDataString) {
-          console.log(`ContentEditor: Обновление блока ${block.component} по индексу ${index} данными:`, newData);
-          // Создаем НОВЫЙ объект блока и НОВЫЙ массив для реактивности
+          console.log(`ContentEditor: Updating ${block.component} block at index ${index} with data:`, newData);
           const updatedBlock = { ...block, data: potentialNewData };
           const newBlocks = [...this.contentBlocks];
           newBlocks[index] = updatedBlock;
-          this.contentBlocks = newBlocks; // Присваиваем новый массив
-        } else {
-           // console.log(`ContentEditor: Фактических изменений данных не обнаружено для блока ${index}. Пропуск обновления.`);
+          this.contentBlocks = newBlocks;
         }
       } else {
-        console.error(`ContentEditor: Неверный индекс ${index} для обновления блока.`);
+        console.error(`ContentEditor: Invalid index ${index} for block update.`);
       }
     },
 
     /**
-     * Удаляет блок по индексу.
+     * Delete block at index
      */
     deleteBlock(index) {
       if (index >= 0 && index < this.contentBlocks.length) {
         const deletedBlockType = this.contentBlocks[index]?.component || 'unknown';
-        console.log(`ContentEditor: Удаление блока ${deletedBlockType} по индексу ${index}`);
-        // filter создает новый массив, обеспечивая реактивность
+        console.log(`ContentEditor: Deleting ${deletedBlockType} block at index ${index}`);
+        
+        // If we're deleting the active block, reset activeBlockIndex
+        if (this.activeBlockIndex === index) {
+          this.activeBlockIndex = -1;
+        } else if (this.activeBlockIndex > index) {
+          // Adjust activeBlockIndex if we're deleting a block before it
+          this.activeBlockIndex--;
+        }
+        
         this.contentBlocks = this.contentBlocks.filter((_, i) => i !== index);
 
         nextTick(() => {
           if (this.contentBlocks.length === 0) {
-            // Если блоков не осталось, фокусируемся на поле ввода
-            console.log("ContentEditor: Блоков не осталось, фокус на EditorInput.");
+            console.log("ContentEditor: No blocks left, focusing on EditorInput.");
             this.$refs.editorInputRef?.focus();
           } else {
-            // Пытаемся сфокусироваться на предыдущем блоке (или первом, если удалили первый)
             const focusIndex = Math.max(0, index - 1);
-            console.log(`ContentEditor: Попытка фокусировки на блоке ${focusIndex} после удаления.`);
+            console.log(`ContentEditor: Attempting to focus on block ${focusIndex} after deletion.`);
             this.focusBlock(focusIndex);
           }
-          this.scrollToInput(); // Убедимся, что поле ввода видно
+          this.scrollToInput();
         });
       } else {
-        console.error(`ContentEditor: Неверный индекс ${index} для удаления блока.`);
+        console.error(`ContentEditor: Invalid index ${index} for block deletion.`);
       }
     },
 
     /**
-     * Конвертирует блок (например, LinkBlock) в ImageBlock.
+     * Convert a block to image block
      */
     handleConvertToImage({ index, imageUrl, caption, alt }) {
       if (index >= 0 && index < this.contentBlocks.length) {
-        console.log(`ContentEditor: Конвертация блока ${index} в изображение, URL: ${imageUrl}`);
+        console.log(`ContentEditor: Converting block ${index} to image, URL: ${imageUrl}`);
         const imageBlock = {
           component: 'image-block',
           id: generateId(),
-          data: { src: imageUrl, caption: caption || 'Изображение по URL', alt: alt || 'Изображение по URL' }
+          data: { src: imageUrl, caption: caption || 'Image from URL', alt: alt || 'Image from URL' }
         };
         const newBlocks = [...this.contentBlocks];
         newBlocks[index] = imageBlock;
@@ -391,74 +397,73 @@ export default {
       }
     },
 
-    // --- Обработка ввода из EditorInput ---
+    // --- Input handling from EditorInput ---
 
     /**
-     * Обрабатывает ввод команды (например, /code).
+     * Handle command typed (e.g., /code)
      */
     handleCommandTyped(commandType) {
       const action = this.commandActions[commandType];
       if (action) {
-        console.log(`ContentEditor: Выполнение команды /${commandType}`);
+        console.log(`ContentEditor: Executing command /${commandType}`);
         action();
       } else {
-        console.warn(`ContentEditor: Неизвестная команда: /${commandType}`);
-        // Можно добавить как текст, если команда не распознана
-        // this.addTextBlock(`/${commandType} `, this.contentBlocks.length);
+        console.warn(`ContentEditor: Unknown command: /${commandType}`);
       }
     },
 
     handleDirectInput(htmlContent) {
-      console.log("ContentEditor: handleDirectInput вызван");
+      console.log("ContentEditor: handleDirectInput called");
       this.processPastedOrEnteredContent(htmlContent);
     },
 
     handleTextEntered(htmlContent) {
-      console.log("ContentEditor: handleTextEntered вызван");
+      console.log("ContentEditor: handleTextEntered called");
       this.processPastedOrEnteredContent(htmlContent);
     },
 
     /**
-     * Обрабатывает вставленный или введенный текст/HTML, определяет тип контента (URL, Image URL, Text) и добавляет соответствующий блок.
+     * Process pasted or entered content
      */
     processPastedOrEnteredContent(htmlContent) {
       const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = htmlContent; // Используем innerHTML для обработки возможного форматирования
+      tempDiv.innerHTML = htmlContent;
       const textContent = tempDiv.textContent || tempDiv.innerText || "";
       const trimmedText = textContent.trim();
 
-      console.log("ContentEditor: Обработка контента. Текст:", trimmedText);
+      console.log("ContentEditor: Processing content. Text:", trimmedText);
 
       if (!trimmedText) {
-        console.log("ContentEditor: Обработанный контент пуст, игнорирование.");
-        this.$refs.editorInputRef?.clearInput(); // Очищаем инпут в любом случае
+        console.log("ContentEditor: Processed content is empty, ignoring.");
+        this.$refs.editorInputRef?.clearInput();
         return;
       }
 
       if (isValidHttpUrl(trimmedText)) {
-        console.log("ContentEditor: Обнаружен валидный URL:", trimmedText);
+        console.log("ContentEditor: Valid URL detected:", trimmedText);
         if (isImageUrl(trimmedText)) {
-          console.log("ContentEditor: Добавление блока изображения по URL.");
+          console.log("ContentEditor: Adding image block from URL.");
           this.addImageBlockFromUrl(trimmedText, this.contentBlocks.length);
         } else {
-          console.log("ContentEditor: Добавление блока ссылки по URL.");
+          console.log("ContentEditor: Adding link block from URL.");
           this.addLinkBlockWithUrl(trimmedText, this.contentBlocks.length);
         }
       } else {
-        console.log("ContentEditor: Добавление текстового блока.");
-        // Используем исходный htmlContent, чтобы сохранить базовое форматирование (если было)
+        console.log("ContentEditor: Adding text block.");
         this.addTextBlock(htmlContent, this.contentBlocks.length);
       }
-
-      // Очистка инпута и фокусировка обрабатываются внутри методов add*Block
     },
 
-    // --- Загрузка файлов ---
+    // --- File uploads ---
 
     handleImageUpload(event) {
       const file = event.target.files?.[0];
       if (!file || !file.type.startsWith('image/')) return;
-      console.log("ContentEditor: Обработка загрузки изображения:", file.name);
+      console.log("ContentEditor: Processing image upload:", file.name);
+      
+      // Deactivate all blocks before adding new one
+      this.deactivateAllBlocks();
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         this.addBlock({
@@ -468,71 +473,81 @@ export default {
         this.scrollToInput();
       };
       reader.readAsDataURL(file);
-      event.target.value = ''; // Сбрасываем значение инпута
+      event.target.value = '';
       this.$refs.editorInputRef?.clearInput();
     },
 
     handleFileUpload(event) {
       const file = event.target.files?.[0];
       if (!file) return;
-      console.log("ContentEditor: Обработка загрузки файла:", file.name);
-      // ВАЖНО: Object URL должен быть освобожден (URL.revokeObjectURL), когда блок или компонент уничтожается.
-      // Это лучше делать внутри FileBlock.vue в хуке unmounted/beforeUnmount.
+      console.log("ContentEditor: Processing file upload:", file.name);
+      
+      // Deactivate all blocks before adding new one
+      this.deactivateAllBlocks();
+      
       this.addBlock({
         component: 'file-block',
-        data: { name: file.name, size: file.size, fileUrl: URL.createObjectURL(file) /*, fileObject: file // Если нужно хранить сам файл */ }
+        data: { name: file.name, size: file.size, fileUrl: URL.createObjectURL(file) }
       }, this.contentBlocks.length);
-      event.target.value = ''; // Сбрасываем значение инпута
+      event.target.value = '';
       this.scrollToInput();
       this.$refs.editorInputRef?.clearInput();
     },
 
-    // --- Фокус и прокрутка ---
+    // --- Focus and scrolling ---
 
     /**
-     * Обрабатывает событие фокуса от дочернего блока (опционально).
+     * Handle focus event from child block
      */
     handleBlockFocus(index) {
-       // console.log(`ContentEditor: Блок ${index} получил фокус`);
-       this.lastFocusedBlockIndex = index;
+      console.log(`ContentEditor: Block ${index} received focus`);
+      
+      // Deactivate previous active block if different
+      if (this.activeBlockIndex !== -1 && this.activeBlockIndex !== index) {
+        const prevComponent = this.blockRefs[this.activeBlockIndex];
+        if (prevComponent && typeof prevComponent.exitEditMode === 'function') {
+          prevComponent.exitEditMode();
+        }
+      }
+      
+      this.activeBlockIndex = index;
     },
 
     /**
-     * Устанавливает фокус на указанный блок.
+     * Focus on specified block
      */
     focusBlock(index) {
-      // Используем nextTick, чтобы гарантировать, что DOM обновлен после добавления/удаления блока
       nextTick(() => {
         const componentRef = this.blockRefs[index];
-        console.log(`ContentEditor: Попытка фокусировки на блоке ${index}. Реф найден:`, !!componentRef);
+        console.log(`ContentEditor: Attempting to focus on block ${index}. Ref found:`, !!componentRef);
 
         if (componentRef) {
-          // 1. Предпочтительный способ: вызвать метод focusEditor у компонента блока
           if (typeof componentRef.focusEditor === 'function') {
-            console.log(`ContentEditor: Вызов focusEditor для компонента ${index}`);
-            componentRef.focusEditor(); // Предполагается, что блок реализует этот метод
+            console.log(`ContentEditor: Calling focusEditor for component ${index}`);
+            componentRef.focusEditor();
+            this.activeBlockIndex = index;
           }
-          // 2. Запасной способ: сфокусироваться на корневом элементе компонента блока
           else if (componentRef.$el && typeof componentRef.$el.focus === 'function') {
-            console.warn(`ContentEditor: Блок ${index} (${componentRef.$options.name}) не имеет метода focusEditor. Фокусировка на корневом $el.`);
-            componentRef.$el.focus({ preventScroll: false }); // Фокусируем сам элемент
-            // Дополнительно прокручиваем к элементу
+            console.warn(`ContentEditor: Block ${index} (${componentRef.$options.name}) has no focusEditor method. Focusing on root $el.`);
+            componentRef.$el.focus({ preventScroll: false });
             componentRef.$el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            this.activeBlockIndex = index;
           }
-          // 3. Не удалось сфокусироваться
           else {
-            console.warn(`ContentEditor: Не удалось программно сфокусироваться на блоке ${index} (нет focusEditor или фокусируемого $el).`);
-            this.scrollToInput(); // Возвращаемся к полю ввода
+            console.warn(`ContentEditor: Unable to programmatically focus on block ${index} (no focusEditor or focusable $el).`);
+            this.scrollToInput();
+            this.activeBlockIndex = -1;
           }
         } else {
-          console.warn(`ContentEditor: Не найден реф компонента для индекса ${index}. Невозможно сфокусироваться.`);
-          this.scrollToInput(); // Возвращаемся к полю ввода
+          console.warn(`ContentEditor: No component ref found for index ${index}. Cannot focus.`);
+          this.scrollToInput();
+          this.activeBlockIndex = -1;
         }
       });
     },
 
     /**
-     * Прокручивает к компоненту EditorInput.
+     * Scroll to EditorInput component
      */
     scrollToInput() {
       nextTick(() => {
@@ -541,7 +556,7 @@ export default {
     },
 
     /**
-     * Очищает поле ввода EditorInput.
+     * Clear EditorInput
      */
     clearEditorInput() {
       this.$refs.editorInputRef?.clearInput();
@@ -549,42 +564,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.content-blocks {
-  padding-bottom: 1rem;
-}
-
-.drag-handle {
-  color: #888;
-  transition: opacity 0.2s ease;
-}
-
-.drag-handle:hover {
-  color: #333;
-}
-
-.drag-active {
-  opacity: 0.8;
-}
-
-/* Анимация для перетаскиваемых элементов */
-.flip-list-move {
-  transition: transform 0.2s;
-}
-
-/* Стиль для состояния перетаскивания */
-.sortable-chosen {
-  opacity: 0.8;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-radius: 4px;
-}
-
-/* Стиль для места, куда можно перетащить элемент */
-.sortable-ghost {
-  opacity: 0.5;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-</style>
-
