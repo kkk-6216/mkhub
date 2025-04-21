@@ -14,6 +14,7 @@
       :animation="200"
       @start="dragStart"
       @end="dragEnd"
+      :forceFallback="true"
     >
       <template #item="{ element: block, index }">
         <div
@@ -24,25 +25,30 @@
         >
           <!-- Кнопка для перетаскивания -->
           <button
-            class="drag-handle absolute left-[-30px] top-[5px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move"
+            class="drag-handle absolute left-[5px] top-[5px] z-10  opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move p-1 bg-white bg-opacity-50 rounded /* Optional styling */"
             :class="{ 'opacity-100': isDragging || hoveredBlockIndex === index }"
+            title="Перетащить блок"
           >
-          <ChevronUpDown class="h-5 w-5" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="black" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+          </svg>
 
           </button>
 
           <!-- Сам блок контента -->
-          <component
-            :is="blockComponents[block.component]"
-            :ref="(el) => { if (el) blockRefs[index] = el; }"
-            :data="block.data"
-            :index="index"
-            @update="handleBlockUpdate"
-            @delete="deleteBlock(index)"
-            @request-new-block-after="insertNewBlockAfter"
-            @convert-to-image="handleConvertToImage"
-            @focus="handleBlockFocus(index)"
-          />
+          <div class="pl-[35px] pt-[5px]">
+            <component
+              :is="blockComponents[block.component]"
+              :ref="(el) => { if (el) blockRefs[index] = el; }"
+              :data="block.data"
+              :index="index"
+              @update="handleBlockUpdate"
+              @delete="deleteBlock(index)"
+              @request-new-block-after="insertNewBlockAfter"
+              @convert-to-image="handleConvertToImage"
+              @focus="handleBlockFocus(index)"
+            />
+          </div>
         </div>
       </template>
     </draggable>
@@ -66,11 +72,11 @@ import ImageBlock from '@/modules/content/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/blocks/FileBlock.vue';
 import LinkBlock from '@/modules/content/blocks/LinkBlock.vue';
 import CodeBlock from '@/modules/content/blocks/CodeBlock.vue';
+import FormulaBlock from '@/modules/content/blocks/FormulaBlock.vue';
 import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.vue';
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
-import ChevronUpDown from '@heroicons/vue/24/outline';
 
 // Утилиты
 const isValidHttpUrl = (string) => {
@@ -93,10 +99,10 @@ export default {
     ImageBlock,
     FileBlock,
     LinkBlock,
-    CodeBlock, // CodeBlock зарегистрирован
+    CodeBlock,
+    FormulaBlock,
     EditorInput,
-    draggable,
-    ChevronUpDown
+    draggable 
   },
   props: {
     initialContent: { type: Array, default: () => [] }
@@ -113,7 +119,8 @@ export default {
         'image-block': ImageBlock,
         'file-block': FileBlock,
         'link-block': LinkBlock,
-        'code-block': CodeBlock // Маппинг для CodeBlock
+        'code-block': CodeBlock,
+        'formula-block': FormulaBlock// Маппинг для CodeBlock
       },
       lastFocusedBlockIndex: -1, // Опционально: для отслеживания фокуса
       isMounted: false, // Флаг для предотвращения действий до монтирования
@@ -129,7 +136,8 @@ export default {
         image: () => this.$refs.imageInputRef?.click(),
         file: () => this.$refs.fileInputRef?.click(),
         link: () => this.addLinkBlock(this.contentBlocks.length),
-        code: () => this.addCodeBlock(this.contentBlocks.length) // Команда для CodeBlock
+        code: () => this.addCodeBlock(this.contentBlocks.length),
+        formula: () => this.addFormulaBlock(this.contentBlocks.length) // Команда для CodeBlock
       };
     }
   },
@@ -233,6 +241,19 @@ export default {
       const currentBlocks = [...this.contentBlocks];
       currentBlocks.splice(index, 0, newBlock);
       this.contentBlocks = currentBlocks; // Присваиваем новый массив
+    },
+
+    // Добавьте метод
+    addFormulaBlock(index) {
+      console.log(`ContentEditor: Добавление блока формулы по индексу ${index}`);
+      this.addBlock({
+        component: 'formula-block',
+        data: { latex: '', displayMode: true }
+      }, index);
+      this.$refs.editorInputRef?.clearInput();
+      nextTick(() => {
+        this.focusBlock(index);
+      });
     },
 
     /**

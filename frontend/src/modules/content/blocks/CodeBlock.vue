@@ -3,7 +3,7 @@
     class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4   duration-200 resize-y min-h-[200px]"
   >
     <!-- Языковая метка -->
-    <div class="absolute top-1 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
+    <div class="absolute top-2 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
       {{ detectedLanguage }}
     </div>
 

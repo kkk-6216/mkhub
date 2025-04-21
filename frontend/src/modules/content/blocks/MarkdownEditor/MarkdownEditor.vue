@@ -1,76 +1,66 @@
 <template>
-  <div 
-    :class="{
-      'bg-gray-100 min-h-100 mb-2 p-4 rounded-md': !isFinalView, 
-      'final-view-active mb-2': isFinalView      
-    }"
-  >
-    <!-- Header -->
-    <EditorMenu 
-      v-if="!isFinalView"
-      @clear="clearEditor"
-      @show-help="showHelpModal = true"
-      @finish="finishEditing"
-    />
+  <div :class="['mb-2', !isFinalView ? 'bg-gray-100 min-h-150 p-4 rounded-md' : 'final-view-active']">
+    <!-- Editor Mode -->
+    <template v-if="!isFinalView">
+      <EditorMenu 
+        @clear="clearEditor"
+        @show-help="showHelpModal = true"
+        @finish="finishEditing"
+      />
 
-    <!-- Main Toolbar -->
-    <FormattingToolbar 
-      v-if="!isFinalView"
-      @format="handleFormat"
-      @heading="addHeader"
-      @align="setTextAlign"
-      @list="handleList"
-      @insert="handleInsert"
-      @color="setTextColor"
-      @color-reset="resetTextColor"
-      @font-size="setFontSize"
-      @font-size-reset="resetFontSize"
-    />
+      <FormattingToolbar 
+        @format="handleFormat"
+        @heading="addHeader"
+        @align="setTextAlign"
+        @list="handleList"
+        @insert="handleInsert"
+        @color="setTextColor"
+        @color-reset="resetTextColor"
+        @font-size="setFontSize"
+        @font-size-reset="resetFontSize"
+      />
 
-    <!-- Editor and Preview Area -->
-    <div v-if="!isFinalView" class="flex flex-col md:flex-row gap-4">
+      <div class="flex flex-col md:flex-row gap-4">
+        <!-- Editor -->
+        <div class="w-full md:w-1/2">
+          <textarea
+            ref="editor"
+            v-model="markdownText"
+            @input="updatePreview"
+            @keydown="handleKeyDown"
+            class="w-full h-[60vh] p-4 border border-gray-300 rounded-lg bg-white shadow-sm resize-none font-mono text-sm text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            placeholder="Write your markdown here..."
+            spellcheck="false"
+          ></textarea>
 
-      <!-- Editor -->
-      <div class="editor-wrapper w-full md:w-1/2">
-
-        <textarea
-          ref="editor"
-          v-model="markdownText"
-          @input="handleInput" 
-          @keydown="handleKeyDown"
-          class="editor w-full h-[60vh] p-4 border border-gray-300 rounded-lg bg-white shadow-sm resize-none font-mono text-sm text-gray-800 leading-relaxed transition-all"
-          placeholder="Write your markdown here..."
-          spellcheck="false"
-        ></textarea>
-
-        <div class="text-xs text-gray-500 mt-2 flex gap-4">
-          <span>Lines: {{ lineCount }}</span>
-          <span>Words: {{ wordCount }}</span>
-          <span>Chars: {{ charCount }}</span>
+          <div class="text-xs text-gray-500 mt-2 flex gap-4">
+            <span>Lines: {{ lineCount }}</span>
+            <span>Words: {{ wordCount }}</span>
+            <span>Chars: {{ charCount }}</span>
+          </div>
         </div>
 
-      </div>
-
-      <!-- Preview -->
-      <div class="preview-wrapper w-full md:w-1/2">
-        <div
-          class="preview p-6 border border-gray-300 rounded-lg bg-white overflow-y-auto shadow-sm h-[60vh] prose max-w-none prose-sm prose-headings:font-semibold prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-red-600 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-table:border-collapse prose-table:w-full prose-table:my-4 prose-th:bg-gray-100 prose-th:font-semibold prose-td:border prose-th:border prose-img:rounded-lg"
-          v-html="renderedMarkdown">
-        </div>
-        <div class="text-xs text-gray-500 mt-2 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Live Preview
+        <!-- Preview -->
+        <div class="w-full md:w-1/2">
+          <div
+            class="p-6 border border-gray-300 rounded-lg bg-white overflow-y-auto shadow-sm h-[60vh] prose max-w-none prose-sm"
+            v-html="renderedMarkdown">
+          </div>
+          <div class="text-xs text-gray-500 mt-2 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Live Preview
+          </div>
         </div>
       </div>
-    </div>
+    </template>
 
-    <!-- Final Preview View section -->
-    <div v-if="isFinalView" class="final-preview-container relative group hover:bg-gray-50 rounded-md">
+    <!-- Final Preview View -->
+    <div v-else class="relative group hover:bg-gray-50 rounded-md">
       <div
-        class="preview-final p-2 w-full prose max-w-none mx-auto ..."
+        class="p-2 w-full prose max-w-none mx-auto"
         v-html="renderedMarkdown">
       </div>
 
@@ -79,18 +69,17 @@
           @copy="copyContent"
           @download="downloadContent"
           @delete="$emit('delete', index)"
-          @edit="returnToEditing"  
-          :showEdit="true"        
+          @edit="returnToEditing"
+          :showEdit="true"
           :showDelete="true"
         />
       </div>
-  </div>
+    </div>
 
-  <!-- Help Modal -->
-  <HelpModal 
-        :show="showHelpModal"
-        @close="showHelpModal = false"
-      />
+    <HelpModal 
+      :show="showHelpModal"
+      @close="showHelpModal = false"
+    />
   </div>
 </template>
 
@@ -99,6 +88,36 @@ import EditorMenu from '@/modules/content/blocks/MarkdownEditor/components/Edito
 import FormattingToolbar from '@/modules/content/blocks/MarkdownEditor/components/FormattingToolbar.vue';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 import HelpModal from '@/modules/content/blocks/MarkdownEditor/components/HelpModal.vue';
+import MarkdownIt from 'markdown-it';
+
+const COLOR_MAP = {
+  red: 'text-red-600',
+  blue: 'text-blue-600',
+  green: 'text-green-600',
+  yellow: 'text-yellow-600',
+  purple: 'text-purple-600',
+  gray: 'text-gray-600'
+};
+
+const SHORTCUTS = {
+  'b': 'addBold',
+  'i': 'addItalic'
+};
+
+const FORMAT_ACTIONS = {
+  bold: 'addBold',
+  italic: 'addItalic',
+  strikethrough: 'addStrikethrough',
+  blockquote: 'addBlockquote',
+  'inline-code': 'addInlineCode',
+  underline: 'addUnderline'
+};
+
+const INSERT_ACTIONS = {
+  link: 'addLink',
+  table: 'addTable',
+  hr: 'addHorizontalRule'
+};
 
 export default {
   components: {
@@ -107,12 +126,11 @@ export default {
     OptionsMenu,
     HelpModal 
   },
-  // --- NEW: Define props ---
+  
   props: {
     data: {
       type: Object,
       required: true,
-      // Provide a default structure, especially for text
       default: () => ({ text: '' })
     },
     index: {
@@ -120,19 +138,20 @@ export default {
       required: true
     }
   },
-  // --- NEW: Define emits ---
+  
   emits: ['update', 'delete', 'request-new-block-after'],
+  
   data() {
     return {
-      // --- MODIFIED: Initialize from prop ---
-      markdownText: this.data?.text || '', // Use optional chaining and fallback
+      markdownText: this.data?.text || '',
       renderedMarkdown: '',
       showHelpModal: false,
       isFinalView: false,
-      showHelpModal: false,
-      isInternalChange: false
+      isInternalChange: false,
+      md: null
     };
   },
+  
   computed: {
     charCount() {
       return this.markdownText.length;
@@ -142,298 +161,130 @@ export default {
     },
     lineCount() {
       const lines = this.markdownText.split('\n');
-      if (lines.length === 1 && lines[0] === '') return 0;
-      return lines.length;
+      return lines.length === 1 && !lines[0] ? 0 : lines.length;
     }
   },
-  // --- NEW: Add watchers ---
+  
   watch: {
-    // Watch for external changes to the data prop
     'data.text'(newText) {
-      // Only update if the prop changed externally and differs from internal state
       if (!this.isInternalChange && newText !== this.markdownText) {
-        console.log(`MarkdownEditor ${this.index}: Prop data.text changed, updating markdownText.`);
         this.markdownText = newText || '';
-        // No need to emit update here, it came from outside
-        this.updatePreview(); // Re-render markdown when prop changes
+        this.updatePreview();
       }
-      // Reset flag after handling potential external change
       this.isInternalChange = false;
     },
-    // Watch for internal changes to markdownText to emit updates
-    markdownText(newValue) {
-      this.isInternalChange = true; // Mark change as internal
-      console.log(`MarkdownEditor ${this.index}: Internal markdownText changed, emitting update.`);
-      // Debounce or throttle this emit in real applications if needed
-      this.$emit('update', { index: this.index, newData: { text: newValue } });
-      // updatePreview is implicitly called by v-model binding on textarea,
-      // but calling explicitly ensures consistency if v-model logic changes.
+    markdownText() {
+      this.isInternalChange = true;
+      this.$emit('update', { index: this.index, newData: { text: this.markdownText } });
       this.updatePreview();
     }
   },
+  
+  created() {
+    this.initMarkdownIt();
+  },
+  
   mounted() {
     this.updatePreview();
+    this.applyTailwindStylesToPreview();
   },
-  beforeUnmount() {
-  },
+  
   methods: {
-    handleFormat(type) {
-      switch(type) {
-        case 'bold': this.addBold(); break;
-        case 'italic': this.addItalic(); break;
-        case 'strikethrough': this.addStrikethrough(); break;
-        case 'blockquote': this.addBlockquote(); break;
-        case 'inline-code': this.addInlineCode(); break;
-        case 'underline': this.addUnderline(); break;
+  
+    initMarkdownIt() {
+      this.md = new MarkdownIt({
+        html: true,
+        xhtmlOut: true,
+        breaks: true,
+        linkify: true,
+        typographer: true
+      });
+      
+      this.configureMarkdownRenderer();
+    },
+    
+    configureMarkdownRenderer() {
+      const { renderer } = this.md;
+      const rules = renderer.rules;
+     
+      const defaultLinkRenderer = rules.link_open || 
+        ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
+      
+      rules.link_open = (tokens, idx, options, env, self) => {
+        tokens[idx].attrPush(['target', '_blank'], ['rel', 'noopener noreferrer']);
+        return defaultLinkRenderer(tokens, idx, options, env, self);
       }
+      this.configureListRenderer(rules);
     },
-    handleList(type) {
-      if (type === 'unordered') this.addList();
-      else this.addOrderedList();
-    },
-    handleInsert(type) {
-      switch(type) {
-        case 'link': this.addLink(); break;
-        case 'table': this.addTable(); break;
-        case 'hr': this.addHorizontalRule(); break;
-      }
-    },
-    // --- NEW: Handle textarea input ---
-    handleInput() {
-        // v-model already updates markdownText.
-        // The watcher for markdownText will handle emitting the update.
-        // We still need updatePreview if not relying solely on the watcher triggering it.
-        // this.updatePreview(); // updatePreview is called via watcher now
-    },
-    setFontSize(size) {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`<span style="font-size: ${size};">${selection.text}</span>`);
-      } else {
-        this.insertAtCursor(`<span style="font-size: ${size};">sized text</span>`, false);
-      }
-    },
-    resetFontSize() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        const resetText = selection.text.replace(/<span style="font-size: [^"]+">([^<]+)<\/span>/g, '$1');
-        this.replaceSelection(resetText);
-      }
-    },
-    updatePreview() {
-      this.renderedMarkdown = this.convertMarkdownToHtml(this.markdownText);
-    },
-    convertMarkdownToHtml(markdown) {
-      if (!markdown) return '';
-      let html = markdown;
-
-      const htmlPlaceholders = [];
-
-      const protectHtml = (html) => {
-        return html.replace(/<([a-z][a-z0-9]*)\b[^>]*>([\s\S]*?)<\/\1>/gi, (match) => {
-          htmlPlaceholders.push(match);
-          return `__HTMLPLACEHOLDER_${htmlPlaceholders.length - 1}__`;
-        });
-      };
-
-      const restoreHtml = (processedHtml) => {
-        let result = processedHtml;
-        for (let i = 0; i < htmlPlaceholders.length; i++) {
-          const placeholderRegex = new RegExp(`__HTMLPLACEHOLDER_${i}__`, 'g');
-          result = result.replace(placeholderRegex, htmlPlaceholders[i]);
-        }
-        return result;
-      };
-
-      html = protectHtml(html);
-
-      // Tables
-      html = html.replace(/^\|(.*\|)+\s*\n\|([\s:\-\|]+)\|\s*\n(\|.*\|\n?)*$/gm, (match) => {
-        // Split the match into rows
-        const rows = match.split('\n').filter(row => row.trim());
+    
+    configureListRenderer(rules) {
+      const setRenderer = (ruleName, className) => {
+        const defaultRenderer = rules[ruleName] || 
+          ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
         
-        if (rows.length < 2) return match; 
-        
-        const headerRow = rows[0];
-        const delimiterRow = rows[1];
-        const bodyRows = rows.slice(2);
-        
-
-        const extractCells = (row) => {
-          return row.split('|')
-            .slice(1, -1) 
-            .map(cell => cell.trim());
+        rules[ruleName] = (tokens, idx, options, env, self) => {
+          tokens[idx].attrPush(['class', className]);
+          return defaultRenderer(tokens, idx, options, env, self);
         };
-        
-        
-        const headers = extractCells(headerRow);
-        
-      
-        const alignments = extractCells(delimiterRow).map(delim => {
-          delim = delim.trim();
-          const hasLeft = delim.startsWith(':');
-          const hasRight = delim.endsWith(':');
-          if (hasLeft && hasRight) return 'center';
-          if (hasRight) return 'right';
-          return 'left';
-        });
-        
-      
-        let tableHtml = '<table class="markdown-table w-full border-collapse my-4">\n';
-        
-      
-        tableHtml += '<thead>\n<tr>\n';
-        headers.forEach((header, i) => {
-          const align = alignments[i] || 'left';
-          tableHtml += `  <th class="border px-4 py-2 text-${align} bg-gray-100">${this.processInlineElements(header)}</th>\n`;
-        });
-        tableHtml += '</tr>\n</thead>\n';
-        
-
-        tableHtml += '<tbody>\n';
-        bodyRows.forEach(row => {
-          if (!row.trim()) return; 
-          
-          const cells = extractCells(row);
-          tableHtml += '<tr>\n';
-          
-          headers.forEach((_, i) => {
-            const align = alignments[i] || 'left';
-            const cellContent = cells[i] || '';
-            tableHtml += `  <td class="border px-4 py-2 text-${align}">${this.processInlineElements(cellContent)}</td>\n`;
-          });
-          
-          tableHtml += '</tr>\n';
-        });
-        
-        tableHtml += '</tbody>\n</table>';
-        return tableHtml;
-      });
-
-      // Blockquotes
-      html = html.replace(/^> (.*(?:\n> .*)*)/gm, (match, content) => {
-        const lines = content.replace(/^> /gm, '');
-        return `\n<blockquote class="border-l-4 border-gray-300 pl-4 italic text-gray-700 my-2">${this.processInlineElements(lines.trim())}</blockquote>\n`;
-      });
-      html = html.replace(/<\/blockquote>\n?<blockquote class="[^"]*">/g, '<br>');
-
-      // Horizontal Rule
-      html = html.replace(/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/gm, '\n<hr class="my-4 border-t border-gray-300">\n');
-
-      // Lists
-      const processList = (html, isOrdered) => {
-        const marker = isOrdered ? '\\d+\\.' : '[-*+]';
-        const regex = new RegExp(`^(\\s*)(${marker})\\s+(.*?)$`, 'gm');
-        const matches = [];
-        let match;
-        while ((match = regex.exec(html)) !== null) {
-          matches.push({
-            fullMatch: match[0],
-            indent: match[1].length,
-            marker: match[2],
-            content: match[3],
-            index: match.index,
-            length: match[0].length
-          });
-        }
-
-        if (matches.length === 0) return html;
-
-        const lists = [];
-        let currentList = null;
-        matches.forEach((item, index) => {
-          if (!currentList || (index > 0 && matches[index - 1].index + matches[index - 1].length + 1 < item.index)) {
-            if (currentList) lists.push(currentList);
-            currentList = {
-              items: [item],
-              isOrdered,
-              startIndex: item.index,
-              endIndex: item.index + item.length
-            };
-            if (isOrdered) {
-              currentList.startNumber = parseInt(item.marker, 10);
-            }
-          } else {
-            currentList.items.push(item);
-            currentList.endIndex = item.index + item.length;
-          }
-        });
-        if (currentList) lists.push(currentList);
-
-        let resultHtml = '';
-        let currentPosition = 0;
-
-        lists.forEach(list => {
-          resultHtml += html.substring(currentPosition, list.startIndex);
-          const tag = list.isOrdered ? 'ol' : 'ul';
-          const listClass = list.isOrdered ? 'list-decimal' : 'list-disc';
-          const startAttr = list.isOrdered ? ` start="${list.startNumber}"` : '';
-          resultHtml += `\n<${tag}${startAttr} class="${listClass} pl-5 my-2">\n`;
-          list.items.forEach(item => {
-            resultHtml += `<li class="my-1">${this.processInlineElements(item.content)}</li>\n`;
-          });
-          resultHtml += `</${tag}>\n`;
-          currentPosition = list.endIndex;
-        });
-
-        resultHtml += html.substring(currentPosition);
-        return resultHtml;
       };
-
-      html = processList(html, false); // Unordered
-      html = processList(html, true);  // Ordered
-
-      // Headers
-      html = html.replace(/^###### (.*$)/gm, '\n<h6 class="text-sm font-semibold mt-4 mb-2">$1</h6>\n');
-      html = html.replace(/^##### (.*$)/gm, '\n<h5 class="text-base font-semibold mt-4 mb-2">$1</h5>\n');
-      html = html.replace(/^#### (.*$)/gm, '\n<h4 class="text-lg font-semibold mt-4 mb-2">$1</h4>\n');
-      html = html.replace(/^### (.*$)/gm, '\n<h3 class="text-xl font-semibold mt-5 mb-3">$1</h3>\n');
-      html = html.replace(/^## (.*$)/gm, '\n<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>\n');
-      html = html.replace(/^# (.*$)/gm, '\n<h1 class="text-3xl font-bold mt-6 mb-4">$1</h1>\n');
-
-      html = restoreHtml(html);
-
-      // Paragraphs
-      html = html.split(/\n{2,}/).map(paragraph => {
-        const trimmed = paragraph.trim();
-        if (!trimmed) return '';
-        if (/^<(h[1-6]|ul|ol|li|blockquote|pre|hr|table|p|div|span|u|code)[\s>]/i.test(trimmed)) {
-          return trimmed;
-        }
-        const processed = this.processInlineElements(trimmed);
-        return `<p class="my-3">${processed.replace(/\n/g, '<br>\n')}</p>`;
-      }).join('\n\n');
-
-      html = html.replace(/(<\/(?:ul|ol|table|blockquote|pre)>)\s*(?=<)/g, '$1\n');
-      html = html.replace(/<\/li><br>\n<li/g, '</li><li');
-      html = html.replace(/<p class="[^"]*">\s*<\/p>/g, '');
-      html = html.replace(/<p>(\s*<(?:ul|ol|blockquote|pre|hr|table)[^>]*>[\s\S]*?<\/(?:ul|ol|blockquote|pre|hr|table)>)\s*<\/p>/g, '$1');
-
-      return html.trim();
-
-    },
-    processInlineElements(text) {
-      if (!text) return '';
-      let processedText = text;
       
-      // Защита от некорректного HTML
-      if (/<ol|<ul|<li|<\/ol|<\/ul|<\/li/i.test(text)) {
-        return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      }
-
-      processedText = processedText.replace(/\[([^\]]+)]\(([^)\s]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>');
-      processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      processedText = processedText.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-      processedText = processedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      processedText = processedText.replace(/_([^_]+)_/g, '<em>$1</em>');
-      processedText = processedText.replace(/~~([^~]+)~~/g, '<del>$1</del>');
-      processedText = processedText.replace(/`([^`]+)`/g,
-        '<code class="bg-gray-100 px-1 py-0.5 rounded text-red-600 font-mono text-sm">$1</code>');
-
-      return processedText;
-
+      setRenderer('list_item_open', 'py-1');
+      setRenderer('bullet_list_open', 'list-disc pl-5 my-2');
+      setRenderer('ordered_list_open', 'list-decimal pl-5 my-2');
     },
+    
+    updatePreview() {
+      try {
+        this.renderedMarkdown = this.md.render(this.markdownText);
+        this.$nextTick(this.applyTailwindStylesToPreview);
+      } catch (error) {
+        console.error('Markdown rendering error:', error);
+        this.renderedMarkdown = `<div class="text-red-600">Error rendering markdown: ${error.message}</div>`;
+      }
+    },
+    
+    applyTailwindStylesToPreview() {
+      if (!this.$el) return;
+      
+      const previewEl = this.$el.querySelector('.prose');
+      if (!previewEl) return;
+      
+      const styleMap = {
+        'ul': ['list-disc', 'pl-5', 'my-2', 'space-y-1'],
+        'ol': ['list-decimal', 'pl-5', 'my-2', 'space-y-1'],
+        'li': ['py-1'],
+        'h1': ['text-2xl', 'font-bold', 'my-4'],
+        'h2': ['text-xl', 'font-bold', 'my-3'],
+        'h3': ['text-lg', 'font-bold', 'my-2'],
+        'blockquote': ['pl-4', 'border-l-4', 'border-gray-300', 'italic', 'my-2', 'text-gray-600'],
+        'a': ['text-blue-600', 'hover:underline'],
+        'pre': ['bg-gray-100', 'p-3', 'rounded', 'my-2', 'overflow-x-auto'],
+        'code:not(pre code)': ['bg-gray-100', 'px-1', 'rounded', 'text-red-600', 'font-mono', 'text-sm']
+      };
+      
+      Object.entries(styleMap).forEach(([selector, classes]) => {
+        previewEl.querySelectorAll(selector).forEach(el => {
+          classes.forEach(cls => {
+            if (!el.classList.contains(cls)) {
+              el.classList.add(cls);
+            }
+          });
+        });
+      });
+      
+      previewEl.querySelectorAll('table').forEach(table => {
+        table.classList.add('border-collapse', 'border', 'border-gray-300', 'my-4', 'w-full');
+        
+        table.querySelectorAll('th').forEach(th => {
+          th.classList.add('border', 'border-gray-300', 'bg-gray-100', 'p-2', 'text-left');
+        });
+        
+        table.querySelectorAll('td').forEach(td => {
+          td.classList.add('border', 'border-gray-300', 'p-2');
+        });
+      });
+    },
+    
     getSelectedText() {
       const textarea = this.$refs.editor;
       const start = textarea.selectionStart;
@@ -444,6 +295,7 @@ export default {
         end
       };
     },
+    
     insertAtCursor(text, moveCaretAfter = true) {
       const textarea = this.$refs.editor;
       const startPos = textarea.selectionStart;
@@ -469,9 +321,9 @@ export default {
             textarea.selectionStart = textarea.selectionEnd = cursorPos - 1;
           }
         }
-        this.updatePreview();
       });
     },
+    
     replaceSelection(text) {
       const textarea = this.$refs.editor;
       const startPos = textarea.selectionStart;
@@ -486,41 +338,56 @@ export default {
         textarea.focus();
         textarea.selectionStart = startPos;
         textarea.selectionEnd = startPos + text.length;
-        this.updatePreview();
       });
     },
+    
+    handleFormat(type) {
+      const method = FORMAT_ACTIONS[type];
+      if (method && this[method]) {
+        this[method]();
+      }
+    },
+    
+    handleList(type) {
+      type === 'unordered' ? this.addList() : this.addOrderedList();
+    },
+    
+    handleInsert(type) {
+      const method = INSERT_ACTIONS[type];
+      if (method && this[method]) {
+        this[method]();
+      }
+    },
+    
+    wrapSelection(wrapStart, wrapEnd, placeholder = '') {
+      const selection = this.getSelectedText();
+      if (selection.text) {
+        this.replaceSelection(`${wrapStart}${selection.text}${wrapEnd}`);
+      } else {
+        this.insertAtCursor(`${wrapStart}${placeholder}${wrapEnd}`, false);
+      }
+    },
+    
     addBold() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`**${selection.text}**`);
-      } else {
-        this.insertAtCursor('**bold text**', false);
-      }
+      this.wrapSelection('**', '**', 'bold text');
     },
+    
     addItalic() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`*${selection.text}*`);
-      } else {
-        this.insertAtCursor('*italic text*', false);
-      }
+      this.wrapSelection('*', '*', 'italic text');
     },
+    
     addStrikethrough() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`~~${selection.text}~~`);
-      } else {
-        this.insertAtCursor('~~strikethrough text~~', false);
-      }
+      this.wrapSelection('~~', '~~', 'strikethrough text');
     },
+    
     addInlineCode() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`\`${selection.text}\``);
-      } else {
-        this.insertAtCursor('`code`', false);
-      }
+      this.wrapSelection('`', '`', 'code');
     },
+    
+    addUnderline() {
+      this.wrapSelection('<u>', '</u>', 'underlined text');
+    },
+    
     addBlockquote() {
       const selection = this.getSelectedText();
       if (selection.text) {
@@ -533,25 +400,14 @@ export default {
         this.insertAtCursor('> blockquote text\n', false);
       }
     },
-    addUnderline() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`<u>${selection.text}</u>`);
-      } else {
-        this.insertAtCursor('<u>underlined text</u>', false);
-      }
-    },
+    
     addHeader(level) {
       const selection = this.getSelectedText();
       const prefix = '#'.repeat(level) + ' ';
       
       if (selection.text) {
-        if (/^#+\s/.test(selection.text)) {
-          const newText = selection.text.replace(/^#+\s/, prefix);
-          this.replaceSelection(newText);
-        } else {
-          this.replaceSelection(`${prefix}${selection.text}`);
-        }
+        const newText = selection.text.replace(/^#+\s/, prefix);
+        this.replaceSelection(newText.startsWith(prefix) ? newText : `${prefix}${selection.text}`);
       } else {
         const lineStart = this.markdownText.lastIndexOf('\n', selection.start - 1) + 1;
         const lineEnd = this.markdownText.indexOf('\n', selection.start);
@@ -570,9 +426,9 @@ export default {
           this.insertAtCursor(`${prefix}Heading ${level}\n`);
         }
       }
-      
-      this.updatePreview();
     },
+    
+    
     addLink() {
       const selection = this.getSelectedText();
       if (selection.text) {
@@ -585,26 +441,30 @@ export default {
         this.insertAtCursor('[link text](https://example.com)', false);
       }
     },
+    
     addList() {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        const lines = selection.text.split('\n');
-        const bulletedLines = lines.map(line => `- ${line}`).join('\n');
-        this.replaceSelection(bulletedLines);
-      } else {
-        this.insertAtCursor('- List item\n- Another item\n');
-      }
+      this.formatLines('- ', 'List item');
     },
+    
     addOrderedList() {
+      this.formatLines('1. ', 'First item', (lines, index) => 
+        `${index + 1}. ${lines[index].replace(/^\d+\.\s*/, '')}`
+      );
+    },
+    
+    formatLines(prefix, placeholder, lineFormatter = null) {
       const selection = this.getSelectedText();
       if (selection.text) {
         const lines = selection.text.split('\n');
-        const numberedLines = lines.map((line, index) => `${index + 1}. ${line}`).join('\n');
-        this.replaceSelection(numberedLines);
+        const formattedLines = lineFormatter 
+          ? lines.map((line, i) => lineFormatter(lines, i))
+          : lines.map(line => `${prefix}${line}`);
+        this.replaceSelection(formattedLines.join('\n'));
       } else {
-        this.insertAtCursor('1. First item\n2. Second item\n');
+        this.insertAtCursor(`${prefix}${placeholder}\n${prefix}Another item\n`);
       }
     },
+    
     addTable() {
       const tableTemplate = 
 `| Header 1 | Header 2 | Header 3 |
@@ -614,32 +474,29 @@ export default {
 `;
       this.insertAtCursor(`\n${tableTemplate}\n`);
     },
+    
     addHorizontalRule() {
       this.insertAtCursor('\n---\n');
     },
+    
+   
     setTextAlign(align) {
-      const selection = this.getSelectedText();
-      if (selection.text) {
-        this.replaceSelection(`<div style="text-align: ${align};">${selection.text}</div>`);
-      } else {
-        this.insertAtCursor(`<div style="text-align: ${align};">Aligned text</div>`, false);
-      }
+      this.wrapSelection(`<div class="text-${align}">`, '</div>', 'Aligned text');
     },
+    
     setTextColor(color) {
       const selection = this.getSelectedText();
       if (selection.text) {
         if (color === null) {
-          const uncoloredText = selection.text.replace(/<span style="color: [^"]+">([^<]+)<\/span>/g, '$1');
-          this.replaceSelection(uncoloredText);
+          this.resetTextColor();
         } else {
           this.replaceSelection(`<span style="color: ${color};">${selection.text}</span>`);
         }
-      } else {
-        if (color !== null) {
-          this.insertAtCursor(`<span style="color: ${color};">colored text</span>`, false);
-        }
+      } else if (color !== null) {
+        this.insertAtCursor(`<span style="color: ${color};">colored text</span>`, false);
       }
     },
+    
     resetTextColor() {
       const selection = this.getSelectedText();
       if (selection.text) {
@@ -647,148 +504,121 @@ export default {
         this.replaceSelection(uncoloredText);
       }
     },
+    
+    setFontSize(size) {
+      this.wrapSelection(`<span style="font-size: ${size};">`, '</span>', 'sized text');
+    },
+
+    resetFontSize() {
+      const selection = this.getSelectedText();
+      if (selection.text) {
+        const resetText = selection.text.replace(/<span style="font-size: [^"]+;">([^<]+)<\/span>/g, '$1');
+        this.replaceSelection(resetText);
+      }
+    },
+   
     handleKeyDown(e) {
       if (e.key === 'Enter') {
-        const target = e.target;
-        const cursorPos = target.selectionStart;
-        const textBeforeCursor = target.value.substring(0, cursorPos);
-        const textAfterCursor = target.value.substring(cursorPos);
-        const currentLine = textBeforeCursor.split('\n').pop();
-        
-        // Проверяем, находимся ли мы в строке списка
-        const unorderedListMatch = currentLine.match(/^(\s*[-*+]\s+)(.*)$/);
-        const orderedListMatch = currentLine.match(/^(\s*\d+\.\s+)(.*)$/);
-        
-        if (unorderedListMatch) {
-          // Неупорядоченный список
-          const [, prefix, content] = unorderedListMatch;
-          
-          // Если строка списка пуста, прекращаем список
-          if (!content.trim()) {
-            e.preventDefault();
-            const newText = textBeforeCursor.substring(0, textBeforeCursor.length - prefix.length) + '\n' + textAfterCursor;
-            this.markdownText = newText;
-            this.$nextTick(() => {
-              target.selectionStart = target.selectionEnd = cursorPos - prefix.length + 1;
-            });
-            return;
-          }
-          
-          // продолжаем список с новым элементом
-          e.preventDefault();
-          const newText = textBeforeCursor + '\n' + prefix + textAfterCursor;
-          this.markdownText = newText;
-          this.$nextTick(() => {
-            target.selectionStart = target.selectionEnd = cursorPos + prefix.length + 1;
-          });
-          return;
-        } 
-        else if (orderedListMatch) {
-          // Упорядоченный список
-          const [, prefix, content] = orderedListMatch;
-          
-          // Если строка списка пуста, прекращаем список
-          if (!content.trim()) {
-            e.preventDefault();
-            const newText = textBeforeCursor.substring(0, textBeforeCursor.length - prefix.length) + '\n' + textAfterCursor;
-            this.markdownText = newText;
-            this.$nextTick(() => {
-              target.selectionStart = target.selectionEnd = cursorPos - prefix.length + 1;
-            });
-            return;
-          }
-          
-          // Получаем номер текущего элемента и инкрементируем для следующего
-          const currentNumber = parseInt(prefix.match(/\d+/)[0]);
-          const nextNumber = currentNumber + 1;
-          const newPrefix = prefix.replace(/\d+/, nextNumber);
-          
-          // продолжаем список с инкрементированным номером
-          e.preventDefault();
-          const newText = textBeforeCursor + '\n' + newPrefix + textAfterCursor;
-          this.markdownText = newText;
-          this.$nextTick(() => {
-            target.selectionStart = target.selectionEnd = cursorPos + newPrefix.length + 1;
-          });
-          return;
-        }
-        
-        // ИЗМЕНЕНО: Проверка наличия специальной комбинации клавиш для создания нового блока
-        if (e.ctrlKey || e.shiftKey) {
-          // Если нажат Ctrl+Enter или Shift+Enter, создаем новый блок после текущего
-          e.preventDefault();
-          // Trim trailing newlines for better UX
-          if (target.value[target.value.length - 1] === '\n') {
-            this.markdownText = this.markdownText.replace(/\n+$/, '');
-            this.$emit('update', { index: this.index, newData: { text: this.markdownText } });
-          }
-          
-          // Request a new block after this one
-          this.$emit('request-new-block-after', this.index);
-          return;
-        }
-        
-        // ИЗМЕНЕНО: По умолчанию, просто вставляем перенос строки
-        // Не предотвращаем стандартное поведение Enter, что позволяет перейти на новую строку
+        this.handleEnterKey(e);
         return;
       }
       
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key.toLowerCase()) {
-          case 'b':
-            e.preventDefault();
-            this.addBold();
-            break;
-          case 'i':
-            e.preventDefault();
-            this.addItalic();
-            break;
-        }
+      if ((e.ctrlKey || e.metaKey) && SHORTCUTS[e.key.toLowerCase()]) {
+        e.preventDefault();
+        this[SHORTCUTS[e.key.toLowerCase()]]();
       }
     },
+    
+    handleEnterKey(e) {
+      const textarea = e.target;
+      const cursorPos = textarea.selectionStart;
+      const textBeforeCursor = this.markdownText.substring(0, cursorPos);
+      const currentLine = textBeforeCursor.split('\n').pop();
+      
+      const listMatch = currentLine.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);
+      if (listMatch) {
+        e.preventDefault();
+        this.handleListEnter(listMatch, textBeforeCursor, cursorPos);
+        return;
+      }
+      
+      if (e.ctrlKey || e.shiftKey) {
+        e.preventDefault();
+        this.handleNewBlockShortcut();
+      }
+    },
+    
+    handleListEnter(listMatch, textBeforeCursor, cursorPos) {
+      const [, indent, marker, content] = listMatch;
+      
+      if (!content.trim()) {
+        this.markdownText = 
+          textBeforeCursor.substring(0, textBeforeCursor.length - (indent.length + marker.length + 2)) + 
+          '\n' + this.markdownText.substring(cursorPos);
+        
+        this.$nextTick(() => {
+          this.$refs.editor.selectionStart = this.$refs.editor.selectionEnd = 
+            cursorPos - (indent.length + marker.length + 2) + 1;
+        });
+        return;
+      }
+      
+      let newMarker = marker;
+      if (marker.match(/^\d/)) {
+        newMarker = `${parseInt(marker) + 1}.`;
+      }
+      
+      this.markdownText = 
+        textBeforeCursor + '\n' + indent + newMarker + ' ' + 
+        this.markdownText.substring(cursorPos);
+      
+      this.$nextTick(() => {
+        this.$refs.editor.selectionStart = this.$refs.editor.selectionEnd = 
+          cursorPos + indent.length + newMarker.length + 2;
+      });
+    },
+    
+    handleNewBlockShortcut() {
+      if (this.markdownText.endsWith('\n')) {
+        this.markdownText = this.markdownText.replace(/\n+$/, '');
+        this.$emit('update', { index: this.index, newData: { text: this.markdownText } });
+      }
+      this.$emit('request-new-block-after', this.index);
+    },
+    
     clearEditor() {
       if (confirm('Are you sure you want to clear the editor? All content will be lost.')) {
         this.markdownText = '';
-        this.updatePreview();
         this.$refs.editor.focus();
       }
     },
+    
     finishEditing() {
-      this.isFinalView = true;
+      const isEmpty = !this.markdownText.trim().replace(/<[^>]*>/g, '').length;
+      isEmpty ? this.$emit('delete', this.index) : this.isFinalView = true;
     },
+    
     returnToEditing() {
-      this.isFinalView = false; // Возвращаем в режим редактирования
-      // Добавляем фокусировку на редактор для удобства
-      this.$nextTick(() => { // Дожидаемся обновления DOM
-        if (this.$refs.editor) { // Проверяем, что ссылка на редактор существует
-           this.$refs.editor.focus();
-        }
-      });
-    },
-    copyContent() {
-      navigator.clipboard.writeText(this.markdownText)
-        .then(() => {
-          this.$toast?.success('Текст скопирован') || alert('Текст скопирован');
-        })
-        .catch(err => {
-          console.error('Ошибка копирования:', err);
-          this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
-        });
-    },
-    // --- MODIFIED: Emit delete event ---
-    deleteContent() {
-        if (confirm('Are you sure you want to delete this block?')) {
-            this.$emit('delete', this.index);
-        }
-    },
-    // --- NEW: Method to be called by parent ---
-    focusEditor() {
+      this.isFinalView = false;
       this.$nextTick(() => {
-        this.$refs.editor?.focus();
-        // Optionally scroll into view if needed
-        // this.$refs.editor?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (this.$refs.editor) {
+          this.$refs.editor.focus();
+          const isEmpty = !this.markdownText.trim().replace(/<[^>]*>/g, '').length;
+          if (isEmpty) this.$emit('delete', this.index);
+        }
       });
     },
+    
+    async copyContent() {
+      try {
+        await navigator.clipboard.writeText(this.markdownText);
+        this.showToast('success', 'Text copied');
+      } catch (err) {
+        console.error('Copy error:', err);
+        this.showToast('error', 'Copy error');
+      }
+    },
+    
     downloadContent() {
       try {
         const blob = new Blob([this.markdownText], { type: 'text/markdown' });
@@ -802,101 +632,13 @@ export default {
         URL.revokeObjectURL(url);
       } catch (err) {
         console.error('Download failed:', err);
-        this.$toast?.error('Download failed') || alert('Download failed');
+        this.showToast('error', 'Download failed');
       }
+    },
+    
+    showToast(type, message) {
+      this.$toast?.[type](message) || alert(message);
     }
   }
 };
 </script>
-<style>
-.final-preview {
-  animation: fadeIn 0.3s ease-in-out;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.final-preview .preview {
-  min-height: calc(100vh - 120px);
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 2rem;
-}
-
-.editor-container {
-  padding: 0;
-}
-
-.final-preview .prose {
-  max-width: 100%;
-}
-
-.toolbar button {
-  transition: all 0.15s ease;
-}
-
-.toolbar button:hover {
-  transform: translateY(-1px);
-}
-
-.editor {
-  transition: all 0.2s ease;
-}
-
-.editor:focus {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-}
-
-.preview {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db #f3f4f6;
-}
-
-.preview::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.preview::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 4px;
-}
-
-.preview::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 4px;
-}
-
-.markdown-table th, .markdown-table td {
-  border: 1px solid #e5e7eb;
-  padding: 0.5rem 1rem;
-}
-
-.markdown-table th {
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-
-.prose :where(pre):not(:where([class~="not-prose"] *)) {
-  background-color: #f3f4f6;
-  border-radius: 0.375rem;
-  padding: 1rem;
-  overflow-x: auto;
-}
-
-.prose :where(code):not(:where([class~="not-prose"] *))::before,
-.prose :where(code):not(:where([class~="not-prose"] *))::after {
-  content: none;
-}
-
-.final-preview {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-</style>
