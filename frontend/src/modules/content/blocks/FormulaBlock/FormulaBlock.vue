@@ -1,8 +1,19 @@
 <template>
-  <div class="mb-2 p-4 rounded-md bg-gray-100 transition-colors duration-200 relative group">
+  <div
+    class="mb-2 p-4 rounded-md transition-colors duration-200 relative group"
+    :class="{
+      'bg-gray-100': isEditing,             // Серый фон при редактировании
+      'bg-white hover:bg-gray-50': !isEditing // Белый фон при просмотре и серый при наведении
+    }"
+  >
     <!-- Верхняя панель редактирования -->
     <div v-if="isEditing" class="flex justify-between items-center mb-2">
-      <h3 class="text-lg font-semibold">Редактирование формулы</h3>
+      <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-main" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.745 3A23.933 23.933 0 0 0 3 12c0 3.183.62 6.22 1.745 9M19.5 3c.967 2.78 1.5 5.817 1.5 9s-.533 6.22-1.5 9M8.25 8.885l1.444-.89a.75.75 0 0 1 1.105.402l2.402 7.206a.75.75 0 0 0 1.104.401l1.445-.889m-8.25.75.213.09a1.687 1.687 0 0 0 2.062-.617l4.45-6.676a1.688 1.688 0 0 1 2.062-.618l.213.09" />
+        </svg>
+        Редактирование формулы
+      </h1> 
       <EditorMenu
         @clear="clearEditor"
         @show-help="showHelpModal = true"
@@ -19,9 +30,9 @@
         placeholder="Введите LaTeX формулу"
       ></textarea>
 
-      <div class="mt-4 p-2  rounded w-full h-20">
+      <div class="mt-4 p-2 rounded w-full h-20">
         <p class="text-sm text-gray-600 mb-1">Превью:</p>
-        <div id="formula-preview" v-html="renderedFormula" class="text-black text-lg"></div>
+        <div id="formula-preview" v-html="renderedFormula"></div>
       </div>
     </div>
 
@@ -44,9 +55,9 @@
       v-if="showHelpModal" 
       @close="showHelpModal = false" 
     />
-
   </div>
 </template>
+
 
 <script>
 import katex from 'katex';
