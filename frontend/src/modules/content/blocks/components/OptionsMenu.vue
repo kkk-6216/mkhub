@@ -32,7 +32,6 @@
           <ArrowDownTrayIcon class="w-4 h-4 mr-3 flex-shrink-0" />
           Скачать
         </button>
-        <!-- Новая кнопка Редактировать -->
         <button
           v-if="showEdit"
           @click="handleAction('edit')"
@@ -60,9 +59,9 @@ import {
   EllipsisHorizontalIcon,
   DocumentDuplicateIcon,
   ArrowDownTrayIcon,
-  PencilIcon, // <-- Импортируем новую иконку
+  PencilIcon,
   TrashIcon,
-} from "@heroicons/vue/24/outline"; // Или /20/solid, /24/solid в зависимости от стиля
+} from "@heroicons/vue/24/outline"; 
 
 export default {
   name: "OptionsMenu",
@@ -70,7 +69,7 @@ export default {
     EllipsisHorizontalIcon,
     DocumentDuplicateIcon,
     ArrowDownTrayIcon,
-    PencilIcon, // <-- Регистрируем иконку
+    PencilIcon, 
     TrashIcon,
   },
   props: {
@@ -82,17 +81,15 @@ export default {
       type: Boolean,
       default: true,
     },
-    // Новый prop для управления видимостью кнопки редактирования
     showEdit: {
       type: Boolean,
-      default: true, // По умолчанию показываем кнопку
+      default: true, 
     },
     showDelete: {
       type: Boolean,
       default: true,
     },
   },
-  // Хорошая практика - объявить события, которые компонент может генерировать
   emits: ['copy', 'download', 'edit', 'delete'],
   data() {
     return {
@@ -102,7 +99,6 @@ export default {
   mounted() {
     document.addEventListener("click", this.handleClickOutside);
   },
-  // В Vue 3 лучше использовать beforeUnmount
   beforeUnmount() {
     document.removeEventListener("click", this.handleClickOutside);
   },
@@ -114,20 +110,19 @@ export default {
       this.isOpen = false;
     },
     handleClickOutside(event) {
-      // Проверяем, что клик был вне кнопки-триггера И вне открытого меню
-      const triggerButton = this.$el.querySelector('button'); // Получаем кнопку-триггер
+      const triggerButton = this.$el.querySelector('button'); 
       if (
         this.$refs.menuRef &&
         !this.$refs.menuRef.contains(event.target) &&
-        !triggerButton.contains(event.target) && // Добавляем проверку на кнопку-триггер
+        !triggerButton.contains(event.target) && 
         this.isOpen
       ) {
         this.closeMenu();
       }
     },
     handleAction(action) {
-      this.$emit(action); // Генерируем событие с именем действия ('copy', 'download', 'edit', 'delete')
-      this.closeMenu(); // Закрываем меню после выбора действия
+      this.$emit(action); 
+      this.closeMenu(); 
     },
   },
 };

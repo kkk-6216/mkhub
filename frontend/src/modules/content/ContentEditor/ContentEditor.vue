@@ -4,18 +4,46 @@
     <!-- Верхняя панель -->
     <div class="relative flex items-center justify-center p-5">
       <h1 class="text-2xl font-semibold">{{ topic }}</h1>
+
       <div class="absolute right-0 flex items-center space-x-2 pr-4">
-        <button @click="goBack" class="p-2  rounded " title="Назад">
-          <ArrowLeftIcon class="w-5 h-5" />
+        <button @click="goBack" class="rounded " title="Назад">
+          <ArrowUturnLeftIcon class="w-5 h-5" />
         </button>
-        <button @click="showDeleteModal = true" class="p-2  rounded " title="Очистить">
-          <TrashIcon class="w-5 h-5" />
-        </button>
-        <button @click="submitContent" class="p-2  rounded " title="Отправить">
-          <PaperAirplaneIcon class="w-5 h-5 transform rotate-45" />
-        </button>
-      </div>
-    </div>
+
+        <div class="relative" ref="dropdownRef">
+          <button 
+            @click="toggleDropdown" 
+            class="p-1 rounded flex items-center"
+            title="Действия"
+          >
+            <EllipsisVerticalIcon class="w-5 h-5" />
+          </button>
+          <transition name="dropdown">
+            <div 
+              v-show="isDropdownOpen" 
+              class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-48 py-1"
+            >
+              <button 
+                @click="showDeleteModal = true" 
+                class="flex items-center w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+              >
+                <TrashIcon class="w-4 h-4 mr-2" />
+                Очистить
+              </button>
+              <button 
+                @click="submitContent" 
+                class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              >
+                <PaperAirplaneIcon class="w-4 h-4 mr-2 transform rotate-315" />
+                Отправить
+              </button>
+            </div>
+          </transition>
+        </div>
+        
+      </div>  
+
+    </div>     
 
     <div class="mx-auto max-w-5xl">
       <!-- Hidden file inputs -->
@@ -90,7 +118,7 @@
         @confirm="confirmDelete"
         @cancel="showDeleteModal = false"
       />
-   </div>
+    </div>
   </div>
 </template>
 
@@ -107,7 +135,7 @@ import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
-import { ArrowLeftIcon, TrashIcon, PaperAirplaneIcon } from '@heroicons/vue/24/solid'
+import {  ArrowUturnLeftIcon, TrashIcon, PaperAirplaneIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 
 // Utilities
 const isValidHttpUrl = (string) => {
@@ -137,9 +165,10 @@ export default {
     EditorInput,
     ConfirmModal,
     draggable,
-    ArrowLeftIcon,
+    ArrowUturnLeftIcon,
     TrashIcon,
-    PaperAirplaneIcon
+    PaperAirplaneIcon,
+    EllipsisVerticalIcon
   },
   inject: ['showAlert'],
   props: {
@@ -148,6 +177,7 @@ export default {
   emits: ['update:content'],
   data() {
     return {
+      isDropdownOpen: false,
       showDeleteModal: false,
       contentBlocks: [],
       blockRefs: {}, 
@@ -228,12 +258,21 @@ export default {
       this.topic = 'Тестовые данные'
     }, 500)
 
+    document.addEventListener('click', this.handleClickOutside);
+
     // this.fetchTopic()
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
   beforeUpdate() {
     this.blockRefs = {};
   },
   methods: {
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
+    },
+
     // async fetchTopic() {
     //   try {
     //     const response = await fetch('/api/topic') // Замените на реальный endpoint
@@ -264,6 +303,12 @@ export default {
       } catch (error) {
         console.error('Ошибка при отправке:', error)
         this.showAlert('error','Произошла ошибка при отправке.')
+      }
+      this.showDeleteModal = false;
+    },
+    handleClickOutside(e) {
+      if (!this.$el.contains(e.target)) {
+        this.isDropdownOpen = false;
       }
     },
 
@@ -646,3 +691,15 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
