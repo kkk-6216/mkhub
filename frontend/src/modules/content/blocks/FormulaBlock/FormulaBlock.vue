@@ -46,18 +46,29 @@
           @copy="copyFormula"
           @edit="isEditing = true"
           @download="downloadImage"
-          @delete="$emit('delete', index)"
+          @delete="showDeleteModal = true"
         />
       </div>
     </div>
 
+    <!-- Модальное окно помощи -->
     <HelpModal 
       v-if="showHelpModal" 
       @close="showHelpModal = false" 
     />
+    
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление формулы"
+      message="Вы уверены, что хотите удалить эту формулу?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
-
 
 <script>
 import katex from 'katex';
@@ -65,11 +76,12 @@ import 'katex/dist/katex.min.css';
 import html2canvas from 'html2canvas';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
 import EditorMenu from '@/modules/content/blocks/components/EditorMenu.vue'; 
-import HelpModal from '@/modules/content/blocks//FormulaBlock/components/HelpModal.vue';
+import HelpModal from '@/modules/content/blocks/FormulaBlock/components/HelpModal.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 export default {
   name: 'FormulaBlock',
-  components: { OptionsMenu, EditorMenu, HelpModal },
+  components: { OptionsMenu, EditorMenu, HelpModal, ConfirmModal },
   inject: ['showAlert'],
   props: {
     data: {
@@ -90,7 +102,8 @@ export default {
     return {
       isEditing: true,
       formula: this.data.formula || '',
-      showHelpModal: false
+      showHelpModal: false,
+      showDeleteModal: false
     };
   },
   computed: {
@@ -150,6 +163,10 @@ export default {
         this.showAlert('error','Ошибка при сохранении');
       }
     },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
+    }
   }
 };
 </script>

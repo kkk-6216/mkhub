@@ -25,21 +25,34 @@
       <OptionsMenu
         @copy="copyImageUrl"
         @download="downloadImage"
-        @delete="$emit('delete', index)"
+        @delete="showDeleteModal = true"
         @edit="triggerImageEdit"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление изображения"
+      message="Вы уверены, что хотите удалить это изображение?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 export default defineComponent({
   name: "ImageBlock",
   components: {
-    OptionsMenu
+    OptionsMenu,
+    ConfirmModal
   },
   inject: ['showAlert'],
   props: {
@@ -52,6 +65,11 @@ export default defineComponent({
       type: Number,
       required: true
     }
+  },
+  data() {
+    return {
+      showDeleteModal: false
+    };
   },
   methods: {
     openImage() {
@@ -103,6 +121,10 @@ export default defineComponent({
       };
       reader.readAsDataURL(file);
       event.target.value = '';
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 });

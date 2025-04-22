@@ -30,9 +30,20 @@
         @copy="copyCode"
         @download="downloadCode"
         @edit="startEditing"
-        @delete="$emit('delete')"
+        @delete="showDeleteModal = true"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление кода"
+      message="Вы уверены, что хотите удалить этот код?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
@@ -43,6 +54,7 @@ import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import hljs from 'highlight.js'
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 // Языковые расширения
 import { javascript } from '@codemirror/lang-javascript'
@@ -59,7 +71,7 @@ import { xml } from '@codemirror/lang-xml'
 
 export default {
   name: 'CodeEditor',
-  components: { OptionsMenu },
+  components: { OptionsMenu, ConfirmModal },
   inject: ['showAlert'],
   props: {
     modelValue: { type: String, default: '' },
@@ -74,6 +86,7 @@ export default {
       isEditing: true,
       shouldDelete: false, 
       detectedLanguage: 'text',
+      showDeleteModal: false,
       languageWhitelist: [
         'javascript',
         'typescript',
@@ -248,6 +261,10 @@ export default {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 }

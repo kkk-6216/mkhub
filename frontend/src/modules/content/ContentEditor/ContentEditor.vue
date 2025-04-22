@@ -8,7 +8,7 @@
         <button @click="goBack" class="p-2  rounded " title="Назад">
           <ArrowLeftIcon class="w-5 h-5" />
         </button>
-        <button @click="confirmClear" class="p-2  rounded " title="Очистить">
+        <button @click="showDeleteModal = true" class="p-2  rounded " title="Очистить">
           <TrashIcon class="w-5 h-5" />
         </button>
         <button @click="submitContent" class="p-2  rounded " title="Отправить">
@@ -79,6 +79,17 @@
         @text-entered="handleTextEntered"
         @clear-requested="clearEditorInput"
       />
+
+      <!-- Модальное окно подтверждения удаления -->
+      <ConfirmModal
+        v-if="showDeleteModal"
+        title="Удаление контента"
+        message="Вы уверены, что хотите удалить весь контент?"
+        confirm-text="Удалить"
+        cancel-text="Отмена"
+        @confirm="confirmDelete"
+        @cancel="showDeleteModal = false"
+      />
    </div>
   </div>
 </template>
@@ -92,6 +103,7 @@ import LinkBlock from '@/modules/content/blocks/LinkBlock.vue';
 import CodeBlock from '@/modules/content/blocks/CodeBlock.vue';
 import FormulaBlock from '@/modules/content/blocks/FormulaBlock/FormulaBlock.vue';
 import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
@@ -123,6 +135,7 @@ export default {
     CodeBlock,
     FormulaBlock,
     EditorInput,
+    ConfirmModal,
     draggable,
     ArrowLeftIcon,
     TrashIcon,
@@ -135,6 +148,7 @@ export default {
   emits: ['update:content'],
   data() {
     return {
+      showDeleteModal: false,
       contentBlocks: [],
       blockRefs: {}, 
       commands: {},
@@ -232,10 +246,9 @@ export default {
     goBack() {
       this.$router.back()
     },
-    confirmClear() {
-      if (confirm('Вы уверены, что хотите очистить весь контент?')) {
-        this.contentBlocks = []
-      }
+    confirmDelete() {
+      this.contentBlocks = []
+      this.showDeleteModal = false;
     },
     async submitContent() {
       try {

@@ -32,19 +32,32 @@
         @copy="copyFileUrl"
         @download="downloadFile"
         @edit="triggerFileEdit"
-        @delete="$emit('delete', index)"
+        @delete="showDeleteModal = true"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление файла"
+      message="Вы уверены, что хотите удалить этот файл?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 export default {
   name: "FileBlock",
   components: {
-    OptionsMenu
+    OptionsMenu,
+    ConfirmModal
   },
   inject: ['showAlert'],
   props: {
@@ -59,6 +72,11 @@ export default {
       type: Number,
       required: true
     }
+  },
+  data() {
+    return {
+      showDeleteModal: false
+    };
   },
   computed: {
     formattedSize() {
@@ -150,6 +168,10 @@ export default {
       });
 
       event.target.value = ''; // сброс input'а
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 };

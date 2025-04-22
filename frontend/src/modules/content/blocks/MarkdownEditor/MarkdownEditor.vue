@@ -78,13 +78,24 @@
         <OptionsMenu
           @copy="copyContent"
           @download="downloadContent"
-          @delete="$emit('delete', index)"
+          @delete="showDeleteModal = true"
           @edit="returnToEditing"
           :showEdit="true"
           :showDelete="true"
         />
       </div>
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление изображения"
+      message="Вы уверены, что хотите удалить это изображение?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
 
     <HelpModal 
       :show="showHelpModal"
@@ -97,6 +108,7 @@
 import EditorMenu from '@/modules/content/blocks/components/EditorMenu.vue';
 import FormattingToolbar from '@/modules/content/blocks/MarkdownEditor/components/FormattingToolbar.vue';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 import HelpModal from '@/modules/content/blocks/MarkdownEditor/components/HelpModal.vue';
 import MarkdownIt from 'markdown-it';
 
@@ -134,6 +146,7 @@ export default {
     EditorMenu,
     FormattingToolbar,
     OptionsMenu,
+    ConfirmModal,
     HelpModal 
   },
   inject: ['showAlert'],
@@ -159,6 +172,7 @@ export default {
     return {
       markdownText: this.data?.text || '',
       renderedMarkdown: '',
+      showDeleteModal: false,
       showHelpModal: false,
       isFinalView: false,
       isInternalChange: false,
@@ -660,6 +674,10 @@ export default {
         this.$emit('delete', this.index);
       }
     },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
+    }
   }
 };
 </script>
