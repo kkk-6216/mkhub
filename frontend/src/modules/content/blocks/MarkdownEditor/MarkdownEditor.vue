@@ -136,7 +136,7 @@ export default {
     OptionsMenu,
     HelpModal 
   },
-  
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -626,10 +626,10 @@ export default {
     async copyContent() {
       try {
         await navigator.clipboard.writeText(this.markdownText);
-        this.showToast('success', 'Text copied');
+        this.showAlert('success', 'Текст скопирован.');
       } catch (err) {
         console.error('Copy error:', err);
-        this.showToast('error', 'Copy error');
+        this.showAlert('error', 'Произошла ошибка при копировании текста');
       }
     },
     
@@ -646,7 +646,7 @@ export default {
         URL.revokeObjectURL(url);
       } catch (err) {
         console.error('Download failed:', err);
-        this.showToast('error', 'Download failed');
+        this.showAlert('error', 'Ошибка скачивания');
       }
     },
     

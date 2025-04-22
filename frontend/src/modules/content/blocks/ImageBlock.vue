@@ -41,6 +41,7 @@ export default defineComponent({
   components: {
     OptionsMenu
   },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -58,10 +59,10 @@ export default defineComponent({
     },
     copyImageUrl() {
       navigator.clipboard.writeText(this.data.src)
-        .then(() => this.$toast?.success('URL изображения скопирован') || alert('URL изображения скопирован'))
+        .then(() => this.showAlert('success','URL изображения скопирован'))
         .catch(err => {
           console.error('Ошибка копирования URL:', err);
-          this.$toast?.error('Ошибка копирования URL') || alert('Ошибка копирования URL');
+          this.showAlert('error','Ошибка копирования URL');
         });
     },
     downloadImage() {
@@ -77,7 +78,7 @@ export default defineComponent({
         document.body.removeChild(link);
       } catch (err) {
         console.error('Ошибка скачивания:', err);
-        this.$toast?.error('Ошибка скачивания') || alert('Ошибка скачивания');
+        this.showAlert('error','Ошибка скачивания');
       }
     },
     getFileExtension(url) {

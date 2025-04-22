@@ -46,6 +46,7 @@ export default {
   components: {
     OptionsMenu
   },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -77,7 +78,7 @@ export default {
     },
     openFile() {
       if (!this.hasFileData) {
-        this.$toast?.error('Файл недоступен') || alert('Файл недоступен');
+        this.showAlert('error','Файл недоступен');
         return;
       }
 
@@ -91,22 +92,22 @@ export default {
     },
     copyFileUrl() {
       if (!this.data.fileUrl) {
-        this.$toast?.error('Нет URL для копирования') || alert('Нет URL для копирования');
+        this.showAlert('error','Нет URL для копирования файла');
         return;
       }
       
       navigator.clipboard.writeText(this.data.fileUrl)
         .then(() => {
-          this.$toast?.success('Ссылка скопирована') || alert('Ссылка скопирована');
+          this.showAlert('success','Ссылка  файла скопирована');
         })
         .catch(err => {
           console.error('Ошибка копирования:', err);
-          this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
+          this.showAlert('error','Ошибка копирования');
         });
     },
     downloadFile() {
       if (!this.hasFileData) {
-        this.$toast?.error('Файл недоступен для скачивания') || alert('Файл недоступен для скачивания');
+        this.showAlert('error','Файл недоступен для скачивания');
         return;
       }
 
@@ -124,7 +125,7 @@ export default {
         }
       } catch (err) {
         console.error('Ошибка скачивания:', err);
-        this.$toast?.error('Ошибка скачивания') || alert('Ошибка скачивания');
+        this.showAlert('error','Ошибка скачивания файла');
       }
     },
 

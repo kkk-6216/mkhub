@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4   duration-200 resize-y min-h-[200px]"
+    class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4 duration-200 resize-y"
   >
     <!-- Языковая метка -->
     <div class="absolute top-2 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
@@ -60,6 +60,7 @@ import { xml } from '@codemirror/lang-xml'
 export default {
   name: 'CodeEditor',
   components: { OptionsMenu },
+  inject: ['showAlert'],
   props: {
     modelValue: { type: String, default: '' },
     language: { type: String, default: '' },
@@ -232,11 +233,11 @@ export default {
     copyCode() {
       navigator.clipboard.writeText(this.code)
         .then(() => {
-            this.$toast?.success('Код скопирован') || alert('Код скопирован');
+            this.showAlert('success','Код скопирован');
           })
           .catch(err => {
             console.error('Ошибка копирования:', err);
-            this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
+            this.showAlert('error','Ошибка копирования');
           });
     },
     downloadCode() {
@@ -256,7 +257,7 @@ export default {
 .code-container {
   position: relative;
   box-sizing: border-box;
-  min-height: 150px;
+  min-height: 50px;
   z-index: 0;
   padding-top: 0.5rem;
 }

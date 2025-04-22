@@ -2,8 +2,8 @@
   <div
     class="mb-2 p-4 rounded-md transition-colors duration-200 relative group"
     :class="{
-      'bg-gray-100': isEditing,             // Серый фон при редактировании
-      'bg-white hover:bg-gray-50': !isEditing // Белый фон при просмотре и серый при наведении
+      'bg-gray-100': isEditing,           
+      'bg-white hover:bg-gray-50': !isEditing 
     }"
   >
     <!-- Верхняя панель редактирования -->
@@ -70,6 +70,7 @@ import HelpModal from '@/modules/content/blocks//FormulaBlock/components/HelpMod
 export default {
   name: 'FormulaBlock',
   components: { OptionsMenu, EditorMenu, HelpModal },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -131,8 +132,8 @@ export default {
     },
     copyFormula() {
       navigator.clipboard.writeText(this.formula)
-        .then(() => this.$toast?.success('Формула скопирована') || alert('Формула скопирована'))
-        .catch(() => this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования'));
+        .then(() => this.showAlert('success','Формула скопирована'))
+        .catch(() => this.showAlert('error','Ошибка копирования'));
     },
     async downloadImage() {
       const el = document.querySelector(`#formula-preview`);
@@ -146,7 +147,7 @@ export default {
         link.click();
       } catch (err) {
         console.error('Ошибка при сохранении изображения', err);
-        this.$toast?.error('Ошибка при сохранении') || alert('Ошибка при сохранении');
+        this.showAlert('error','Ошибка при сохранении');
       }
     },
   }

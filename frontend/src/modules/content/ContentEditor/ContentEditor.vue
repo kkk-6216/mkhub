@@ -1,66 +1,85 @@
 <template>
-  <div class="relative w-full p-5 mt-10">
-    <!-- Hidden file inputs -->
-    <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
-    <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
+  <div class="relative w-full p-5 mx-auto">
 
-    <!-- Draggable content blocks -->
-    <draggable
-      v-model="contentBlocks"
-      item-key="id"
-      tag="div"
-      class="mb-4"
-      handle=".drag-handle"
-      :animation="200"
-      @start="dragStart"
-      @end="dragEnd"
-      :forceFallback="true"
-    >
-      <template #item="{ element: block, index }">
-        <div
-          class="relative group"
-          :class="{ 'opacity-80 bg-gray-50 rounded': isDragging }"
-          @mouseenter="hoveredBlockIndex = index"
-          @mouseleave="hoveredBlockIndex = -1"
-        >
-          <!-- Drag handle button -->
-          <button
-            class="drag-handle absolute left-1 top-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move p-1 rounded"
-            :class="{ 'opacity-100': isDragging || hoveredBlockIndex === index }"
-            title="Drag block"
+    <!-- Верхняя панель -->
+    <div class="relative flex items-center justify-center p-5">
+      <h1 class="text-2xl font-semibold">{{ topic }}</h1>
+      <div class="absolute right-0 flex items-center space-x-2 pr-4">
+        <button @click="goBack" class="p-2  rounded " title="Назад">
+          <ArrowLeftIcon class="w-5 h-5" />
+        </button>
+        <button @click="confirmClear" class="p-2  rounded " title="Очистить">
+          <TrashIcon class="w-5 h-5" />
+        </button>
+        <button @click="submitContent" class="p-2  rounded " title="Отправить">
+          <PaperAirplaneIcon class="w-5 h-5 transform rotate-45" />
+        </button>
+      </div>
+    </div>
+
+    <div class="mx-auto max-w-5xl">
+      <!-- Hidden file inputs -->
+      <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
+      <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
+
+      <!-- Draggable content blocks -->
+      <draggable
+        v-model="contentBlocks"
+        item-key="id"
+        tag="div"
+        class="mb-4"
+        handle=".drag-handle"
+        :animation="200"
+        @start="dragStart"
+        @end="dragEnd"
+        :forceFallback="true"
+      >
+        <template #item="{ element: block, index }">
+          <div
+            class="relative group"
+            :class="{ 'opacity-80 bg-gray-50 rounded': isDragging }"
+            @mouseenter="hoveredBlockIndex = index"
+            @mouseleave="hoveredBlockIndex = -1"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-gray-700">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-            </svg>
-          </button>
+            <!-- Drag handle button -->
+            <button
+              class="drag-handle absolute left-1 top-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-move p-1 rounded"
+              :class="{ 'opacity-100': isDragging || hoveredBlockIndex === index }"
+              title="Drag block"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-500 hover:text-gray-700">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+              </svg>
+            </button>
 
-          <!-- Content block -->
-          <div class="pl-9 pt-1">
-            <component
-              :is="blockComponents[block.component]"
-              :ref="(el) => { if (el) blockRefs[index] = el; }"
-              :data="block.data"
-              :index="index"
-              :isActive="activeBlockIndex === index"
-              @update="handleBlockUpdate"
-              @delete="deleteBlock(index)"
-              @request-new-block-after="insertNewBlockAfter"
-              @convert-to-image="handleConvertToImage"
-              @focus="handleBlockFocus(index)"
-            />
+            <!-- Content block -->
+            <div class="pl-9 pt-1">
+              <component
+                :is="blockComponents[block.component]"
+                :ref="(el) => { if (el) blockRefs[index] = el; }"
+                :data="block.data"
+                :index="index"
+                :isActive="activeBlockIndex === index"
+                @update="handleBlockUpdate"
+                @delete="deleteBlock(index)"
+                @request-new-block-after="insertNewBlockAfter"
+                @convert-to-image="handleConvertToImage"
+                @focus="handleBlockFocus(index)"
+              />
+            </div>
           </div>
-        </div>
-      </template>
-    </draggable>
+        </template>
+      </draggable>
 
-    <!-- Input area for text and commands -->
-    <EditorInput
-      ref="editorInputRef"
-      @command-typed="handleCommandTyped"
-      @direct-input="handleDirectInput"
-      @text-entered="handleTextEntered"
-      @clear-requested="clearEditorInput"
-    />
+      <!-- Input area for text and commands -->
+      <EditorInput
+        ref="editorInputRef"
+        @command-typed="handleCommandTyped"
+        @direct-input="handleDirectInput"
+        @text-entered="handleTextEntered"
+        @clear-requested="clearEditorInput"
+      />
+   </div>
   </div>
 </template>
 
@@ -76,6 +95,7 @@ import EditorInput from '@/modules/content/ContentEditor/components/EditorInput.
 import { useCommands } from '@/modules/content/ContentEditor/components/useCommands';
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
+import { ArrowLeftIcon, TrashIcon, PaperAirplaneIcon } from '@heroicons/vue/24/solid'
 
 // Utilities
 const isValidHttpUrl = (string) => {
@@ -103,8 +123,12 @@ export default {
     CodeBlock,
     FormulaBlock,
     EditorInput,
-    draggable 
+    draggable,
+    ArrowLeftIcon,
+    TrashIcon,
+    PaperAirplaneIcon
   },
+  inject: ['showAlert'],
   props: {
     initialContent: { type: Array, default: () => [] }
   },
@@ -125,7 +149,10 @@ export default {
       activeBlockIndex: -1,
       isMounted: false,
       isDragging: false,
-      hoveredBlockIndex: -1
+      hoveredBlockIndex: -1,
+
+      topic: '',
+      contentBlocks: []
     };
   },
   computed: {
@@ -181,11 +208,53 @@ export default {
     if (this.contentBlocks.length === 0) {
       this.$refs.editorInputRef?.focus();
     }
+
+    // Имитация получения темы с бэкенда
+    setTimeout(() => {
+      this.topic = 'Тестовые данные'
+    }, 500)
+
+    // this.fetchTopic()
   },
   beforeUpdate() {
     this.blockRefs = {};
   },
   methods: {
+    // async fetchTopic() {
+    //   try {
+    //     const response = await fetch('/api/topic') // Замените на реальный endpoint
+    //     const data = await response.json()
+    //     this.topic = data.title
+    //   } catch (err) {
+    //     console.error('Ошибка загрузки темы:', err)
+    //   }
+    // },
+    goBack() {
+      this.$router.back()
+    },
+    confirmClear() {
+      if (confirm('Вы уверены, что хотите очистить весь контент?')) {
+        this.contentBlocks = []
+      }
+    },
+    async submitContent() {
+      try {
+        await fetch('/api/submit-content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic: this.topic,
+            blocks: this.contentBlocks
+          })
+        })
+        this.showAlert('success', 'Контент отправлен на модерацию.')
+      } catch (error) {
+        console.error('Ошибка при отправке:', error)
+        this.showAlert('error','Произошла ошибка при отправке.')
+      }
+    },
+
+
     // --- Block management ---
     dragStart() {
       this.isDragging = true;
