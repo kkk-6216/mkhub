@@ -25,22 +25,36 @@
       <OptionsMenu
         @copy="copyImageUrl"
         @download="downloadImage"
-        @delete="$emit('delete', index)"
+        @delete="showDeleteModal = true"
         @edit="triggerImageEdit"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление изображения"
+      message="Вы уверены, что хотите удалить это изображение?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
 import { defineComponent } from 'vue';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 export default defineComponent({
   name: "ImageBlock",
   components: {
-    OptionsMenu
+    OptionsMenu,
+    ConfirmModal
   },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -52,16 +66,21 @@ export default defineComponent({
       required: true
     }
   },
+  data() {
+    return {
+      showDeleteModal: false
+    };
+  },
   methods: {
     openImage() {
       window.open(this.data.src, '_blank', 'noopener,noreferrer');
     },
     copyImageUrl() {
       navigator.clipboard.writeText(this.data.src)
-        .then(() => this.$toast?.success('URL изображения скопирован') || alert('URL изображения скопирован'))
+        .then(() => this.showAlert('success','URL изображения скопирован'))
         .catch(err => {
           console.error('Ошибка копирования URL:', err);
-          this.$toast?.error('Ошибка копирования URL') || alert('Ошибка копирования URL');
+          this.showAlert('error','Ошибка копирования URL');
         });
     },
     downloadImage() {
@@ -77,7 +96,7 @@ export default defineComponent({
         document.body.removeChild(link);
       } catch (err) {
         console.error('Ошибка скачивания:', err);
-        this.$toast?.error('Ошибка скачивания') || alert('Ошибка скачивания');
+        this.showAlert('error','Ошибка скачивания');
       }
     },
     getFileExtension(url) {
@@ -102,6 +121,10 @@ export default defineComponent({
       };
       reader.readAsDataURL(file);
       event.target.value = '';
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 });

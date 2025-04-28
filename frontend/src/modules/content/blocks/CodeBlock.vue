@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4   duration-200 resize-y min-h-[200px]"
+    class="relative group mb-4 rounded-md  bg-white hover:bg-gray-50 p-4 duration-200 resize-y"
   >
     <!-- Языковая метка -->
     <div class="absolute top-2 left-2 text-xs font-semibold text-gray-600 px-2 py-0.5 z-10">
@@ -30,9 +30,20 @@
         @copy="copyCode"
         @download="downloadCode"
         @edit="startEditing"
-        @delete="$emit('delete')"
+        @delete="showDeleteModal = true"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление кода"
+      message="Вы уверены, что хотите удалить этот код?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
@@ -43,6 +54,7 @@ import { defaultKeymap, indentWithTab } from '@codemirror/commands'
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import hljs from 'highlight.js'
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 // Языковые расширения
 import { javascript } from '@codemirror/lang-javascript'
@@ -59,7 +71,8 @@ import { xml } from '@codemirror/lang-xml'
 
 export default {
   name: 'CodeEditor',
-  components: { OptionsMenu },
+  components: { OptionsMenu, ConfirmModal },
+  inject: ['showAlert'],
   props: {
     modelValue: { type: String, default: '' },
     language: { type: String, default: '' },
@@ -73,6 +86,7 @@ export default {
       isEditing: true,
       shouldDelete: false,
       detectedLanguage: 'text',
+      showDeleteModal: false,
       languageWhitelist: [
         'javascript',
         'typescript',
@@ -232,11 +246,11 @@ export default {
     copyCode() {
       navigator.clipboard.writeText(this.code)
         .then(() => {
-            this.$toast?.success('Код скопирован') || alert('Код скопирован');
+            this.showAlert('success','Код скопирован');
           })
           .catch(err => {
             console.error('Ошибка копирования:', err);
-            this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
+            this.showAlert('error','Ошибка копирования');
           });
     },
     downloadCode() {
@@ -247,6 +261,10 @@ export default {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 }
@@ -256,7 +274,7 @@ export default {
 .code-container {
   position: relative;
   box-sizing: border-box;
-  min-height: 150px;
+  min-height: 50px;
   z-index: 0;
   padding-top: 0.5rem;
 }

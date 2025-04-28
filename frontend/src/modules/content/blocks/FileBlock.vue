@@ -32,20 +32,34 @@
         @copy="copyFileUrl"
         @download="downloadFile"
         @edit="triggerFileEdit"
-        @delete="$emit('delete', index)"
+        @delete="showDeleteModal = true"
       />
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление файла"
+      message="Вы уверены, что хотите удалить этот файл?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 export default {
   name: "FileBlock",
   components: {
-    OptionsMenu
+    OptionsMenu,
+    ConfirmModal
   },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -58,6 +72,11 @@ export default {
       type: Number,
       required: true
     }
+  },
+  data() {
+    return {
+      showDeleteModal: false
+    };
   },
   computed: {
     formattedSize() {
@@ -77,7 +96,7 @@ export default {
     },
     openFile() {
       if (!this.hasFileData) {
-        this.$toast?.error('Файл недоступен') || alert('Файл недоступен');
+        this.showAlert('error','Файл недоступен');
         return;
       }
 
@@ -91,22 +110,22 @@ export default {
     },
     copyFileUrl() {
       if (!this.data.fileUrl) {
-        this.$toast?.error('Нет URL для копирования') || alert('Нет URL для копирования');
+        this.showAlert('error','Нет URL для копирования файла');
         return;
       }
       
       navigator.clipboard.writeText(this.data.fileUrl)
         .then(() => {
-          this.$toast?.success('Ссылка скопирована') || alert('Ссылка скопирована');
+          this.showAlert('success','Ссылка  файла скопирована');
         })
         .catch(err => {
           console.error('Ошибка копирования:', err);
-          this.$toast?.error('Ошибка копирования') || alert('Ошибка копирования');
+          this.showAlert('error','Ошибка копирования');
         });
     },
     downloadFile() {
       if (!this.hasFileData) {
-        this.$toast?.error('Файл недоступен для скачивания') || alert('Файл недоступен для скачивания');
+        this.showAlert('error','Файл недоступен для скачивания');
         return;
       }
 
@@ -124,7 +143,7 @@ export default {
         }
       } catch (err) {
         console.error('Ошибка скачивания:', err);
-        this.$toast?.error('Ошибка скачивания') || alert('Ошибка скачивания');
+        this.showAlert('error','Ошибка скачивания файла');
       }
     },
 
@@ -149,6 +168,10 @@ export default {
       });
 
       event.target.value = ''; // сброс input'а
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 };

@@ -6,7 +6,7 @@
 
       <div class="flex justify-between items-center mb-2">
         <h1 class="text-2xl font-bold text-gray-800 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-main" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           Текстовый редактор
@@ -78,13 +78,24 @@
         <OptionsMenu
           @copy="copyContent"
           @download="downloadContent"
-          @delete="$emit('delete', index)"
+          @delete="showDeleteModal = true"
           @edit="returnToEditing"
           :showEdit="true"
           :showDelete="true"
         />
       </div>
     </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление изображения"
+      message="Вы уверены, что хотите удалить это изображение?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
 
     <HelpModal 
       :show="showHelpModal"
@@ -97,6 +108,7 @@
 import EditorMenu from '@/modules/content/blocks/components/EditorMenu.vue';
 import FormattingToolbar from '@/modules/content/blocks/MarkdownEditor/components/FormattingToolbar.vue';
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 import HelpModal from '@/modules/content/blocks/MarkdownEditor/components/HelpModal.vue';
 import MarkdownIt from 'markdown-it';
 
@@ -134,9 +146,10 @@ export default {
     EditorMenu,
     FormattingToolbar,
     OptionsMenu,
+    ConfirmModal,
     HelpModal 
   },
-  
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -159,6 +172,7 @@ export default {
     return {
       markdownText: this.data?.text || '',
       renderedMarkdown: '',
+      showDeleteModal: false,
       showHelpModal: false,
       isFinalView: false,
       isInternalChange: false,
@@ -601,10 +615,7 @@ export default {
     },
     
     clearEditor() {
-      if (confirm('Are you sure you want to clear the editor? All content will be lost.')) {
         this.markdownText = '';
-        this.$refs.editor.focus();
-      }
     },
     
     finishEditing() {
@@ -626,10 +637,10 @@ export default {
     async copyContent() {
       try {
         await navigator.clipboard.writeText(this.markdownText);
-        this.showToast('success', 'Text copied');
+        this.showAlert('success', 'Текст скопирован.');
       } catch (err) {
         console.error('Copy error:', err);
-        this.showToast('error', 'Copy error');
+        this.showAlert('error', 'Произошла ошибка при копировании текста');
       }
     },
     
@@ -646,7 +657,7 @@ export default {
         URL.revokeObjectURL(url);
       } catch (err) {
         console.error('Download failed:', err);
-        this.showToast('error', 'Download failed');
+        this.showAlert('error', 'Ошибка скачивания');
       }
     },
     
@@ -660,6 +671,10 @@ export default {
         this.$emit('delete', this.index);
       }
     },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
+    }
   }
 };
 </script>

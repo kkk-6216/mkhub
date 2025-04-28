@@ -68,7 +68,7 @@
                 <img
                     :src="avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
                     alt="Avatar"
-                    class="w-10 h-10 rounded-xl"
+                    class="w-10 h-10 rounded-full"
                 />
                 <div>
                   <p class="text-dark font-semibold">{{ user.sub }}</p>
@@ -96,6 +96,8 @@ import HomeIcon from "@/components/icons/SidebarIcons/HomeIcon.vue";
 import UsersIcon from "@/components/icons/AdminSidebarIcons/UsersIcon.vue";
 import FacultiesIcon from "@/components/icons/AdminSidebarIcons/FacultiesIcon.vue";
 import DepartmentIcon from "@/components/icons/AdminSidebarIcons/DepartmentIcon.vue";
+import CoursesIcon from "@/components/icons/AdminSidebarIcons/CoursesIcon.vue";
+import LessonsIcon from "@/components/icons/AdminSidebarIcons/LessonsIcon.vue";
 import ModerationIcon from "@/components/icons/AdminSidebarIcons/ModerationIcon.vue";
 import RequestsIcon from "@/components/icons/AdminSidebarIcons/RequestsIcon.vue";
 import {markRaw} from "vue";
@@ -120,8 +122,8 @@ export default {
         { to: '/moderator/users', label: 'Пользователи', icon: markRaw(UsersIcon), iconClass: 'mdi-account' },
         { to: '/moderator/faculties', label: 'Факультеты', icon: markRaw(FacultiesIcon), iconClass: 'mdi-school' },
         { to: '/moderator/departments', label: 'Кафедры', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
-        { to: '/moderator/courses', label: 'Курсы', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
-        { to: '/moderator/lessons', label: 'Темы', icon: markRaw(DepartmentIcon), iconClass: 'mdi-domain' },
+        { to: '/moderator/courses', label: 'Курсы', icon: markRaw(CoursesIcon), iconClass: 'mdi-school' },
+        { to: '/moderator/lessons', label: 'Темы', icon: markRaw(LessonsIcon), iconClass: 'mdi-school' },
         { to: '/moderator/moderation', label: 'Модерации', icon: markRaw(ModerationIcon), iconClass: 'mdi-shield-check' },
         { to: '/moderator/requests', label: 'Запросы', icon: markRaw(RequestsIcon), iconClass: 'mdi-message-question' },
         { to: '/home', label: 'Выйти', icon: markRaw(LogoutIcon), iconClass: 'mdi-logout' }

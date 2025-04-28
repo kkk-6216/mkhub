@@ -69,9 +69,7 @@
             </ul>
           </div>
           <div class="mt-6 text-right">
-            <button @click="close" class="px-4 py-2 bg-main hover:bg-main-hover text-white rounded-lg transition-colors">
-              Закрыть
-            </button>
+            <DefaultButton label="Закрыть" variant="primary" @click="close" />
           </div>
         </div>
       </div>
@@ -79,7 +77,14 @@
   </template>
   
   <script>
+   import DefaultButton from "@/components/buttons/DefaultButton.vue";
+
   export default {
+    name: 'HelpModal',
+    components: {
+      DefaultButton,
+    },
+    
     props: {
       show: {
         type: Boolean,

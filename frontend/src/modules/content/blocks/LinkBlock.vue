@@ -79,18 +79,30 @@
         @copy="copyUrl"
         @download="downloadUrl"
         @edit="startEditing"
-        @delete="$emit('delete')"
+        @delete="showDeleteModal = true"
         @convert-to-image="convertToImageBlock"
         :disable-copy="!isValidUrl"
         :disable-download="!isValidUrl"
         :disable-convert-to-image="!isValidUrl || !isImageUrl"
       />
     </div>
+
+     <!-- Модальное окно подтверждения удаления -->
+     <ConfirmModal
+      v-if="showDeleteModal"
+      title="Удаление ссылки"
+      message="Вы уверены, что хотите удалить эту ссылку?"
+      confirm-text="Удалить"
+      cancel-text="Отмена"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    />
   </div>
 </template>
 
 <script>
 import OptionsMenu from '@/modules/content/blocks/components/OptionsMenu.vue';
+import ConfirmModal from '@/modules/content/blocks/components/ConfirmModal.vue';
 
 // API Configuration
 const MICROLINK_API_KEY = '';
@@ -113,7 +125,8 @@ const ensureHttpProtocol = (url) => {
 
 export default {
   name: 'LinkBlock',
-  components: { OptionsMenu },
+  components: { OptionsMenu, ConfirmModal },
+  inject: ['showAlert'],
   props: {
     data: {
       type: Object,
@@ -143,7 +156,8 @@ export default {
         title: this.data?.title || '',
         description: this.data?.description || '',
         favicon: this.data?.favicon || ''
-      }
+      },
+      showDeleteModal: false
     };
   },
 
@@ -461,22 +475,22 @@ export default {
     // Copy URL to clipboard
     copyUrl() {
       if (!this.isValidUrl) {
-        alert('Нет URL для копирования');
+        this.showAlert('error','Нет URL для копирования');
         return;
       }
 
       navigator.clipboard.writeText(this.meta.url)
-        .then(() => alert('Ссылка скопирована'))
+        .then(() => this.showAlert('success','Ссылка скопирована'))
         .catch(err => {
           console.error(err);
-          alert('Ошибка копирования');
+          this.showAlert('error','Ошибка копирования');
         });
     },
 
     // Trigger download from URL
     downloadUrl() {
       if (!this.isValidUrl) {
-        alert('Нет URL для скачивания');
+        this.showAlert('error','Нет URL для скачивания');
         return;
       }
 
@@ -503,7 +517,7 @@ export default {
         document.body.removeChild(link);
       } catch (err) {
         console.error('Ошибка скачивания:', err);
-        alert('Ошибка при попытке скачивания файла.');
+        this.showAlert('error','Ошибка при попытке скачивания.');
         window.open(this.meta.url, '_blank', 'noopener,noreferrer');
       }
     },
@@ -562,6 +576,10 @@ export default {
       const spaceAbove = rect.top;
 
       this.showAbove = spaceBelow < hoverCardHeight && spaceAbove >= hoverCardHeight;
+    },
+    confirmDelete() {
+      this.$emit('delete', this.index);
+      this.showDeleteModal = false;
     }
   }
 }
