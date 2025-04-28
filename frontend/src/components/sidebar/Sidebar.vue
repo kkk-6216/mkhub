@@ -70,7 +70,7 @@
                 <img
                     :src="avatar || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
                     alt="Avatar"
-                    class="w-10 h-10 rounded-xl"
+                    class="w-10 h-10 rounded-full"
                 />
                 <div>
                   <p class="text-dark font-semibold">{{ user.sub }}</p>

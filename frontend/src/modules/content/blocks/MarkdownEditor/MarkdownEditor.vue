@@ -615,10 +615,7 @@ export default {
     },
     
     clearEditor() {
-      if (confirm('Are you sure you want to clear the editor? All content will be lost.')) {
         this.markdownText = '';
-        this.$refs.editor.focus();
-      }
     },
     
     finishEditing() {
