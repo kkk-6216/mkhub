@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full p-5 mt-10">
+  <div class="relative w-full">
     <!-- Hidden file inputs -->
     <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
     <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
@@ -65,7 +65,7 @@
 </template>
 
 <script>
-// Component imports 
+// Component imports
 import MarkdownEditor from '@/modules/content/blocks/MarkdownEditor/MarkdownEditor.vue';
 import ImageBlock from '@/modules/content/blocks/ImageBlock.vue';
 import FileBlock from '@/modules/content/blocks/FileBlock.vue';
@@ -103,7 +103,7 @@ export default {
     CodeBlock,
     FormulaBlock,
     EditorInput,
-    draggable 
+    draggable
   },
   props: {
     initialContent: { type: Array, default: () => [] }
@@ -112,7 +112,7 @@ export default {
   data() {
     return {
       contentBlocks: [],
-      blockRefs: {}, 
+      blockRefs: {},
       commands: {},
       blockComponents: {
         'text-block': MarkdownEditor,
@@ -191,7 +191,7 @@ export default {
       this.isDragging = true;
       console.log("ContentEditor: Started block dragging");
     },
-    
+
     dragEnd() {
       this.isDragging = false;
       console.log("ContentEditor: Finished block dragging");
@@ -220,17 +220,17 @@ export default {
     addBlock(blockData, index) {
       // Deactivate all blocks before adding a new one
       this.deactivateAllBlocks();
-      
+
       const newBlock = {
         ...blockData,
         id: blockData.id || generateId()
       };
       console.log(`ContentEditor: Adding ${newBlock.component} block at index ${index} with ID ${newBlock.id}`);
-      
+
       const currentBlocks = [...this.contentBlocks];
       currentBlocks.splice(index, 0, newBlock);
       this.contentBlocks = currentBlocks;
-      
+
       // Set the new block as active
       nextTick(() => {
         this.activeBlockIndex = index;
@@ -352,7 +352,7 @@ export default {
       if (index >= 0 && index < this.contentBlocks.length) {
         const deletedBlockType = this.contentBlocks[index]?.component || 'unknown';
         console.log(`ContentEditor: Deleting ${deletedBlockType} block at index ${index}`);
-        
+
         // If we're deleting the active block, reset activeBlockIndex
         if (this.activeBlockIndex === index) {
           this.activeBlockIndex = -1;
@@ -360,7 +360,7 @@ export default {
           // Adjust activeBlockIndex if we're deleting a block before it
           this.activeBlockIndex--;
         }
-        
+
         this.contentBlocks = this.contentBlocks.filter((_, i) => i !== index);
 
         nextTick(() => {
@@ -460,10 +460,10 @@ export default {
       const file = event.target.files?.[0];
       if (!file || !file.type.startsWith('image/')) return;
       console.log("ContentEditor: Processing image upload:", file.name);
-      
+
       // Deactivate all blocks before adding new one
       this.deactivateAllBlocks();
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         this.addBlock({
@@ -481,10 +481,10 @@ export default {
       const file = event.target.files?.[0];
       if (!file) return;
       console.log("ContentEditor: Processing file upload:", file.name);
-      
+
       // Deactivate all blocks before adding new one
       this.deactivateAllBlocks();
-      
+
       this.addBlock({
         component: 'file-block',
         data: { name: file.name, size: file.size, fileUrl: URL.createObjectURL(file) }
@@ -501,7 +501,7 @@ export default {
      */
     handleBlockFocus(index) {
       console.log(`ContentEditor: Block ${index} received focus`);
-      
+
       // Deactivate previous active block if different
       if (this.activeBlockIndex !== -1 && this.activeBlockIndex !== index) {
         const prevComponent = this.blockRefs[this.activeBlockIndex];
@@ -509,7 +509,7 @@ export default {
           prevComponent.exitEditMode();
         }
       }
-      
+
       this.activeBlockIndex = index;
     },
 

@@ -71,7 +71,7 @@ export default {
       code: this.modelValue,
       editorView: null,
       isEditing: true,
-      shouldDelete: false, 
+      shouldDelete: false,
       detectedLanguage: 'text',
       languageWhitelist: [
         'javascript',

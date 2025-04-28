@@ -98,11 +98,11 @@ const API_BASE = MICROLINK_API_KEY ? 'https://pro.microlink.io' : 'https://api.m
 
 // URL utility functions
 const isValidHttpUrl = (url) => {
-  try { 
+  try {
     const parsed = new URL(url);
     return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch (_) { 
-    return false; 
+  } catch (_) {
+    return false;
   }
 };
 
@@ -115,18 +115,18 @@ export default {
   name: 'LinkBlock',
   components: { OptionsMenu },
   props: {
-    data: { 
-      type: Object, 
-      required: true, 
-      default: () => ({ url: '', title: '', description: '', favicon: '' }) 
+    data: {
+      type: Object,
+      required: true,
+      default: () => ({ url: '', title: '', description: '', favicon: '' })
     },
-    index: { 
-      type: Number, 
-      required: true 
+    index: {
+      type: Number,
+      required: true
     }
   },
   emits: ['update', 'delete', 'convert-to-image'],
-  
+
   data() {
     return {
       isEditing: !this.data?.url,
@@ -146,74 +146,74 @@ export default {
       }
     };
   },
-  
+
   computed: {
     isValidUrl() {
       return this.meta.url && isValidHttpUrl(this.meta.url);
     },
-    
+
     isImageUrl() {
       if (!this.isValidUrl) return false;
-      
+
       // Check file extensions
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.ico', '.tiff'];
       const url = this.meta.url.toLowerCase();
-      
-      const hasImageExtension = imageExtensions.some(ext => 
+
+      const hasImageExtension = imageExtensions.some(ext =>
         url.endsWith(ext) || url.includes(ext + '?'));
-      
+
       // Check URL patterns
       const hasImagePattern = /images?|\.(?:static|cdn|media)\.|\/img\/|\/photos?\//i.test(url);
       const hasImageQuery = url.includes('image') || url.includes('photo') || url.includes('pic');
-      
+
       return hasImageExtension || (hasImagePattern && hasImageQuery);
     },
-    
+
     displayText() {
       if (this.isLoading) return 'Загрузка...';
       if (this.error) return 'Ошибка URL';
       return this.meta.title || (this.meta.url ? this.meta.url : 'Без заголовка');
     },
-    
+
     shouldShowHoverCard() {
       return !this.isEditing && this.meta.url && !this.isLoading && !this.error;
     },
-    
+
     cardPositionClass() {
       return this.showAbove ? 'bottom-full mb-1.5' : 'top-full mt-1.5';
     }
   },
-  
+
   watch: {
     data: {
       handler(newData) {
         if (this.updateInProgress) return;
-        
+
         const newUrl = newData?.url || '';
         const currentUrl = this.meta.url;
-        
-        if (newUrl !== currentUrl || 
-            newData?.title !== this.meta.title || 
-            newData?.description !== this.meta.description || 
+
+        if (newUrl !== currentUrl ||
+            newData?.title !== this.meta.title ||
+            newData?.description !== this.meta.description ||
             newData?.favicon !== this.meta.favicon) {
-          
+
           this.meta = {
             url: newUrl,
             title: newData?.title || '',
             description: newData?.description || '',
             favicon: newData?.favicon || ''
           };
-          
+
           this.editUrl = newUrl;
           this.initialUrl = newUrl;
-          
+
           if (this.fetchTimeout) clearTimeout(this.fetchTimeout);
-          
+
           // Handle URL change
           if (!this.isEditing) {
             if (newUrl && isValidHttpUrl(newUrl)) {
               this.error = '';
-              
+
               // Fetch metadata if needed
               if (newUrl !== currentUrl && !newData?.title) {
                 this.fetchTimeout = setTimeout(() => {
@@ -235,7 +235,7 @@ export default {
       deep: true
     }
   },
-  
+
   mounted() {
     // Setup initial state
     if (this.meta.url && !this.meta.title && isValidHttpUrl(this.meta.url)) {
@@ -246,21 +246,21 @@ export default {
       this.error = "Некорректный URL";
       this.meta.title = this.meta.url;
     }
-    
+
     // Setup position observer
     this.setupPositionObserver();
-    
+
     // Auto-convert image URLs
     if (this.isValidUrl && this.isImageUrl) {
       this.convertToImageBlock();
     }
   },
-  
+
   beforeUnmount() {
     if (this.fetchTimeout) clearTimeout(this.fetchTimeout);
     this.cleanupObservers();
   },
-  
+
   methods: {
     // Fetch URL metadata
     async fetchMetadata(url) {
@@ -269,17 +269,17 @@ export default {
         this.isLoading = false;
         return;
       }
-      
+
       this.isLoading = true;
       this.error = '';
-      
+
       try {
         const encodedUrl = encodeURIComponent(url);
         const apiUrl = `${API_BASE}/?url=${encodedUrl}&palette=true`;
         const headers = MICROLINK_API_KEY ? { 'x-api-key': MICROLINK_API_KEY } : {};
-        
+
         const response = await fetch(apiUrl, { headers });
-        
+
         if (!response.ok) {
           let errorMessage = `Ошибка API: ${response.status}`;
           try {
@@ -288,14 +288,14 @@ export default {
           } catch(e) {}
           throw new Error(errorMessage);
         }
-        
+
         const result = await response.json();
-        
+
         if (result.status === 'success' && result.data) {
           const data = result.data;
           const title = data.title || url;
           const description = data.description || '';
-          
+
           let favicon = data.logo?.url || '';
           if (!favicon) {
             try {
@@ -303,7 +303,7 @@ export default {
               favicon = `https://www.google.com/s2/favicons?sz=64&domain=${parsedUrl.hostname}`;
             } catch(e) {}
           }
-          
+
           this.updateMetadata({
             url,
             title,
@@ -326,98 +326,98 @@ export default {
         this.isLoading = false;
       }
     },
-    
+
     // Update metadata and emit changes
     updateMetadata(newData) {
       this.updateInProgress = true;
-      
+
       // Update local state
       this.meta = { ...this.meta, ...newData };
       this.error = '';
-      
+
       // Emit update to parent
-      this.$emit('update', { 
-        index: this.index, 
-        newData: { ...this.data, ...newData } 
+      this.$emit('update', {
+        index: this.index,
+        newData: { ...this.data, ...newData }
       });
-      
-      setTimeout(() => { 
-        this.updateInProgress = false; 
+
+      setTimeout(() => {
+        this.updateInProgress = false;
       }, 50);
     },
-    
+
     // Handle URL save
     async saveUrl() {
       const rawUrl = this.editUrl.trim();
       const newUrl = ensureHttpProtocol(rawUrl);
-      
+
       if (newUrl !== rawUrl) {
         this.editUrl = newUrl;
       }
-      
+
       if (newUrl === this.initialUrl && isValidHttpUrl(newUrl)) {
         this.isEditing = false;
         this.error = '';
         return;
       }
-      
+
       if (!newUrl) {
         this.error = 'URL не может быть пустым';
         this.$refs.urlInputRef?.focus();
         return;
       }
-      
+
       if (!isValidHttpUrl(newUrl)) {
         this.error = 'Некорректный URL (нужен http/https)';
         this.$refs.urlInputRef?.focus();
         return;
       }
-      
+
       this.error = '';
       this.isLoading = true;
       this.isEditing = false;
       this.updateInProgress = true;
-      
+
       // Initial update with minimal data
       this.updateMetadata({
         url: newUrl,
         title: newUrl
       });
-      
+
       this.initialUrl = newUrl;
-      
+
       // Fetch and update with complete metadata
       await this.fetchMetadata(newUrl);
-      
+
       this.updateInProgress = false;
-      
+
       // Auto-convert image URLs
       if (this.isImageUrl) {
         this.convertToImageBlock();
       }
     },
-    
+
     // Start editing mode
     startEditing() {
       if (this.isLoading) return;
-      
+
       this.initialUrl = this.meta.url;
       this.editUrl = this.meta.url;
       this.isEditing = true;
       this.error = '';
-      
+
       this.$nextTick(() => {
         this.$refs.urlInputRef?.focus();
         this.$refs.urlInputRef?.select();
       });
     },
-    
+
     // Cancel editing
     cancelEdit() {
       this.editUrl = this.initialUrl;
       this.isEditing = false;
       this.error = '';
-      
+
       if (!this.initialUrl && !this.meta.url) {
         setTimeout(() => {
           this.$emit('delete');
@@ -430,41 +430,41 @@ export default {
         this.meta.title = this.initialUrl;
       }
     },
-    
+
     // Handle click on content area
     handleContentClick() {
       if (!this.isEditing && this.meta.url && !this.isLoading && !this.error && isValidHttpUrl(this.meta.url)) {
         window.open(this.meta.url, '_blank', 'noopener,noreferrer');
       }
     },
-    
+
     // Handle input blur
     handleBlur(event) {
       const relatedTarget = event.relatedTarget;
-      
+
       if (relatedTarget && this.$el.contains(relatedTarget)) {
         const isOptionsMenu = this.$el.querySelector('.options-menu-container')?.contains(relatedTarget);
         const isHoverCard = this.$el.querySelector('.absolute.top-full, .absolute.bottom-full')?.contains(relatedTarget);
-        
+
         if (isOptionsMenu || isHoverCard) {
           return;
         }
       }
-      
+
       setTimeout(() => {
         if (this.isEditing) {
           this.saveUrl();
         }
       }, 150);
     },
-    
+
     // Copy URL to clipboard
     copyUrl() {
       if (!this.isValidUrl) {
         alert('Нет URL для копирования');
         return;
       }
-      
+
       navigator.clipboard.writeText(this.meta.url)
         .then(() => alert('Ссылка скопирована'))
         .catch(err => {
@@ -472,18 +472,18 @@ export default {
           alert('Ошибка копирования');
         });
     },
-    
+
     // Trigger download from URL
     downloadUrl() {
       if (!this.isValidUrl) {
         alert('Нет URL для скачивания');
         return;
       }
-      
+
       try {
         const link = document.createElement('a');
         link.href = this.meta.url;
-        
+
         // Try to extract filename
         let downloadName = this.meta.title || 'download';
         try {
@@ -493,11 +493,11 @@ export default {
             downloadName = filename;
           }
         } catch(e) {}
-        
+
         link.download = downloadName;
         link.rel = 'noopener noreferrer';
         link.target = '_blank';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -507,14 +507,14 @@ export default {
         window.open(this.meta.url, '_blank', 'noopener,noreferrer');
       }
     },
-    
+
     // Convert link to image block
     convertToImageBlock() {
       if (!this.isValidUrl) {
         console.error("LinkBlock: Cannot convert to image - invalid URL");
         return;
       }
-      
+
       this.$emit('convert-to-image', {
         index: this.index,
         imageUrl: this.meta.url,
@@ -522,16 +522,16 @@ export default {
         alt: this.meta.title || 'Image from URL'
       });
     },
-    
+
     // Setup position observer
     setupPositionObserver() {
       // Initial position check
       this.$nextTick(this.checkPosition);
-      
+
       // Add event listeners
       window.addEventListener('scroll', this.checkPosition);
       window.addEventListener('resize', this.checkPosition);
-      
+
       // Setup resize observer
       if (typeof ResizeObserver !== 'undefined') {
         this.resizeObserver = new ResizeObserver(this.checkPosition);
@@ -540,27 +540,27 @@ export default {
         }
       }
     },
-    
+
     // Clean up observers
     cleanupObservers() {
       window.removeEventListener('scroll', this.checkPosition);
       window.removeEventListener('resize', this.checkPosition);
-      
+
       if (this.resizeObserver) {
         this.resizeObserver.disconnect();
       }
     },
-    
+
     // Check and set hover card position
     checkPosition() {
       if (!this.$refs.contentRef) return;
-      
+
       const rect = this.$refs.contentRef.getBoundingClientRect();
       const hoverCardHeight = 250;
-      
+
       const spaceBelow = window.innerHeight - rect.bottom;
       const spaceAbove = rect.top;
-      
+
       this.showAbove = spaceBelow < hoverCardHeight && spaceAbove >= hoverCardHeight;
     }
   }

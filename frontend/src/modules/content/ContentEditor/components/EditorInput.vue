@@ -1,22 +1,22 @@
 <template>
   <div class="relative command-input-area mb-4">
     <div
-      ref="editorRef"
-      class="w-full p-2 focus:outline-none pt-2 text-gray-700"
-      contenteditable="true"
-      @input="handleInput"
-      @keydown="handleKeyDown"
-      :placeholder="inputPlaceholder"
-      @click="handleClick"
+        ref="editorRef"
+        class="w-full ml-10 p-2 focus:outline-none pt-2 text-gray-700"
+        contenteditable="true"
+        @input="handleInput"
+        @keydown="handleKeyDown"
+        :placeholder="inputPlaceholder"
+        @click="handleClick"
     ></div>
 
     <CommandMenu
-      v-if="showCommandMenu"
-      :commands="filteredCommands"
-      :active-index="activeCommandIndex"
-      :style="commandMenuPosition"
-      @command-selected="executeCommand"
-      @set-active-index="activeCommandIndex = $event"
+        v-if="showCommandMenu"
+        :commands="filteredCommands"
+        :active-index="activeCommandIndex"
+        :style="commandMenuPosition"
+        @command-selected="executeCommand"
+        @set-active-index="activeCommandIndex = $event"
     />
   </div>
 </template>
@@ -27,139 +27,144 @@ import { useCommands } from '@/modules/content/ContentEditor/components/useComma
 
 export default {
   name: 'EditorInput',
-  components: {
-    CommandMenu
-  },
+  components: { CommandMenu },
   emits: ['command-typed', 'direct-input', 'text-entered', 'clear-requested'],
-  setup() {
-    const { getFilteredCommands } = useCommands();
-    return { getFilteredCommands };
-  },
+
   data() {
     return {
+      commands: [],
       showCommandMenu: false,
       commandText: '',
       isCommandTyping: false,
       isDirectlyTyping: false,
       commandMenuPosition: { top: '100%', left: '0px' },
       activeCommandIndex: 0,
-      inputPlaceholder: "Введите '/' для отображения команд..."
-    }
+      inputPlaceholder: "Введите '/' для отображения команд...",
+      getFilteredCommands: null
+    };
   },
+
   computed: {
     filteredCommands() {
-      if (!this.isCommandTyping || !this.commandText.startsWith('/')) return [];
-      if (this.commandText === '/') return this.getFilteredCommands('');
-      return this.getFilteredCommands(this.commandText.substring(1).toLowerCase());
+      if (!this.isCommandTyping || !this.commandText.startsWith('/')) {
+        return [];
+      }
+      const query = this.commandText === '/' ? '' : this.commandText.slice(1).toLowerCase();
+      return this.getFilteredCommands
+          ? this.getFilteredCommands(query)
+          : this.commands;
     }
   },
+
+  created() {
+    const { commands, getFilteredCommands } = useCommands();
+    this.commands = commands;
+    this.getFilteredCommands = getFilteredCommands;
+  },
+
   mounted() {
     document.addEventListener('click', this.handleClickOutside);
   },
+
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside);
   },
+
   methods: {
     handleInput(event) {
-      const text = event.target.innerText;
-      
+      const editor = this.$refs.editorRef;
+      // если пусто — очистим всё и покажем placeholder
+      const text = editor.innerText.trim();
+      if (!text) {
+        this.clearInput();
+        return;
+      }
       if (text.startsWith('/')) {
         this.isCommandTyping = true;
         this.isDirectlyTyping = false;
-        this.commandText = text;
+        this.commandText = editor.innerText;
         this.activeCommandIndex = 0;
         this.showCommandMenu = true;
         this.calculateCommandMenuPosition();
-      } 
-      else if (text && !this.isCommandTyping) {
+      } else if (!this.isCommandTyping) {
         this.isDirectlyTyping = true;
-      }
-      else if (this.isCommandTyping && !text.startsWith('/')) {
+      } else if (this.isCommandTyping && !editor.innerText.startsWith('/')) {
         this.resetCommandState();
-        if (text) {
-          this.isDirectlyTyping = true;
-        }
+        this.isDirectlyTyping = !!editor.innerText.trim();
       }
     },
 
     handleKeyDown(event) {
       if (this.showCommandMenu) {
-        const commandsCount = this.filteredCommands.length;
-        if (!commandsCount && !['Escape', 'Backspace', 'Enter', 'Tab'].includes(event.key)) return;
-
-        switch (event.key) {
-          case 'ArrowUp':
-            event.preventDefault();
-            this.activeCommandIndex = (this.activeCommandIndex - 1 + commandsCount) % commandsCount;
-            break;
-          case 'ArrowDown':
-            event.preventDefault();
-            this.activeCommandIndex = (this.activeCommandIndex + 1) % commandsCount;
-            break;
-          case 'Enter':
-          case 'Tab':
-            event.preventDefault();
-            const command = this.filteredCommands[this.activeCommandIndex];
-            if (command) {
-              this.executeCommand(command);
-            } else {
-              if (this.$refs.editorRef?.innerText === '/') {
-                this.$emit('text-entered', this.$refs.editorRef.innerHTML);
-              }
-              this.resetCommandState();
-            }
-            break;
-          case 'Escape':
-            event.preventDefault();
-            this.resetCommandState();
-            break;
-          case 'Backspace':
-            this.$nextTick(() => {
-              const currentText = this.$refs.editorRef?.innerText || '';
-              if (this.isCommandTyping && !currentText.startsWith('/')) {
-                this.resetCommandState();
-                if (currentText) {
-                  this.isDirectlyTyping = true;
-                }
-              } else if (this.isCommandTyping && currentText !== this.commandText) {
-                this.commandText = currentText;
-                this.activeCommandIndex = 0;
-                this.calculateCommandMenuPosition();
-              }
-            });
-            break;
-        }
-      } 
-      else if (event.key === 'Enter') {
+        this.onCommandMenuKey(event);
+      } else if (event.key === 'Enter') {
         event.preventDefault();
         const editor = this.$refs.editorRef;
-        if (editor?.innerText.trim()) {
-          // Отправляем текст для создания нового блока
+        const content = editor.innerText.trim();
+        if (content) {
           this.$emit('text-entered', editor.innerHTML);
-          // Очищаем поле ввода
           this.clearInput();
-          this.isDirectlyTyping = false;
         } else {
           this.clearInput();
         }
-      }
-      else if (this.isDirectlyTyping && event.key === '.') {
+      } else if (this.isDirectlyTyping && event.key === '.') {
         setTimeout(() => {
           const editor = this.$refs.editorRef;
-          if (editor?.innerText.trim()) {
+          if (editor.innerText.trim()) {
             this.$emit('text-entered', editor.innerHTML);
-            // Очищаем поле ввода после создания блока с текстом
             this.clearInput();
-            this.isDirectlyTyping = false;
           }
         }, 0);
       }
     },
 
-    handleClick() {
-      if (this.isCommandTyping && this.showCommandMenu) {
-        this.calculateCommandMenuPosition();
+    onCommandMenuKey(event) {
+      const count = this.filteredCommands.length;
+      if (!count && !['Escape', 'Backspace', 'Enter', 'Tab'].includes(event.key)) return;
+
+      switch (event.key) {
+        case 'ArrowUp':
+          event.preventDefault();
+          this.activeCommandIndex = (this.activeCommandIndex - 1 + count) % count;
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          this.activeCommandIndex = (this.activeCommandIndex + 1) % count;
+          break;
+        case 'Enter':
+        case 'Tab':
+          event.preventDefault();
+          const cmd = this.filteredCommands[this.activeCommandIndex];
+          if (cmd) {
+            this.executeCommand(cmd);
+          } else if (this.$refs.editorRef.innerText === '/') {
+            this.$emit('text-entered', this.$refs.editorRef.innerHTML);
+            this.resetCommandState();
+          }
+          break;
+        case 'Escape':
+          event.preventDefault();
+          this.resetCommandState();
+          break;
+        case 'Backspace':
+          this.$nextTick(() => {
+            const editor = this.$refs.editorRef;
+            const current = editor.innerText;
+            if (this.isCommandTyping && !current.startsWith('/')) {
+              this.resetCommandState();
+              this.isDirectlyTyping = !!current.trim();
+            } else if (this.isCommandTyping && current !== this.commandText) {
+              this.commandText = current;
+              this.activeCommandIndex = 0;
+              this.calculateCommandMenuPosition();
+            }
+          });
+          break;
       }
+    },
+
+    handleClick() {
+      if (this.isCommandTyping && this.showCommandMenu) this.calculateCommandMenuPosition();
     },
 
     executeCommand(command) {
@@ -176,77 +181,67 @@ export default {
 
     calculateCommandMenuPosition() {
       this.$nextTick(() => {
-        const inputEl = this.$refs.editorRef;
-        if (!inputEl) return;
+        const editor = this.$refs.editorRef;
+        const sel = window.getSelection();
+        if (!editor || !sel || !sel.rangeCount) return;
 
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) return;
-
-        const range = selection.getRangeAt(0);
+        const range = sel.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        const inputRect = inputEl.getBoundingClientRect();
+        const inputRect = editor.getBoundingClientRect();
+        const menuHeight = 200;
+        const margin = 2;
+        const below = window.innerHeight - rect.bottom;
+        const above = rect.top;
 
-        // Оценка места для меню сверху и снизу
-        const menuHeight = 200; // Примерная высота меню
-        const verticalMargin = 2;
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
-        
         let top;
-        if (spaceBelow < menuHeight && spaceAbove >= menuHeight) {
-          top = rect.top - inputRect.top - menuHeight - verticalMargin;
+        if (below < menuHeight && above >= menuHeight) {
+          top = rect.top - inputRect.top - menuHeight - margin;
         } else {
-          top = rect.bottom - inputRect.top + verticalMargin;
+          top = rect.bottom - inputRect.top + margin;
         }
 
-        // Горизонтальное позиционирование
-        const menuWidth = 208; // Примерная ширина меню (w-52 = 13rem = 208px)
+        const menuWidthPx = 208;
         let left = rect.left - inputRect.left;
-        
-        if ((left + menuWidth) > inputRect.width) {
-          left = inputRect.width - menuWidth - 5;
+        if (left + menuWidthPx > inputRect.width) {
+          left = inputRect.width - menuWidthPx - 5;
         }
         left = Math.max(left, 0);
 
-        this.commandMenuPosition = {
-          top: `${top}px`,
-          left: `${left}px`,
-        };
+        this.commandMenuPosition = { top: `${top}px`, left: `${left}px` };
       });
     },
 
     handleClickOutside(event) {
       const editor = this.$refs.editorRef;
       if (editor && !editor.contains(event.target)) {
-        if (this.showCommandMenu) {
-          this.resetCommandState();
-        }
-        
+        if (this.showCommandMenu) this.resetCommandState();
         if (editor.innerText.trim() && this.isDirectlyTyping) {
           this.$emit('direct-input', editor.innerHTML);
-          this.isDirectlyTyping = false;
+          this.clearInput();
         }
       }
     },
 
     clearInput() {
+      this.resetCommandState();
       const editor = this.$refs.editorRef;
-      if (editor) editor.innerHTML = '';
+      if (editor) {
+        // полностью очистить содержимое и узлы
+        editor.innerHTML = '';
+        editor.textContent = '';
+      }
       this.$emit('clear-requested');
     },
 
     focus() {
-      this.$refs.editorRef?.focus();
+      this.$refs.editorRef.focus();
     },
 
     scrollToView() {
-      this.$refs.editorRef?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-      });
+      this.$refs.editorRef.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
-}
+};
 </script>
 
 <style scoped>
