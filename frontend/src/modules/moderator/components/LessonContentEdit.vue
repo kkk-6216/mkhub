@@ -1,16 +1,13 @@
 <template>
   <div class="max-w-7xl mx-auto p-6 bg-white rounded-lg">
-    <div class="flex justify-between items-center mb-6">
-      <div class="flex items-center justify-center">
-        <h2 class="text-2xl font-medium text-dark ml-10">{{ lessonName }}</h2>
-      </div>
-      <button class="text-white px-3 py-1 rounded-md hover:opacity-90 flex items-center bg-main hover:bg-main-hover">
-        Сохранить
-      </button>
-    </div>
     <div class="flex justify-center items-center">
       <div class="min-h-screen w-full bg-white">
-        <ContentEditor :initial-blocks="pageContent" @update-blocks="updateContent" />
+        <ContentEditor
+            :initial-blocks="pageContent"
+            @update-blocks="updateContent"
+            :lesson-name="lessonName"
+            :lesson-id="lessonId"
+        />
       </div>
     </div>
   </div>
