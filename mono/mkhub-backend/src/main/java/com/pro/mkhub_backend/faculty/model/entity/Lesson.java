@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,5 +32,23 @@ public class Lesson {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "course_id", referencedColumnName = "id", nullable = false)
+    private Course course;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<LessonBlock> blocks = new ArrayList<>();
+
+    public void addBlock(LessonBlock block) {
+        block.setLesson(this);
+        blocks.add(block);
+    }
+
+    public void removeBlock(LessonBlock block) {
+        blocks.remove(block);
+        block.setLesson(null);
+    }
     
 }
