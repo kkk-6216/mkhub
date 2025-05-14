@@ -49,26 +49,42 @@ public class GoogleDriveService {
 
             File fileMetadata = new File();
             fileMetadata.setName(file.getOriginalFilename());
-            fileMetadata.setParents(Collections.singletonList(parentFolderId));
-
-            InputStreamContent mediaContent = new InputStreamContent(file.getContentType(), inputStream);
-
-            File uploadedFile = googleDrive.files().create(fileMetadata, mediaContent)
-                    .setFields("id, name")
-                    .execute();
-
-            String storagePath = parentFolderId + "/" + uploadedFile.getName();
-
-            FileUploadResult result = new FileUploadResult();
-            result.setFileId(uploadedFile.getId());
-            result.setStoredFileName(uploadedFile.getName());
-            result.setStoragePath(storagePath);
-
-            return result;
+            return getFileUploadResult(file, parentFolderId, inputStream, fileMetadata);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка загрузки файла в Google Drive", e);
         }
     }
+
+    private FileUploadResult getFileUploadResult(MultipartFile file, String parentFolderId, InputStream inputStream, File fileMetadata) throws IOException {
+        fileMetadata.setParents(Collections.singletonList(parentFolderId));
+
+        InputStreamContent mediaContent = new InputStreamContent(file.getContentType(), inputStream);
+
+        File uploadedFile = googleDrive.files().create(fileMetadata, mediaContent)
+                .setFields("id, name")
+                .execute();
+
+        String storagePath = parentFolderId + "/" + uploadedFile.getName();
+
+        FileUploadResult result = new FileUploadResult();
+        result.setFileId(uploadedFile.getId());
+        result.setStoredFileName(uploadedFile.getName());
+        result.setStoragePath(storagePath);
+
+        return result;
+    }
+
+    public FileUploadResult uploadFile(MultipartFile file, String parentFolderId, String desiredFilename) {
+        try (InputStream inputStream = file.getInputStream()) {
+
+            File fileMetadata = new File();
+            fileMetadata.setName(desiredFilename);
+            return getFileUploadResult(file, parentFolderId, inputStream, fileMetadata);
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка загрузки файла в Google Drive", e);
+        }
+    }
+
 
     private String findFolderIdByName(String folderName, String parentId) {
         try {
