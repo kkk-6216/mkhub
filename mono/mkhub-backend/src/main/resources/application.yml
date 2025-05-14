@@ -16,6 +16,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
 server:
   port: 8000
 
@@ -47,3 +53,10 @@ jwt:
     refresh:
       secret: "il679VYSJ8aex-TiW83Bf313krc-V80Cxvtb1do9-Go0cubt8GNXP-IDsvZnIjNc"
       expiration: 604800000
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          multipart: DEBUG
