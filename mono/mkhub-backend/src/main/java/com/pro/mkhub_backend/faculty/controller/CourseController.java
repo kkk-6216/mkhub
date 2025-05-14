@@ -1,6 +1,7 @@
 package com.pro.mkhub_backend.faculty.controller;
 
 import com.pro.mkhub_backend.faculty.dto.course.CourseDto;
+import com.pro.mkhub_backend.faculty.dto.course.CourseItem;
 import com.pro.mkhub_backend.faculty.dto.course.CreationCourseDto;
 import com.pro.mkhub_backend.faculty.dto.course.UpdateCourseDto;
 import com.pro.mkhub_backend.faculty.service.CourseService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +42,15 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
         courseService.deleteCourseById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<List<CourseItem>> getCourseItemList() {
+        return ResponseEntity.ok(
+                courseService.getCourses().stream()
+                        .map(CourseItem::new)
+                        .collect(Collectors.toList())
+        );
     }
 
 }
