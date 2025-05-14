@@ -73,4 +73,8 @@ public class CourseService {
         );
     }
 
+    public Course getCourse(Long courseId) {
+        return courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
+    }
 }
