@@ -1,36 +1,36 @@
 <template>
   <div class="relative w-full p-5 mx-auto">
     <!-- Верхняя панель -->
-    <div class="relative flex items-center justify-center p-5">
-      <h1 class="text-2xl font-semibold">{{ topic }}</h1>
+    <div class="relative flex items-center p-1">
+      <h1 class="text-2xl font-semibold">{{ lessonName }}</h1>
 
-      <div class="absolute right-0 flex items-center space-x-2 pr-4">
+      <div class="absolute right-0 flex items-center space-x-2">
         <button @click="goBack" class="rounded" title="Назад">
           <ArrowUturnLeftIcon class="w-5 h-5" />
         </button>
 
         <div class="relative" ref="dropdownRef">
-          <button 
-            @click="toggleDropdown" 
+          <button
+            @click="toggleDropdown"
             class="p-1 rounded flex items-center"
             title="Действия"
           >
             <EllipsisVerticalIcon class="w-5 h-5" />
           </button>
           <transition name="dropdown">
-            <div 
-              v-show="isDropdownOpen" 
+            <div
+              v-show="isDropdownOpen"
               class="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 w-48 py-1"
             >
-              <button 
-                @click="showDeleteModal = true" 
+              <button
+                @click="showDeleteModal = true"
                 class="flex items-center w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
               >
                 <TrashIcon class="w-4 h-4 mr-2" />
                 Очистить
               </button>
-              <button 
-                @click="submitContent" 
+              <button
+                @click="submitContent"
                 class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               >
                 <PaperAirplaneIcon class="w-4 h-4 mr-2 transform rotate-315" />
@@ -39,10 +39,10 @@
             </div>
           </transition>
         </div>
-      </div>  
-    </div>     
+      </div>
+    </div>
 
-    <div class="mx-auto max-w-5xl">
+    <div>
       <!-- Hidden file inputs -->
       <input type="file" ref="imageInputRef" @change="handleImageUpload" accept="image/*" class="hidden" />
       <input type="file" ref="fileInputRef" @change="handleFileUpload" class="hidden" />
@@ -133,6 +133,8 @@ import { useCommands } from '@/modules/content/ContentEditor/components/useComma
 import { nextTick } from 'vue';
 import draggable from 'vuedraggable';
 import { ArrowUturnLeftIcon, TrashIcon, PaperAirplaneIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
+import {saveContentDraft} from "@/modules/content/service/contentService.js";
+import {useAuthStore} from "@/store/auth.js";
 
 // Utilities
 const isValidHttpUrl = (string) => {
@@ -169,7 +171,15 @@ export default {
   },
   inject: ['showAlert'],
   props: {
-    initialContent: { type: Array, default: () => [] }
+    initialContent: { type: Array, default: () => [] },
+    lessonName: {
+      type: String,
+      required: true
+    },
+    lessonId: {
+      type: Number,
+      required: true
+    }
   },
   emits: ['update:content'],
   data() {
@@ -193,6 +203,9 @@ export default {
       contentBlocks: []
     };
   },
+  beforeCreate() {
+    this.authStore = useAuthStore();
+  },
   computed: {
     // Command actions
     commandActions() {
@@ -204,6 +217,9 @@ export default {
         code: () => this.addCodeBlock(this.contentBlocks.length),
         formula: () => this.addFormulaBlock(this.contentBlocks.length)
       };
+    },
+    userId() {
+      return this.authStore.user?.id;
     }
   },
   watch: {
@@ -256,7 +272,7 @@ export default {
     setBlockRef(el, index) {
       if (el) this.blockRefs[index] = el;
     },
-    
+
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
@@ -275,7 +291,26 @@ export default {
       this.contentBlocks = [];
       this.showDeleteModal = false;
     },
-    
+
+    mapComponentTypeToLessonBlockType(componentType) {
+      switch (componentType) {
+        case 'text-block':
+          return 'TEXT';
+        case 'image-block':
+          return 'IMAGE';
+        case 'link-block':
+          return 'LINK';
+        case 'formula-block':
+          return 'MATH';
+        case 'file-block':
+          return 'FILE';
+        case 'code-block':
+          return 'CODE';
+        default:
+          throw new Error(`Unknown componentType: ${componentType}`);
+      }
+    },
+
     async submitContent() {
       try {
         const blocksWithOrder = this.contentBlocks.map((block, index) => ({
@@ -284,21 +319,51 @@ export default {
           blockId: block.id,
           data: block.data
         }));
-        
-        const response = await fetch('/api/submit-content', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic: this.topic,
-            blocks: blocksWithOrder
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
+
+        const resultBlocks = [];
+        const files = {};
+        let imageIndex = 0;
+        let fileIndex = 0;
+
+        for (let i = 0; i < blocksWithOrder.length; i++) {
+          const block = blocksWithOrder[i];
+          const type = this.mapComponentTypeToLessonBlockType(block.componentType);
+          const order = block.order;
+
+          if (type === 'TEXT') {
+            resultBlocks.push({ order, type, data: block.data.text });
+          } else if (type === 'LINK') {
+            resultBlocks.push({ order, type, data: block.data.url });
+          } else if (type === 'MATH') {
+            resultBlocks.push({ order, type, data: block.data.formula });
+          } else if (type === 'CODE') {
+            resultBlocks.push({ order, type, data: block.data.code });
+          } else if (type === 'IMAGE') {
+            if(block.data.isFile) {
+              const key = `file_image_${imageIndex++}`;
+              resultBlocks.push({ order, type, data: key });
+              files[key] = block.data.file;
+            } else {
+              resultBlocks.push({ order, type, data: block.data.src });
+            }
+          } else if (type === 'FILE') {
+            const key = `file_doc_${fileIndex++}`;
+            resultBlocks.push({ order, type, data: key });
+            files[key] = block.data.file;
+          } else {
+            throw new Error(`Unsupported block type: ${type}`);
+          }
         }
-        
-        const result = await response.json();
+        console.log(resultBlocks);
+        console.log(files)
+        // Вызов сервиса
+        await saveContentDraft({
+          lessonId: this.lessonId,
+          authorId: this.userId,
+          blocksJson: JSON.stringify(resultBlocks),
+          files
+        });
+
         this.showAlert('success', 'Контент успешно отправлен.');
       } catch (error) {
         console.error('Ошибка при отправке:', error);
@@ -412,7 +477,7 @@ export default {
     addImageBlockFromUrl(imageUrl, index) {
       this.addBlock({
         component: 'image-block',
-        data: { src: imageUrl, caption: 'Image from URL', alt: 'Image from URL' }
+        data: { src: imageUrl, caption: 'Image from URL', alt: 'Image from URL', isFile: false }
       }, index);
       this.clearEditorInput();
       this.scrollToInput();
@@ -483,7 +548,7 @@ export default {
         const imageBlock = {
           component: 'image-block',
           id: generateId(),
-          data: { src: imageUrl, caption: caption || 'Image from URL', alt: alt || 'Image from URL' }
+          data: { src: imageUrl, caption: caption || 'Image from URL', alt: alt || 'Image from URL', isFile: false }
         };
         const newBlocks = [...this.contentBlocks];
         newBlocks[index] = imageBlock;
@@ -542,7 +607,7 @@ export default {
       reader.onload = (e) => {
         this.addBlock({
           component: 'image-block',
-          data: { src: e.target.result, caption: file.name, alt: file.name }
+          data: { src: e.target.result, caption: file.name, alt: file.name, isFile: true, file: file }
         }, this.contentBlocks.length);
         this.scrollToInput();
       };
@@ -557,10 +622,14 @@ export default {
       
       // Deactivate all blocks before adding new one
       this.deactivateAllBlocks();
-      
+
       this.addBlock({
         component: 'file-block',
-        data: { name: file.name, size: file.size, fileUrl: URL.createObjectURL(file) }
+        data: { name: file.name,
+          size: file.size,
+          fileUrl: URL.createObjectURL(file),
+          file: file
+        }
       }, this.contentBlocks.length);
       event.target.value = '';
       this.scrollToInput();
