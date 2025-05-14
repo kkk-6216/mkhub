@@ -2,7 +2,7 @@
   <div class="relative command-input-area mb-4">
     <div
         ref="editorRef"
-        class="w-full ml-10 p-2 focus:outline-none pt-2 text-gray-700"
+        class="w-full focus:outline-none pt-2 text-gray-700"
         contenteditable="true"
         @input="handleInput"
         @keydown="handleKeyDown"
