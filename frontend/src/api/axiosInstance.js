@@ -3,10 +3,7 @@ import {useAuthStore} from "@/store/auth.js";
 import router from "@/router/index.js";
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://localhost:8000/'
 });
 
 // Перехватчик запросов: добавляет accessToken
