@@ -1,7 +1,7 @@
 
 import Home from '@/modules/student/pages/Home.vue';
 import Courses from '@/modules/student/pages/Courses.vue';
-import Resources from '@/modules/student/pages/Resources.vue';
+import Offers from '@/modules/student/pages/Offers.vue';
 import Messages from '@/modules/student/pages/Messages.vue';
 import Settings from '@/modules/student/pages/Settings.vue';
 
@@ -22,9 +22,9 @@ export default {
             meta: { requiresAuth: true },
         },
         {
-            path: 'resources',
-            name: 'Resources',
-            component: Resources,
+            path: 'offers',
+            name: 'Offers',
+            component: Offers,
             meta: { requiresAuth: true },
         },
         {
