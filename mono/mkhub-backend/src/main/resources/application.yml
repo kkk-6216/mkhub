@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: mkhub-backend
+
+  datasource:
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/mkhub-db
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+server:
+  port: 8000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true
+
+
+cors:
+  allowed-origins:
+    - http://localhost:5173
+    - http://localhost:8000
+
+google:
+  drive:
+    credentials: mkhub-storage-cred.json
+    root-folder-id: 1eaYCxnlVjiqshR_4pxjXgnju_etx2PBp
+
+jwt:
+  token:
+    access:
+      secret: "b8RktMUpn2buI-OT299m8oivRdP-UHjhOIyvQdI9-JG23FHW12W0A-P2tTDCFGbq"
+      expiration: 3600000
+    refresh:
+      secret: "il679VYSJ8aex-TiW83Bf313krc-V80Cxvtb1do9-Go0cubt8GNXP-IDsvZnIjNc"
+      expiration: 604800000
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          multipart: DEBUG
